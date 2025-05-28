@@ -1,0 +1,37 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface UserState {
+  username: string;
+  token: string;
+  setUser: (username: string, token: string) => void;
+  reset: () => void;
+}
+
+interface AuthState {
+  isLoggedIn: boolean;
+  login: () => void;
+  logout: () => void;
+}
+
+//회원가입, 로그인 후 상태 저장 및 페이지 새로고침에도 유지
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      username: '',
+      token: '',
+      setUser: (username, token) => set({ username, token }),
+      reset: () => set({ username: '', token: '' }),
+    }),
+    {
+      name: 'user-storage', // localStorage 키 이름
+    }
+  )
+);
+
+export const useAuthStore = create<AuthState>((set) => ({
+  isLoggedIn: false,
+  login: () => set({ isLoggedIn: true }),
+  logout: () => set({ isLoggedIn: false }),
+}));
+
