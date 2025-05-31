@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
+import { useEffect, useState } from 'react';
+import Sidebar from '../components/sidebar/Sidebar';
 import Header from '../components/Header';
 import { SummaryCard } from '../components/SummaryCard';
 import { Panel } from '../components/Panel';
+import DashboardChartTabs from '../components/DashboardChartTabs';
 
 export default function Home() {
+const [selectedType, setSelectedType] = useState<'가입자 수' | '신고 수' | '채팅방 수' | '결제 수'>('가입자 수');
   useEffect(() => {
     document.title = 'DICE TALK | Dashboard';
   }, []);
@@ -14,31 +16,95 @@ export default function Home() {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="flex-1 bg-white p-10 shadow-inner">
-          <h1 className="text-3xl font-bold mb-6">관리자 대시보드</h1>
+        {/* 메인 콘텐츠 영역: 배경색 변경, 패딩 조정, 내부 그림자 제거, 좌상단 모서리 둥글게 */}
+        <main className="flex-1 bg-slate-50 p-6 md:p-8 rounded-tl-xl overflow-y-auto">
+          {/* <h1 className="text-3xl font-bold mb-6">관리자 대시보드</h1> */}
 
           {/* 요약 카드 */}
-          <section className="grid grid-cols-3 gap-6 mb-8">
-            <SummaryCard title="전체 가입자 수" value="1,204" />
-            <SummaryCard title="현재 활성 채팅방" value="56" />
-            <SummaryCard title="신고 수" value="12" />
+          {/* <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 justify-items-center mb-10"> */}
+          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 justify-items-center mb-10 mt-6">
+          <SummaryCard 
+            title="Today" 
+            value="05.24" 
+            className="!bg-slate-100 !border-slate-300 !text-slate-700 cursor-default" // Today 카드는 선택 불가 및 다른 스타일 적용
+          />
+          <SummaryCard
+            title="신규 가입자 수"
+            value= '52'
+            selected={selectedType === '가입자 수'}
+            onClick={() => setSelectedType('가입자 수')}
+          />
+          <SummaryCard
+            title="신고 수"
+            value= '6'
+            selected={selectedType === '신고 수'}
+            onClick={() => setSelectedType('신고 수')}
+          />
+          <SummaryCard
+            title="채팅방 수"
+            value='21'
+            selected={selectedType === '채팅방 수'}
+            onClick={() => setSelectedType('채팅방 수')}
+          />
+          <SummaryCard
+            title="결제 수"
+            value='12'
+            selected={selectedType === '결제 수'}
+            onClick={() => setSelectedType('결제 수')}
+          />
           </section>
 
-          {/* 상세 영역 */}
-          <section className="grid grid-cols-3 gap-6">
-            <Panel title="대기열 현황" items={['하트시그널 - 4/6', '하트시그널 - 3/6', '다이스프렌즈 - 2/6', '다이스프렌즈 - 1/6']} />
-            <Panel title="종료 예정 채팅방" items={['#A1024 - 00:12:36', '#A0918 - 01:05:47', '#A2572 - 02:20:15']} />
-            <Panel title="가입 추이" items={['(그래프 자리)']} heightClass="h-32 flex items-center justify-center text-gray-400" />
-            <Panel title="최근 신고" className="col-span-2" items={[
-              '익명유저568 - 사모 구사 / 립밤 삽입',
-              '익명유저568 - 번쩍 야간 / 립밤 삽입',
-            ]} />
+          {/* ✅ 차트 탭 */}
+          <div className="mx-auto w-full max-w-screen-lg xl:max-w-screen-xl mb-10">
+            {/* <div className="w-full max-w-screen-md"></div> */}
+              <DashboardChartTabs selectedType={selectedType} />
+            {/* </div> */}
+          </div>
 
-            <Panel title="공지사항" items={['[04.23] 사스픈 국전 안내', '[04.24] 블린이 특판 이벤트']} />
+          {/* 상세 영역 */}
+          {/* <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 mb-8"> */}
+          <section className="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-8 mt-8 mb-8">
+            <Panel
+              title="QnA 관리"
+              items={[
+                '최근 7일간 등록된 질문: 23건',
+                '미답변 질문 수: 6건'
+              ]}
+            />
+            <Panel
+              title="공지사항"
+              items={[
+                '최근 등록: 새로운 기능 업데이트 안내',
+                '등록일: 2025-05-13',
+                '진행 중인 이벤트 수: 2건'
+              ]}
+            />
+            <Panel
+              title="결제"
+              items={[
+                '오늘 다이스 충전 금액: 35,000원',
+                '이번 달 다이스 충전: 520,000원',
+                '아이템 사용 건수: 18건'
+              ]}
+            />
+           </section>
+
+            {/* 최근 활동 로그 */}
+           {/* <section className="mt-6"> */}
+           <section className="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto mt-8">
+            <Panel
+              title="최근 활동 로그"
+              className="col-span-3"
+              items={[
+                "새로운 QnA '사진 업로드 용량'이 등록되었습니다.",
+                "새로운 QnA '기록 분류'에 등록되었습니다.",
+                "공지사항 '새로운 기능 업데이트 안내: 편리해진 사용자 인터페이스'가 작성되었습니다.",
+                "공지사항 '특별 이벤트 소식 – 참여하고 보상을 받아보세요!'가 작성되었습니다."
+              ]}
+            />
           </section>
         </main>
       </div>
     </div>
   );
 }
-

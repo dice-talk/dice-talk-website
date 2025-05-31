@@ -1,4 +1,3 @@
-// src/pages/Signup.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminSignup } from '../api/auth';
