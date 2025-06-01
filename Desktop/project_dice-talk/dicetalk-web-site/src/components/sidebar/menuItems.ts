@@ -49,7 +49,7 @@ export const menuItems: MenuItem[] = [
     name: '공지사항 관리',
     subItems: [
       { name: '공지사항&이벤트 등록', path: '/admin/notices' },
-      { name: '공지사항&이벤트 조회', path: '/admin/events' },
+      { name: '공지사항&이벤트 조회', path: '/notices' },
     ],
   },
   {

@@ -25,5 +25,6 @@ export interface ReusableTableProps<T extends TableItem> {
   onSortChange: (value: string) => void;
   sortOptions: { value: string; label: string }[];
   emptyStateMessage?: string;
+   onRowClick?: (item: T) => void; // 행 클릭 핸들러 타입 추가
   // 필요에 따라 추가적인 props (예: 페이지네이션 관련)를 정의할 수 있습니다.
 }

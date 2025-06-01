@@ -10,6 +10,7 @@ export function ReusableTable<T extends TableItem>({
   onSortChange,
   sortOptions,
   emptyStateMessage = "표시할 데이터가 없습니다.",
+  onRowClick, // 행 클릭 핸들러 prop 추가
 }: ReusableTableProps<T>) {
 
   const renderCellContent = (item: T, column: ColumnDefinition<T>, index: number) => {
@@ -58,7 +59,11 @@ export function ReusableTable<T extends TableItem>({
               <tr><td colSpan={columns.length} className="py-10 text-center text-gray-500">{emptyStateMessage}</td></tr>
             ) : (
               data.map((item, index) => (
-                <tr key={item.id} className="hover:bg-slate-50 transition-colors duration-150">
+                <tr
+                  key={item.id}
+                  className={cn("hover:bg-slate-50 transition-colors duration-150", onRowClick ? "cursor-pointer" : "")}
+                  onClick={() => onRowClick?.(item)} // onRowClick 핸들러 호출
+                >
                   {columns.map((col) => (<td key={`${item.id}-${col.key}`} className={cn("py-3 px-4 text-center text-gray-700", col.cellClassName)}>{renderCellContent(item, col, index)}</td>))}
                 </tr>
               ))

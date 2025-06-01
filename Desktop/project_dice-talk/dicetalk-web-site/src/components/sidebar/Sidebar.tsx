@@ -75,7 +75,7 @@ export default function Sidebar() {
               <AnimatePresence initial={false} mode='wait'>
                 {isOpen && (
                   <motion.div
-                    initial={false}
+                    initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.5, ease: [0.25, 0.8, 0.25, 1] }}

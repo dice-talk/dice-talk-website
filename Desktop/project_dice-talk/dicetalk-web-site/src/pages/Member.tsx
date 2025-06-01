@@ -1,66 +1,134 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Sidebar from '../components/sidebar/Sidebar';
 import Header from '../components/Header';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../components/ui/Select'; // Radix UI 기반 Select로 변경
+import { MemberFilterSection } from '../components/member/MemberFilterSection';
+import { ReusableTable } from '../components/common/ReusableTable';
+import type { ColumnDefinition, TableItem } from '../components/common/reusableTableTypes';
  
-const statusOptions = [
-  { value: '전체 상태', label: '전체 상태' },
-  { value: '활동 중', label: '활동 중' },
-  { value: '휴면 회원', label: '휴면 회원' },
-  { value: '정지 회원', label: '정지 회원' },
-  { value: '탈퇴 회원', label: '탈퇴 회원' },
-];
-const genderOptions = [
-  { value: '전체 성별', label: '전체 성별' },
-  { value: '남성', label: '남성' },
-  { value: '여성', label: '여성' },
-];
-const ageGroupOptions = [
-  { value: '전체 연령대', label: '전체 연령대' },
-  { value: '10대', label: '10대' },
-  { value: '20대', label: '20대' },
-  { value: '30대', label: '30대' },
-  { value: '40대', label: '40대' },
-  { value: '50대 이상', label: '50대 이상' },
-];
-const sortOptions = [
+interface Member {
+  memberId: number; // id를 memberId로 변경하여 명확성 증진
+  name: string;
+  email: string;
+  birth: string; // YYYY-MM-DD
+  region: string;
+  status: '활동 중' | '휴면 회원' | '정지 회원' | '탈퇴 회원';
+  lastLogin: string; // YYYY-MM-DD HH:MM
+  // gender와 ageGroup은 필터링을 위해 필요할 수 있으나, 테이블 표시는 선택적
+  gender?: '남성' | '여성'; // 예시 데이터에는 없지만, 필터링을 위해 추가 가능
+  // ageGroup?: string; // birth로 계산 가능
+}
+
+// ReusableTable을 위한 Member 확장
+interface MemberTableItem extends Member, TableItem {
+  id: number; // ReusableTable은 id를 필수로 요구
+}
+
+const memberSortOptions = [
   { value: '접속순 (최신)', label: '접속순 (최신)' },
   { value: '접속순 (오래된)', label: '접속순 (오래된)' },
 ];
 
-const mockMembers = [
-  { id: 1, name: '라바', email: 'ravah002@gmail.com', birth: '2025-05-01', region: '서울특별시 강동구', status: '활동 중', lastLogin: '2025-05-01 12:03' },
-  { id: 2, name: '강민지', email: 'kmg94611@gmail.com', birth: '1994-06-11', region: '경기도 안산시', status: '탈퇴 회원', lastLogin: '2025-05-01 11:13' },
-  { id: 3, name: '태코', email: 'taekho98@gmail.com', birth: '1998-12-25', region: '인천광역시 연수구', status: '활동 중', lastLogin: '2025-05-01 09:53' },
+const mockMembers: Member[] = [
+  { memberId: 1, name: '라바', email: 'ravah002@gmail.com', birth: '2000-05-01', region: '서울특별시 강동구', status: '활동 중', lastLogin: '2025-05-01 12:03', gender: '남성' },
+  { memberId: 2, name: '강민지', email: 'kmg94611@gmail.com', birth: '1994-06-11', region: '경기도 안산시', status: '탈퇴 회원', lastLogin: '2025-05-01 11:13', gender: '여성' },
+  { memberId: 3, name: '태코', email: 'taekho98@gmail.com', birth: '1998-12-25', region: '인천광역시 연수구', status: '활동 중', lastLogin: '2025-05-01 09:53', gender: '남성' },
+  { memberId: 4, name: '김철수', email: 'chulsoo@example.com', birth: '1985-02-10', region: '부산광역시 해운대구', status: '휴면 회원', lastLogin: '2024-10-20 08:30', gender: '남성' },
+  { memberId: 5, name: '이영희', email: 'younghee@example.com', birth: '1999-11-05', region: '대구광역시 수성구', status: '정지 회원', lastLogin: '2025-03-15 17:45', gender: '여성' },
 ];
 
 const StatusBadge = ({ status }: { status: string }) => {
   let badgeColor = 'bg-gray-100 text-gray-700';
   if (status === '활동 중') {
     badgeColor = 'bg-green-100 text-green-700';
-  } else if (status === '휴면 회원') { // '비활동'을 '휴면 회원'으로 변경
-    badgeColor = 'bg-yellow-100 text-yellow-700'; // 휴면 회원은 노란색 계열로 예시 (색상 변경 가능)
+  } else if (status === '휴면 회원') {
+    badgeColor = 'bg-gray-100 text-gray-700'; 
   } else if (status === '정지 회원') {
     badgeColor = 'bg-red-100 text-red-700';
   } else if (status === '탈퇴 회원') {
-    badgeColor = 'bg-yellow-100 text-yellow-700'; // 노란색 계열로 변경
+    badgeColor = 'bg-yellow-100 text-yellow-700'; // 노란색
   }
   return <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${badgeColor}`}>{status}</span>;
 };
 
 export default function MemberManagement() {
-  const [members] = useState(mockMembers);
-  const [status, setStatus] = useState('전체 상태');
-  const [gender, setGender] = useState('전체 성별');
-  const [ageGroup, setAgeGroup] = useState('전체 연령대');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  // const [region, setRegion] = useState('전체'); // 현재 요청사항에 없음
-  const [sort, setSort] = useState('접속순 (최신)');
+  const members : Member[] = (mockMembers);
+  const [statusFilter, setStatusFilter] = useState('전체');
+  const [genderFilter, setGenderFilter] = useState('전체');
+  const [ageGroupFilter, setAgeGroupFilter] = useState('전체');
+  const [nameSearch, setNameSearch] = useState('');
+  const [emailSearch, setEmailSearch] = useState('');
+  const [sortValue, setSortValue] = useState('접속순 (최신)');
 
-  
+  const handleResetFilters = () => {
+    setStatusFilter('전체');
+    setGenderFilter('전체');
+    setAgeGroupFilter('전체');
+    setNameSearch('');
+    setEmailSearch('');
+  };
+
+  const getAgeGroup = (birthDate: string): string => {
+    const birthYear = new Date(birthDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+    if (age < 20) return '10대';
+    if (age < 30) return '20대';
+    if (age < 40) return '30대';
+    if (age < 50) return '40대';
+    return '50대 이상';
+  };
+
+  const filteredAndSortedMembers = useMemo(() => {
+    let filtered = [...members];
+
+    if (statusFilter !== '전체') {
+      filtered = filtered.filter(member => member.status === statusFilter);
+    }
+    if (genderFilter !== '전체') {
+      filtered = filtered.filter(member => member.gender === genderFilter);
+    }
+    if (ageGroupFilter !== '전체') {
+      filtered = filtered.filter(member => getAgeGroup(member.birth) === ageGroupFilter);
+    }
+    if (nameSearch) {
+      filtered = filtered.filter(member => member.name.toLowerCase().includes(nameSearch.toLowerCase()));
+    }
+    if (emailSearch) {
+      filtered = filtered.filter(member => member.email.toLowerCase().includes(emailSearch.toLowerCase()));
+    }
+
+    // 정렬 로직 (ReusableTable에서 처리하므로 여기서는 id 매핑만)
+    // 실제 정렬은 ReusableTable에 sortOptions와 onSortChange를 전달하여 처리
+    // 예시: lastLogin을 기준으로 정렬 (Date 객체로 변환하여 비교 필요)
+    if (sortValue === '접속순 (최신)') {
+        filtered.sort((a, b) => new Date(b.lastLogin).getTime() - new Date(a.lastLogin).getTime());
+    } else if (sortValue === '접속순 (오래된)') {
+        filtered.sort((a, b) => new Date(a.lastLogin).getTime() - new Date(b.lastLogin).getTime());
+    }
+
+    return filtered.map(member => ({ ...member, id: member.memberId }));
+  }, [members, statusFilter, genderFilter, ageGroupFilter, nameSearch, emailSearch, sortValue]);
+
+  const columns: ColumnDefinition<MemberTableItem>[] = [
+    {
+      key: 'no',
+      header: 'No',
+      cellRenderer: (_item, index) => index + 1,
+      headerClassName: 'w-[5%]', // 또는 w-1/12 유지 시 다른 컬럼 조정
+    },
+    { key: 'name', header: '이름', accessor: 'name', headerClassName: 'w-[15%]' }, // 예: w-2/12
+    { key: 'email', header: '이메일', accessor: 'email', headerClassName: 'w-[25%]' }, // 예: w-3/12
+    { key: 'birth', header: '생년월일', accessor: 'birth', headerClassName: 'w-[15%]' }, // 예: w-2/12
+    { key: 'region', header: '지역', accessor: 'region', headerClassName: 'w-[15%]' }, // 예: w-2/12
+    {
+      key: 'status',
+      header: '상태',
+      cellRenderer: (item) => <StatusBadge status={item.status} />,
+      headerClassName: 'w-[10%]', // 예: w-1/12
+    },
+    { key: 'lastLogin', header: '마지막 접속', accessor: 'lastLogin', headerClassName: 'w-[15%]' }, // 예: w-2/12
+  ];
+
   return (
     <div className="min-h-screen flex bg-gradient-to-r from-blue-300 to-purple-300">
       <Sidebar />
@@ -69,107 +137,29 @@ export default function MemberManagement() {
         <main className="flex-1 bg-slate-50 p-6 md:p-8 rounded-tl-xl overflow-y-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-8">회원 관리</h2>
 
-          {/* 필터 섹션 */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 mb-4">
-              {/* 1행: 드롭다운 선택 */}
-              <div className="flex flex-col">
-                <label htmlFor="status-select" className="mb-1 text-sm font-medium text-gray-700">회원 상태</label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger id="status-select">
-                    <SelectValue placeholder="회원 상태 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((opt) => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col">
-                <label htmlFor="gender-select" className="mb-1 text-sm font-medium text-gray-700">성별</label>
-                <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger id="gender-select">
-                    <SelectValue placeholder="성별 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {genderOptions.map((opt) => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col">
-                <label htmlFor="age-select" className="mb-1 text-sm font-medium text-gray-700">연령대</label>
-                <Select value={ageGroup} onValueChange={setAgeGroup}>
-                  <SelectTrigger id="age-select">
-                    <SelectValue placeholder="연령대 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ageGroupOptions.map((opt) => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            {/* 2행: 검색 조회 및 버튼 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-4 items-end">
-              <div className="flex flex-col md:col-span-1">
-                <label htmlFor="name-input" className="mb-1 text-sm font-medium text-gray-700">이름</label>
-                <Input id="name-input" placeholder="이름 입력" value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div className="flex flex-col md:col-span-1 lg:col-span-1">
-                <label htmlFor="email-input" className="mb-1 text-sm font-medium text-gray-700">이메일</label>
-                <Input id="email-input" placeholder="이메일 입력" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              {/* 버튼들을 2행의 나머지 공간을 차지하도록 하고 우측 정렬 */}
-              <div className="flex justify-end gap-3 md:col-span-1 lg:col-span-2">
-                <Button variant="outline" className="px-6 w-full sm:w-auto">초기화</Button>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto">조회</Button>
-              </div>
-            </div>
-          </div>
+          <MemberFilterSection
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            genderFilter={genderFilter}
+            onGenderFilterChange={setGenderFilter}
+            ageGroupFilter={ageGroupFilter}
+            onAgeGroupFilterChange={setAgeGroupFilter}
+            nameSearch={nameSearch}
+            onNameSearchChange={setNameSearch}
+            emailSearch={emailSearch}
+            onEmailSearchChange={setEmailSearch}
+            onResetFilters={handleResetFilters}
+          />
 
-          {/* 총 회원 수 및 정렬 */}
-          <div className="flex justify-between items-center mb-6">
-            <span className="text-sm text-gray-600">총 <strong className="text-gray-800">{members.length}</strong>명</span>
-            <div className="w-48">
-              <Select value={sort} onValueChange={setSort}>
-                <SelectTrigger className="text-xs">
-                  <SelectValue placeholder="정렬 기준 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map((opt) => <SelectItem key={opt.value} value={opt.value} className="text-xs">{opt.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* 회원 목록 테이블 */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-x-auto">
-            <table className="w-full table-auto text-sm">
-              <thead className="bg-slate-100">
-                <tr>
-                  {['No', '이름', '이메일', '생년월일', '지역', '상태', '마지막 접속'].map(header => (
-                     <th
-                      key={header}
-                      className="py-3 px-4 text-center text-xs text-slate-600 uppercase tracking-wider font-semibold"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {members.map((m, idx) => (
-                  <tr key={m.id} className="hover:bg-slate-50 transition-colors duration-150">
-                    <td className="py-3 px-4 text-center text-gray-700">{idx + 1}</td>
-                    <td className="py-3 px-4 text-center text-gray-700 font-medium">{m.name}</td>
-                    <td className="py-3 px-4 text-center text-gray-700">{m.email}</td>
-                    <td className="py-3 px-4 text-center text-gray-700">{m.birth}</td>
-                    <td className="py-3 px-4 text-center text-gray-700">{m.region}</td>
-                    <td className="py-3 px-4 text-center"><StatusBadge status={m.status} /></td>
-                    <td className="py-3 px-4 text-center text-gray-700">{m.lastLogin}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ReusableTable
+            columns={columns}
+            data={filteredAndSortedMembers}
+            totalCount={filteredAndSortedMembers.length}
+            sortValue={sortValue}
+            onSortChange={setSortValue}
+            sortOptions={memberSortOptions}
+            emptyStateMessage="검색 결과에 해당하는 회원이 없습니다."
+          />
         </main>
       </div>
     </div>

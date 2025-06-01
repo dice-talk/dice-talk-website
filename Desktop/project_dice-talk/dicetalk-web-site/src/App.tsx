@@ -5,6 +5,8 @@ import Signup from './pages/Signup';
 import MemberManagement from './pages/Member';
 import DeletedMember from './pages/DeletedMember';
 import QnaManagment from './pages/QnaList'
+import QnaDetailPage from './pages/QnaDetail';
+import NoticeListPage from './pages/NoticeList';
 
 export default function App() {
   return (
@@ -15,7 +17,8 @@ export default function App() {
       <Route path="/membership" element={<MemberManagement />} />
       <Route path="/membership/deleted" element={<DeletedMember />} />
       <Route path='/qnalist' element={<QnaManagment />} />
-      
+      <Route path="/qna/:questionId" element={<QnaDetailPage />} />
+      <Route path="/notices" element={<NoticeListPage/>} /> 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

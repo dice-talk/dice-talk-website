@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/sidebar/Sidebar';
 import Header from '../components/Header';
 import { NewBadge } from '../components/ui/NewBadge';
@@ -32,10 +33,10 @@ const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 
 const mockQnas: QnaItem[] = [
-  { questionId: 103, title: "비밀번호 변경은 어떻게 하나요?", content: "로그인 후 마이페이지에서 비밀번호를 변경하려고 하는데, 메뉴를 찾을 수가 없습니다. 어디서 변경할 수 있나요?", authorEmail: "user1@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2024-05-28T10:00:00Z" },
-  { questionId: 102, title: "앱 사용 중 오류가 발생합니다.", content: "채팅방에 입장하려고 할 때마다 앱이 강제 종료됩니다. 확인 부탁드립니다.", authorEmail: "user2@example.com", questionStatus: "QUESTION_REGISTERED", createdAt: "2024-05-29T11:30:00Z" },
-  { questionId: 101, title: "다이스톡 서비스 이용 문의", content: "유료 아이템 구매 시 환불 규정이 궁금합니다. 자세한 내용을 알려주세요.", authorEmail: "user3@example.com", questionStatus: "UPDATE", createdAt: "2024-05-30T14:15:00Z" },
-  { questionId: 104, title: "친구 추가 기능이 궁금합니다. 자세히 알려주세요.", content: "친구의 아이디를 알고 있는데, 어떻게 추가해야 하나요? 친구 추가 버튼을 못 찾겠습니다.", authorEmail: "user4@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2024-05-27T09:00:00Z" },
+  { questionId: 103, title: "비밀번호 변경은 어떻게 하나요? 비밀번호 변경 메뉴를 찾을 수 없습니다. 상세한 안내 부탁드립니다.", content: "로그인 후 마이페이지에서 비밀번호를 변경하려고 하는데, 메뉴를 찾을 수가 없습니다. 어디서 변경할 수 있나요?", authorEmail: "user1@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2025-05-28T10:00:00Z" },
+  { questionId: 102, title: "앱 사용 중 오류가 발생합니다.", content: "채팅방에 입장하려고 할 때마다 앱이 강제 종료됩니다. 확인 부탁드립니다.", authorEmail: "user2@example.com", questionStatus: "QUESTION_REGISTERED", createdAt: "2025-05-29T11:30:00Z" },
+  { questionId: 101, title: "다이스톡 서비스 이용 문의", content: "유료 아이템 구매 시 환불 규정이 궁금합니다. 자세한 내용을 알려주세요.", authorEmail: "user3@example.com", questionStatus: "UPDATE", createdAt: "2025-05-30T14:15:00Z" },
+  { questionId: 104, title: "친구 추가 기능이 궁금합니다. 자세히 알려주세요.", content: "친구의 아이디를 알고 있는데, 어떻게 추가해야 하나요? 친구 추가 버튼을 못 찾겠습니다.", authorEmail: "user4@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2025-05-27T09:00:00Z" }, // 'S' 제거
   { questionId: 105, title: "프로필 사진 변경 문의", content: "프로필 사진을 변경하고 싶은데 방법을 모르겠습니다. 알려주세요.", authorEmail: "user5@example.com", questionStatus: "QUESTION_REGISTERED", createdAt: yesterday.toISOString() }, // createdAt을 "어제"로 변경
 ];
 
@@ -48,18 +49,17 @@ const AnswerStatusDisplay = ({ status }: { status: QuestionStatusType }) => {
 };
 
 export default function QnaList() {
-  const [qnas] = useState<QnaItem[]>(mockQnas);
+  const qnas: QnaItem[] = mockQnas; // useState 대신 const로 변경
   const [statusFilter, setStatusFilter] = useState('전체');
-  const [authorSearch, setAuthorSearch] = useState('');
-  const [titleSearch, setTitleSearch] = useState('');
-  const [contentSearch, setContentSearch] = useState('');
+  const [searchType, setSearchType] = useState('제목'); // 기본 검색 유형
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [sortValue, setSortValue] = useState('questionId_desc'); // ReusableTable의 sortValue와 연결
+  const navigate = useNavigate();
 
   const handleResetFilters = () => {
     setStatusFilter('전체');
-    setAuthorSearch('');
-    setTitleSearch('');
-    setContentSearch('');
+    setSearchType('제목');
+    setSearchKeyword('');
   };
  
   const filteredAndSortedQnas = useMemo(() => {
@@ -78,19 +78,21 @@ export default function QnaList() {
       });
     }
 
-    // 작성자(이메일) 검색
-    if (authorSearch) {
-      filtered = filtered.filter(qna => qna.authorEmail.toLowerCase().includes(authorSearch.toLowerCase()));
-    }
-
-    // 제목 검색
-    if (titleSearch) {
-      filtered = filtered.filter(qna => qna.title.toLowerCase().includes(titleSearch.toLowerCase()));
-    }
-
-    // 내용 검색
-    if (contentSearch) {
-      filtered = filtered.filter(qna => qna.content.toLowerCase().includes(contentSearch.toLowerCase()));
+    // 통합 검색 필터링
+    if (searchKeyword) {
+      const keyword = searchKeyword.toLowerCase();
+      filtered = filtered.filter(qna => {
+        if (searchType === '작성자') {
+          return qna.authorEmail.toLowerCase().includes(keyword);
+        } else if (searchType === '제목') {
+          return qna.title.toLowerCase().includes(keyword);
+        } else if (searchType === '내용') {
+          return qna.content.toLowerCase().includes(keyword);
+        } else if (searchType === '제목+내용') {
+          return qna.title.toLowerCase().includes(keyword) || qna.content.toLowerCase().includes(keyword);
+        }
+        return true;
+      });
     }
 
     // 정렬 로직은 ReusableTable에 의해 관리되므로, 여기서는 필터링된 데이터를 TableItem 형식으로 변환
@@ -100,8 +102,8 @@ export default function QnaList() {
       filtered.sort((a, b) => a.questionId - b.questionId);
     }
     // ReusableTable에 맞게 id 필드 추가
-    return filtered.map(qna => ({ ...qna, id: qna.questionId }));
-  }, [qnas, statusFilter, authorSearch, titleSearch, contentSearch, sortValue]);
+    return filtered.map(qna => ({ ...qna, id: qna.questionId } as QnaTableItem)); // 명시적 타입 캐스팅 추가
+  }, [qnas, statusFilter, searchType, searchKeyword, sortValue]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -111,40 +113,48 @@ export default function QnaList() {
     });
   };
 
+  //상세조회 페이지 이동 
+  const handleRowClick = (item: QnaTableItem) => {
+    navigate(`/qna/${item.questionId}`);
+  };
+
   const columns: ColumnDefinition<QnaTableItem>[] = [
     {
       key: 'no',
       header: 'No',
       cellRenderer: (_item, index) => index + 1, // ReusableTable에서 index를 받아 순번 표시
-      headerClassName: 'w-1/12',
+      headerClassName: 'w-1/12', // 약 8.33%
       cellClassName: 'text-gray-700',
     },
     {
       key: 'title',
       header: '제목',
-      cellRenderer: (item) => (
-        <div className="w-60 md:w-80 truncate mx-auto flex items-center justify-start text-left" title={item.title}>
-          <NewBadge createdAt={item.createdAt} />
-          <span className="truncate ml-1">{item.title}</span>
-        </div>
-      ),
-      headerClassName: 'w-5/12 text-left',
+      cellRenderer: (item) => {
+        const displayTitle = item.title.length > 30 ? `${item.title.substring(0, 30)}...` : item.title;
+        return (
+            <div className="w-full flex items-center justify-start text-left" title={item.title}>
+              <NewBadge createdAt={item.createdAt} />
+              <span className="ml-1 min-w-0">{displayTitle}</span>
+            </div>
+        );
+      },
+      headerClassName: 'w-5/12 text-left', // 약 41.67%
       cellClassName: 'text-left',
     },
     {
       key: 'authorEmail',
       header: '작성자(이메일)',
       accessor: 'authorEmail',
-      headerClassName: 'w-3/12',
+      headerClassName: 'w-2/12', // 약 16.67% (기존 3/12에서 조정)
       cellClassName: 'text-gray-700',
     },
     {
       key: 'questionStatus',
       header: '답변 등록',
       cellRenderer: (item) => <AnswerStatusDisplay status={item.questionStatus} />,
-      headerClassName: 'w-2/12',
+      headerClassName: 'w-2/12', // 약 16.67%
     },
-    { key: 'createdAt', header: '등록일', accessor: (item) => formatDate(item.createdAt), headerClassName: 'w-2/12', cellClassName: 'text-gray-700' },
+    { key: 'createdAt', header: '등록일', accessor: (item) => formatDate(item.createdAt), headerClassName: 'w-2/12', cellClassName: 'text-gray-700' }, // 약 16.67%
   ];
 
   return (
@@ -159,12 +169,10 @@ export default function QnaList() {
           <QnaFilterSection
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
-            authorSearch={authorSearch}
-            onAuthorSearchChange={setAuthorSearch}
-            titleSearch={titleSearch}
-            onTitleSearchChange={setTitleSearch}
-            contentSearch={contentSearch}
-            onContentSearchChange={setContentSearch}
+            searchType={searchType}
+            onSearchTypeChange={setSearchType}
+            searchKeyword={searchKeyword}
+            onSearchKeywordChange={setSearchKeyword}
             onResetFilters={handleResetFilters}
           />
 
@@ -177,6 +185,7 @@ export default function QnaList() {
             onSortChange={setSortValue}
             sortOptions={qnaSortOptions}
             emptyStateMessage="검색 결과에 해당하는 Q&A가 없습니다."
+            onRowClick={handleRowClick}
           />
 
         </main>
