@@ -8,6 +8,7 @@ interface ImageUploadProps {
   existingImageUrls?: string[];
   label?: string;
   maxFiles?: number;
+  disabled?: boolean;
 }
 
 export function ImageUpload({
@@ -15,6 +16,7 @@ export function ImageUpload({
   existingImageUrls = [],
   label = "이미지 업로드",
   maxFiles = 5,
+  disabled = false
 }: ImageUploadProps) {
   // 표시될 모든 이미지 URL (기존 URL + 새로 추가된 파일의 Blob URL)
   const [currentImageUrls, setCurrentImageUrls] = useState<string[]>(existingImageUrls);
@@ -79,6 +81,7 @@ export function ImageUpload({
       <input
         type="file"
         accept="image/*"
+        disabled={disabled}
         onChange={handleFileChange}
         multiple // 여러 파일 선택 가능하도록
         ref={fileInputRef}
@@ -100,7 +103,7 @@ export function ImageUpload({
           </div>
         ))}
         {currentImageUrls.length < maxFiles && (
-          <Button variant="outline" onClick={triggerFileInput} className="w-full aspect-square border-dashed border-gray-400 hover:border-gray-500 text-gray-600 flex flex-col items-center justify-center p-2"> {/* p-2 추가로 내부 여백 조정 */}
+          <Button type="button" variant="outline" onClick={triggerFileInput} className="w-full aspect-square border-dashed border-gray-400 hover:border-gray-500 text-gray-600 flex flex-col items-center justify-center p-2"> {/* type="button" 추가 */}
             <UploadCloud size={24} className="mb-1 text-gray-500" />
             <span className="text-xs text-center">이미지 추가 ({currentImageUrls.length}/{maxFiles})</span>
           </Button>
