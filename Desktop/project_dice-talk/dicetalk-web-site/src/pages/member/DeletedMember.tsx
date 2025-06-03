@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import Sidebar from '../components/sidebar/Sidebar';
-import Header from '../components/Header';
-import { DeletedMemberFilterSection } from '../components/member/DeletedMemberFilterSection';
-import { ReusableTable } from '../components/common/ReusableTable';
-import type { ColumnDefinition, TableItem } from '../components/common/reusableTableTypes';
+import Sidebar from '../../components/sidebar/Sidebar';
+import Header from '../../components/Header';
+import { DeletedMemberFilterSection } from '../../components/member/DeletedMemberFilterSection';
+import { ReusableTable } from '../../components/common/ReusableTable';
+import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
+import { MemberDetailModal, type MemberDetailData } from '../../components/member/MemberDetailModal';
  
-interface DeletedMember {
+interface DeletedMember extends MemberDetailData { // MemberDetailData 확장
   memberId: number;
   name: string;
   email: string;
@@ -13,8 +14,13 @@ interface DeletedMember {
   region: string;
   reason: string; // 탈퇴 사유
   deletedAt: string; // YYYY-MM-DD HH:MM
-  gender?: '남성' | '여성'; // 필터링을 위해 추가
+  // gender?: '남성' | '여성'; // MemberDetailData 에서 MALE/FEMALE로 관리
   // status는 '탈퇴 회원'으로 고정될 것이므로 인터페이스에서 제외하거나, 항상 '탈퇴 회원'으로 설정
+  // 백엔드 응답 필드 추가 (MemberDetailData에 이미 포함된 것은 제외)
+  // phone?: string;
+  // totalDice?: number; // 탈퇴 회원은 0일 가능성 높음
+  // memberStatus?: string; // 백엔드 원본 상태값 (예: MEMBER_WITHDRAWN)
+  // notification?: boolean;
 }
 
 // ReusableTable을 위한 DeletedMember 확장
@@ -30,15 +36,16 @@ const deletedMemberSortOptions = [
 ];
 
 const mockDeletedMembers: DeletedMember[] = [
-  { memberId: 1, name: '라바', email: 'ravah002@gmail.com', birth: '2000-05-01', region: '서울특별시 강동구', reason: '원하는 기능이 부족해서', deletedAt: '2025-05-30 12:03', gender: '남성' },
-  { memberId: 2, name: '강민지', email: 'kmg94611@gmail.com', birth: '1994-06-11', region: '경기도 안산시', reason: '더 나은 서비스를 찾아서', deletedAt: '2025-05-01 11:13', gender: '여성' },
-  { memberId: 3, name: '태코', email: 'taekho98@gmail.com', birth: '1998-12-25', region: '인천광역시 연수구', reason: '이용 중 불편한 경험이 있어서', deletedAt: '2025-05-01 09:53', gender: '남성' },
-  { memberId: 6, name: '박지성', email: 'jisung@example.com', birth: '1981-02-25', region: '전라북도 고창군', reason: '기타', deletedAt: '2025-04-15 10:00', gender: '남성' },
-  { memberId: 7, name: '김연아', email: 'yunakim@example.com', birth: '1990-09-05', region: '경기도 군포시', reason: '원하는 기능이 부족해서', deletedAt: '2025-03-20 18:30', gender: '여성' },
+  { memberId: 1, name: '라바', email: 'ravah002@gmail.com', phone: '010-1111-1111', birth: '2000-05-01', gender: 'MALE', region: '서울특별시 강동구', reason: '원하는 기능이 부족해서', deletedAt: '2025-05-30 12:03', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: false },
+  { memberId: 2, name: '강민지', email: 'kmg94611@gmail.com', phone: '010-2222-2222', birth: '1994-06-11', gender: 'FEMALE', region: '경기도 안산시', reason: '더 나은 서비스를 찾아서', deletedAt: '2025-05-01 11:13', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: true },
+  { memberId: 3, name: '태코', email: 'taekho98@gmail.com', phone: '010-3333-3333', birth: '1998-12-25', gender: 'MALE', region: '인천광역시 연수구', reason: '이용 중 불편한 경험이 있어서', deletedAt: '2025-05-01 09:53', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: false },
+  { memberId: 6, name: '박지성', email: 'jisung@example.com', phone: '010-6666-6666', birth: '1981-02-25', gender: 'MALE', region: '전라북도 고창군', reason: '기타', deletedAt: '2025-04-15 10:00', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: true },
+  { memberId: 7, name: '김연아', email: 'yunakim@example.com', phone: '010-7777-7777', birth: '1990-09-05', gender: 'FEMALE', region: '경기도 군포시', reason: '원하는 기능이 부족해서', deletedAt: '2025-03-20 18:30', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: false },
 ];
 
 export default function DeletedMemberManagement() {
-  const deletedMembers: DeletedMember[] = mockDeletedMembers;
+  // useState를 사용하여 mock 데이터 관리 (실제 API 연동 시 useEffect로 데이터 가져옴)
+  const [deletedMembers] = useState<DeletedMember[]>(mockDeletedMembers);
   const [statusFilter, setStatusFilter] = useState('탈퇴 회원'); // 기본값 '탈퇴 회원'
   const [genderFilter, setGenderFilter] = useState('전체');
   const [ageGroupFilter, setAgeGroupFilter] = useState('전체');
@@ -46,6 +53,9 @@ export default function DeletedMemberManagement() {
   const [nameSearch, setNameSearch] = useState('');
   const [emailSearch, setEmailSearch] = useState('');
   const [sortValue, setSortValue] = useState('탈퇴일 순 (최신)');
+
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<MemberDetailData | null>(null);
 
   const handleResetFilters = () => {
     setStatusFilter('탈퇴 회원'); // 초기화 시에도 '탈퇴 회원' 유지 또는 '전체'로 변경 가능
@@ -55,6 +65,14 @@ export default function DeletedMemberManagement() {
     setNameSearch('');
     setEmailSearch('');
   };
+
+  const handleOpenDetailModal = (member: DeletedMember) => {
+    setSelectedMember(member);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseDetailModal = () => setIsDetailModalOpen(false);
+
 
   const getAgeGroup = (birthDate: string): string => {
     const birthYear = new Date(birthDate).getFullYear();
@@ -77,7 +95,9 @@ export default function DeletedMemberManagement() {
     // }
 
     if (genderFilter !== '전체') {
-      filtered = filtered.filter(member => member.gender === genderFilter);
+      // genderFilter는 '남성'/'여성', member.gender는 'MALE'/'FEMALE'
+      const backendGender = genderFilter === '남성' ? 'MALE' : 'FEMALE';
+      filtered = filtered.filter(member => member.gender === backendGender);
     }
     if (ageGroupFilter !== '전체') {
       filtered = filtered.filter(member => getAgeGroup(member.birth) === ageGroupFilter);
@@ -107,7 +127,7 @@ export default function DeletedMemberManagement() {
 
   const columns: ColumnDefinition<DeletedMemberTableItem>[] = [
     { key: 'no', header: 'No', cellRenderer: (_item, index) => index + 1, headerClassName: 'w-[5%]' },
-    { key: 'name', header: '이름', accessor: 'name', headerClassName: 'w-[12%]' },
+    { key: 'name', header: '이름', accessor: 'name', headerClassName: 'w-[10%]' },
     { key: 'email', header: '이메일', accessor: 'email', headerClassName: 'w-[18%]' },
     { key: 'birth', header: '생년월일', accessor: 'birth', headerClassName: 'w-[15%]' },
     { key: 'region', header: '지역', accessor: 'region', headerClassName: 'w-[15%]' },
@@ -115,7 +135,7 @@ export default function DeletedMemberManagement() {
       key: 'reason',
       header: '탈퇴 사유',
       accessor: 'reason',
-      headerClassName: 'w-[25%] text-left',
+      headerClassName: 'w-[20%] text-left',
       cellClassName: 'text-left',
       cellRenderer: (item) => <div className="w-full truncate" title={item.reason}>{item.reason}</div>,
     },
@@ -152,8 +172,15 @@ export default function DeletedMemberManagement() {
             totalCount={filteredAndSortedMembers.length}
             sortValue={sortValue}
             onSortChange={setSortValue}
+            onRowClick={handleOpenDetailModal}
             sortOptions={deletedMemberSortOptions}
             emptyStateMessage="탈퇴한 회원이 없습니다."
+          />
+          <MemberDetailModal
+            isOpen={isDetailModalOpen}
+            onClose={handleCloseDetailModal}
+            member={selectedMember}
+            isDeletedMember={true}
           />
         </main>
       </div>

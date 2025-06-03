@@ -1,7 +1,7 @@
 // src/pages/Login.tsx
 import { useState } from 'react';
-import { login } from '../api/auth';
-import { useAuthStore } from '../stores/useUserStore';
+import { login } from '../../api/auth';
+import { useAuthStore } from '../../stores/useUserStore';
 import { useNavigate } from 'react-router-dom';
 
 

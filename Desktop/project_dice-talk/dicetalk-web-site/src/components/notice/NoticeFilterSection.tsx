@@ -1,6 +1,7 @@
 import Button from '../ui/Button';
 import { DropdownFilter } from '../ui/DropdownFilter';
 import { SearchInputFilter } from '../ui/SearchInputFilter';
+import { NoticeStatus } from './noticeUtils'; // NoticeStatus import
 
 const noticeTypeOptions = [
   { value: '전체', label: '전체 유형' },
@@ -14,6 +15,12 @@ const importanceOptions = [
   { value: '일반', label: '일반' },
 ];
 
+// NoticeStatus enum을 사용하여 공지 상태 옵션 생성
+const noticeStatusOptions = [
+  { value: '전체', label: '전체 (공지 상태)' },
+  ...Object.values(NoticeStatus).map(status => ({ value: status, label: status })),
+];
+
 interface NoticeFilterSectionProps {
   typeFilter: string;
   onTypeFilterChange: (value: string) => void;
@@ -22,6 +29,8 @@ interface NoticeFilterSectionProps {
   titleSearch: string;
   onTitleSearchChange: (value: string) => void;
   onResetFilters: () => void;
+  noticeStatusFilter: string; // 새로운 prop
+  onNoticeStatusFilterChange: (value: string) => void; // 새로운 prop
 }
 
 export function NoticeFilterSection({
@@ -32,12 +41,15 @@ export function NoticeFilterSection({
   titleSearch,
   onTitleSearchChange,
   onResetFilters,
+  noticeStatusFilter,
+  onNoticeStatusFilterChange,
 }: NoticeFilterSectionProps) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 mb-6">
         <DropdownFilter label="유형" value={typeFilter} onValueChange={onTypeFilterChange} options={noticeTypeOptions} placeholder="유형 선택" />
         <DropdownFilter label="중요도" value={importanceFilter} onValueChange={onImportanceFilterChange} options={importanceOptions} placeholder="중요도 선택" />
+        <DropdownFilter label="공지 상태" value={noticeStatusFilter} onValueChange={onNoticeStatusFilterChange} options={noticeStatusOptions} placeholder="공지 상태 선택" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 items-end">
         <div className="lg:col-span-1">

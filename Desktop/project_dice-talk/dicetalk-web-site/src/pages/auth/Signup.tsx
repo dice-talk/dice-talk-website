@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminSignup } from '../api/auth';
+import { adminSignup } from '../../api/auth';
 import axios, { AxiosError } from 'axios';
 
 export default function Signup() {
