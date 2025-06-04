@@ -53,7 +53,7 @@ export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionPr
   methodFilter, onMethodFilterChange,
   userSearchTerm, onUserSearchTermChange,
   productSearchTerm, onProductSearchTermChange,
-  onApplyFilters, onResetFilters,
+  onResetFilters,
 }) => {
   return (
     <div className="mb-6 p-4 bg-white rounded-lg shadow border border-gray-200/75 space-y-4">
@@ -100,13 +100,13 @@ export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionPr
           onChange={onProductSearchTermChange}
         />
         <div className="md:col-span-2 flex justify-end items-end space-x-2 pt-4 sm:pt-0">
-          <Button
+          {/* <Button
             variant="default"
             onClick={onApplyFilters}
             className="w-full sm:w-auto"
           >
             조회
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={onResetFilters}

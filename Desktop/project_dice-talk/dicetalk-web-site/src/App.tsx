@@ -14,9 +14,12 @@ import ReportDetailPage from './pages/report/ReportDetail';
 import SuspendedMemberManagement from './pages/report/SuspendedMember';
 import ProductListPage from './pages/product/ProductList';
 import ItemListPage from './pages/item/ItemList';
-import PaymentHistoryPage from './pages/payment/PaymentHistort';
+import PaymentHistoryPage from './pages/payment/PaymentHistory';
 import ChatRoomManagementPage from './pages/chat/ChatRoomManagementPage';
 import ThemeManagementPage from './pages/chat/ThemeManagement';
+import EventManagementPage from './pages/chat/EventManagement';
+import SuspendedQnaListPage from './pages/qna/SuspendedQnaList';
+import SuspendedQnaDetailPage from './pages/qna/SuspendedQnaDetail'; // SuspendedQnaDetailPage 임포트
 
 export default function App() {
   return (
@@ -41,6 +44,9 @@ export default function App() {
       <Route path='/payments' element={<PaymentHistoryPage />} />
       <Route path='/chatrooms' element={<ChatRoomManagementPage />} />
       <Route path='/themes' element={<ThemeManagementPage />} /> 
+      <Route path='/events' element={<EventManagementPage />} />
+      <Route path='/suspendedqnalist' element={<SuspendedQnaListPage />} />
+      <Route path='/suspended-qna/:questionId' element={<SuspendedQnaDetailPage />} /> 
     </Routes>
   );
 }

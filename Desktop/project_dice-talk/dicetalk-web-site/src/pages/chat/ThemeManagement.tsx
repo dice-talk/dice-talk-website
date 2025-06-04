@@ -7,7 +7,7 @@ import Button from '../../components/ui/Button';
 import { ThemeEditModal } from '../../components/chat/ThemeEditModal';
 import { type ThemeItem, ThemeId } from '../../types/themeTypes';
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-import { Switch } from '../../components/ui/Switch'; // Switch 컴포넌트 추가 가정
+// import { Switch } from '../../components/ui/Switch'; // 테이블에서는 뱃지로 대체
 
 // 초기 테마 데이터 (실제로는 API에서 가져옴)
 const initialThemes: ThemeItem[] = [
@@ -45,20 +45,6 @@ export default function ThemeManagementPage() {
     handleCloseEditModal();
     // TODO: API 호출하여 서버에 저장
     alert(`'${updatedTheme.name}' 테마 정보가 수정되었습니다.`);
-  };
-
-  const toggleThemeStatus = (themeId: ThemeId) => {
-    setThemes(prevThemes =>
-      prevThemes.map(t =>
-        t.id === themeId ? { ...t, isActive: !t.isActive } : t
-      )
-    );
-    // TODO: API 호출하여 서버에 상태 업데이트
-    const themeName = themes.find(t => t.id === themeId)?.name;
-    const newStatus = themes.find(t => t.id === themeId)?.isActive ? '비활성' : '활성';
-    if (themeName) {
-        alert(`'${themeName}' 테마가 ${newStatus} 상태로 변경되었습니다.`);
-    }
   };
   
   // 테마 정렬 옵션
@@ -116,20 +102,13 @@ export default function ThemeManagementPage() {
       header: '활성 상태',
       headerClassName: 'w-[15%] text-center',
       cellClassName: 'text-center',
-      cellRenderer: (item) => (
-        // Switch와 Label을 div로 감싸고, label 클릭 시 토글되도록 htmlFor 사용
-        <div className="flex justify-center items-center space-x-2">
-          <Switch
-            checked={item.isActive}
-            onCheckedChange={() => toggleThemeStatus(item.id)}
-            aria-label={`${item.name} 활성 상태 토글`}
-            id={`theme-switch-${item.id}`}
-          />
-          {/* htmlFor를 Switch의 id와 연결 */}
-          <label htmlFor={`theme-switch-${item.id}`} className="text-sm cursor-pointer">
-            {item.isActive ? '활성' : '비활성'}
-          </label>
-        </div>
+      cellRenderer: (item) => ( // 뱃지 형태로 변경
+        <span
+          className={`px-3 py-1 text-xs font-semibold rounded-full
+            ${item.isActive ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-gray-100 text-gray-700 border border-gray-300'}`}
+        >
+          {item.isActive ? '활성화' : '비활성화'}
+        </span>
       ),
     },
     {
@@ -139,7 +118,7 @@ export default function ThemeManagementPage() {
       cellClassName: 'text-center',
       cellRenderer: (item) => (
         <Button variant="outline" size="sm" onClick={() => handleOpenEditModal(item)}>
-          설명 수정
+          수정
         </Button>
       ),
     },

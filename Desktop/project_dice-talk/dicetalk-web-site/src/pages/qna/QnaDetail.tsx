@@ -7,9 +7,9 @@ import { ImageUpload } from '../../components/ui/ImageUpload';
 
 // QnaList.tsx와 동일한 QnaItem 타입 및 mockQnas 데이터를 사용한다고 가정합니다.
 // 실제 애플리케이션에서는 이들을 공유 모듈에서 가져오는 것이 좋습니다.
-type QuestionStatusType = 'QUESTION_ANSWERED' | 'QUESTION_REGISTERED' | 'QUESTION_UPDATED'; // UPDATE -> QUESTION_UPDATED
+export type QuestionStatusType = 'QUESTION_ANSWERED' | 'QUESTION_REGISTERED' | 'QUESTION_UPDATED'; // UPDATE -> QUESTION_UPDATED
 
-interface QnaItem {
+export interface QnaItem {
   questionId: number;
   title: string;
   content: string;
@@ -26,7 +26,7 @@ interface QnaItem {
 // QnaList.tsx의 mockQnas 데이터 (실제로는 import 해야 함)
 const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
-const mockQnas: QnaItem[] = [
+export const mockQnas: QnaItem[] = [
   { questionId: 105, title: "프로필 사진 변경 문의", content: "프로필 사진을 변경하고 싶은데 방법을 모르겠습니다. 알려주세요.", authorEmail: "user5@example.com", questionStatus: "QUESTION_REGISTERED", createdAt: yesterday.toISOString() },
   { questionId: 104, title: "친구 추가 기능이 궁금합니다. 자세히 알려주세요.", content: "친구의 아이디를 알고 있는데, 어떻게 추가해야 하나요? 친구 추가 버튼을 못 찾겠습니다.", authorEmail: "user4@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2025-05-31T19:00:00Z", answerContent: "친구 추가는 메인 화면 우측 상단의 친구 아이콘을 클릭 후, ID로 검색하여 추가할 수 있습니다.", answeredBy: "관리자", answeredAt: "2025-05-31T18:00:00Z", answerImageUrls: [] },
   {
@@ -64,7 +64,7 @@ const mockQnas: QnaItem[] = [
   },
 ];
 
-const formatDate = (dateString: string) => {
+export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: '2-digit',
@@ -107,7 +107,7 @@ export default function QnaDetailPage() {
     // TODO: 답변 저장 API 연결
     if (qnaItem && answer.trim() !== '') {
       const uploadedImageUrls = answerImageFiles.length > 0
-        ? answerImageFiles.map((file, index) => `https://via.placeholder.com/400x200.png?text=New+Answer+Image+${index + 1}`)
+        ? answerImageFiles.map((_file, index) => `https://via.placeholder.com/400x200.png?text=New+Answer+Image+${index + 1}`)
         : []; 
       
       const finalImageUrls = [...(qnaItem.answerImageUrls || []).filter(url => !removedAnswerImageUrls.includes(url)), ...uploadedImageUrls];

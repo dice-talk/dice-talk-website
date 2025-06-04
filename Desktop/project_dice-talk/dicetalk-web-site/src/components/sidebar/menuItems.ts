@@ -55,7 +55,7 @@ export const menuItems: MenuItem[] = [
     name: 'QnA 관리',
     subItems: [
       { name: 'QnA 조회', path: '/qnalist' },
-      { name: '비회원 QnA 조회', path: '/qnalist' },
+      { name: '비회원 QnA 조회', path: '/suspendedqnalist' },
     ],
   }
 ];

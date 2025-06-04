@@ -6,18 +6,9 @@ import { NewBadge } from '../../components/ui/NewBadge';
 import { QnaFilterSection } from '../../components/qna/QnaFilterSection';
 import { ReusableTable } from '../../components/common/ReusableTable';
 import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
-import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes'; // 타입 임포트 경로 변경
- 
-type QuestionStatusType = 'QUESTION_ANSWERED' | 'QUESTION_REGISTERED' | 'QUESTION_UPDATED';
-
-interface QnaItem {
-  questionId: number;
-  title: string;
-  content: string;
-  authorEmail: string;
-  questionStatus: QuestionStatusType;
-  createdAt: string;
-}
+import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
+// QnaDetail.tsx에서 QnaItem, QuestionStatusType, mockQnas, formatDate를 가져옴
+import { type QnaItem, type QuestionStatusType, mockQnas as importedMockQnas, formatDate } from './QnaDetail';
 
 // ReusableTable을 위한 QnaItem 확장 (TableItem의 id와 매핑)
 interface QnaTableItem extends QnaItem, TableItem {
@@ -32,22 +23,7 @@ const qnaSortOptions = [
 // // 테스트를 위해 "어제" 날짜를 생성합니다.
 // const yesterday = new Date();
 // yesterday.setDate(yesterday.getDate() - 1);
-
-const mockQnas: QnaItem[] = [
-  { questionId: 101, title: "비밀번호 변경은 어떻게 하나요? 비밀번호 변경 메뉴를 찾을 수 없습니다. 상세한 안내 부탁드립니다.", content: "로그인 후 마이페이지에서 비밀번호를 변경하려고 하는데, 메뉴를 찾을 수가 없습니다. 어디서 변경할 수 있나요?", authorEmail: "user1@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2025-05-28T10:00:00Z" },
-  { questionId: 102, title: "앱 사용 중 오류가 발생합니다.", content: "채팅방에 입장하려고 할 때마다 앱이 강제 종료됩니다. 확인 부탁드립니다.", authorEmail: "user2@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2025-05-29T11:30:00Z" },
-  { questionId: 103, title: "다이스톡 서비스 이용 문의", content: "유료 아이템 구매 시 환불 규정이 궁금합니다. 자세한 내용을 알려주세요.", authorEmail: "user3@example.com", questionStatus: "QUESTION_UPDATED", createdAt: "2025-05-30T14:15:00Z" },
-  { questionId: 104, title: "친구 추가 기능이 궁금합니다. 자세히 알려주세요.", content: "친구의 아이디를 알고 있는데, 어떻게 추가해야 하나요? 친구 추가 버튼을 못 찾겠습니다.", authorEmail: "user4@example.com", questionStatus: "QUESTION_UPDATED", createdAt: "2025-05-31T14:02:20Z" }, // 'S' 제거
-  { questionId: 105, title: "프로필 사진 변경 문의", content: "프로필 사진을 변경하고 싶은데 방법을 모르겠습니다. 알려주세요.", authorEmail: "user5@example.com", questionStatus: "QUESTION_REGISTERED", createdAt:"2025-06-01T09:00:00Z" },
-  // 페이지네이션 테스트를 위한 추가 데이터
-  { questionId: 106, title: "알림 설정은 어디서 하나요?", content: "푸시 알림을 끄고 싶은데 메뉴를 못 찾겠어요.", authorEmail: "user6@example.com", questionStatus: "QUESTION_REGISTERED", createdAt: "2025-06-02T10:00:00Z" },
-  { questionId: 107, title: "채팅방 배경화면 변경 기능", content: "채팅방 배경화면을 커스텀할 수 있나요?", authorEmail: "user7@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2025-06-02T11:00:00Z" },
-  { questionId: 108, title: "이모티콘 구매는 어떻게 하나요?", content: "새로운 이모티콘을 구매하고 싶은데 방법을 모르겠습니다.", authorEmail: "user8@example.com", questionStatus: "QUESTION_REGISTERED", createdAt: "2025-06-03T12:00:00Z" },
-  { questionId: 109, title: "계정 탈퇴 절차가 궁금합니다.", content: "계정을 탈퇴하고 싶은데 어떻게 해야 하나요?", authorEmail: "user9@example.com", questionStatus: "QUESTION_UPDATED", createdAt: "2025-06-03T13:00:00Z" },
-  { questionId: 110, title: "데이터 백업 기능 문의", content: "대화 내용을 백업할 수 있는 기능이 있나요?", authorEmail: "user10@example.com", questionStatus: "QUESTION_ANSWERED", createdAt: "2025-06-04T14:00:00Z" },
-  { questionId: 111, title: "다크 모드 지원 여부", content: "앱에서 다크 모드를 지원하나요?", authorEmail: "user11@example.com", questionStatus: "QUESTION_REGISTERED", createdAt: "2025-06-04T15:00:00Z" },
-  { questionId: 112, title: "고객센터 운영 시간 문의", content: "고객센터는 몇 시부터 몇 시까지 운영하나요?", authorEmail: "user12@example.com", questionStatus: "QUESTION_UPDATED", createdAt: "2025-06-05T16:00:00Z" },
-];
+// mockQnas를 importedMockQnas로 사용
 
 const AnswerStatusDisplay = ({ status }: { status: QuestionStatusType }) => {
   if (status === 'QUESTION_ANSWERED') {
@@ -58,7 +34,7 @@ const AnswerStatusDisplay = ({ status }: { status: QuestionStatusType }) => {
 };
 
 export default function QnaList() {
-  const qnas: QnaItem[] = mockQnas; // useState 대신 const로 변경
+  const qnas: QnaItem[] = useMemo(() => importedMockQnas, []); // importedMockQnas 사용 및 useMemo
   const [statusFilter, setStatusFilter] = useState('전체');
   const [searchType, setSearchType] = useState('제목'); // 기본 검색 유형
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -128,14 +104,6 @@ export default function QnaList() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
   };
 
   //상세조회 페이지 이동 

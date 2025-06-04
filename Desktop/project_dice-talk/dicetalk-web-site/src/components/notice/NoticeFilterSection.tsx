@@ -62,7 +62,7 @@ export function NoticeFilterSection({
         </div>
         <div className="flex justify-end gap-3 md:col-span-1 lg:col-span-2 mt-4 md:mt-0">
           <Button variant="outline" className="px-6 w-full sm:w-auto" onClick={onResetFilters}>초기화</Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto">조회</Button>
+          {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto">조회</Button> */}
         </div>
       </div>
     </div>

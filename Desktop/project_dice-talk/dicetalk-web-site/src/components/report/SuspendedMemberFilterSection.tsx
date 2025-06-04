@@ -56,7 +56,6 @@ export const SuspendedMemberFilterSection: React.FC<SuspendedMemberFilterSection
   emailSearch,
   onEmailSearchChange,
   onResetFilters,
-  onApplyFilters, // onApplyFilters prop을 받도록 확인
 }) => {
   return (
     <div className="mb-6 p-4 bg-white rounded-lg shadow border border-gray-200/75">
@@ -102,13 +101,13 @@ export const SuspendedMemberFilterSection: React.FC<SuspendedMemberFilterSection
           onChange={onEmailSearchChange}
         />
         <div className="flex items-end justify-end md:col-start-3 space-x-2"> {/* 버튼들을 오른쪽 끝으로 정렬하고 간격 추가 */}
-          <Button
+          {/* <Button
             variant="default" // 조회 버튼은 default variant
             onClick={onApplyFilters}
             className="w-full sm:w-auto"
           >
             조회
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={onResetFilters}

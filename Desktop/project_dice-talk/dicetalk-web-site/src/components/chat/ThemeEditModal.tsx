@@ -5,7 +5,7 @@ import Button from '../ui/Button';
 import { Input } from '../ui/Input'; // Input 컴포넌트 사용
 import { Textarea } from '../ui/Textarea'; // Textarea 컴포넌트 추가 가정 (없다면 Input으로 대체)
 import type { ThemeItem } from '../../types/themeTypes';
-import { Switch } from '../ui/Switch'; // Switch 컴포넌트 임포트
+// import { Switch } from '../ui/Switch'; // Switch 컴포넌트 대신 Button 사용
 
 interface ThemeEditModalProps {
   isOpen: boolean;
@@ -70,18 +70,27 @@ export const ThemeEditModal: React.FC<ThemeEditModalProps> = ({ isOpen, onClose,
               placeholder="예: 6명 랜덤 매칭 / 남3, 여3 필수"
             />
           </div>
-        <div>
-          <label htmlFor="themeIsActive" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="mt-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             활성 상태
           </label>
-          <div className="flex items-center space-x-2 mt-1">
-            <Switch
-              id="themeIsActiveSwitch" // Switch에 id 부여
-              checked={isActive}
-              onCheckedChange={setIsActive}
-              aria-label="테마 활성 상태 토글"
-            />
-            <label htmlFor="themeIsActiveSwitch" className="text-sm cursor-pointer">{isActive ? '활성' : '비활성'}</label> {/* label의 htmlFor를 Switch id와 연결 */}
+          <div className="flex space-x-2 mt-1">
+            <Button
+              onClick={() => setIsActive(true)}
+              variant={isActive ? 'default' : 'outline'}
+              size="sm"
+              className={isActive ? 'bg-green-600 hover:bg-green-700' : ''}
+            >
+              활성화
+            </Button>
+            <Button
+              onClick={() => setIsActive(false)}
+              variant={!isActive ? 'default' : 'outline'}
+              size="sm"
+              className={!isActive ? 'bg-red-600 hover:bg-red-700' : ''}
+            >
+              비활성화
+            </Button>
           </div>
         </div>
         <div className="flex justify-end space-x-2 pt-2">
