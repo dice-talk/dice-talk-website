@@ -82,29 +82,34 @@ export default function MemberManagement() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] =
     useState<MemberMyInfoResponse | null>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const fetchMembers = async () => {
+  const fetchMembers = async (isReset: boolean = false) => {
     try {
       const params = {
         page: 1,
         size: 10,
-        search: search.trim() || undefined,
+        search: isReset ? undefined : search.trim() || undefined,
         sort:
           sortValue === "가입 순 (최신)"
             ? "memberId/desc"
             : sortValue === "가입 순 (오래된)"
             ? "memberId/asc"
             : undefined,
-        memberStatus:
-          statusFilter !== "전체"
-            ? convertStatusFilterToEnum(statusFilter)
-            : undefined,
-        gender:
-          genderFilter !== "전체"
-            ? ((genderFilter === "남성" ? "MALE" : "FEMALE") as Gender)
-            : undefined,
-        ageGroup: ageGroupFilter !== "전체" ? ageGroupFilter : undefined,
+        memberStatus: isReset
+          ? undefined
+          : statusFilter !== "전체"
+          ? convertStatusFilterToEnum(statusFilter)
+          : undefined,
+        gender: isReset
+          ? undefined
+          : genderFilter !== "전체"
+          ? ((genderFilter === "남성" ? "MALE" : "FEMALE") as Gender)
+          : undefined,
+        ageGroup: isReset
+          ? undefined
+          : ageGroupFilter !== "전체"
+          ? ageGroupFilter
+          : undefined,
       };
 
       console.log("API 요청 파라미터:", params);
@@ -117,17 +122,7 @@ export default function MemberManagement() {
   };
 
   useEffect(() => {
-    if (isInitialLoad) {
-      fetchMembers();
-      setIsInitialLoad(false);
-    }
-  }, [isInitialLoad]);
-
-  useEffect(() => {
-    if (!isInitialLoad) {
-      console.log("정렬 변경 감지:", sortValue);
-      fetchMembers();
-    }
+    fetchMembers();
   }, [sortValue]);
 
   const handleResetFilters = () => {
@@ -135,6 +130,7 @@ export default function MemberManagement() {
     setGenderFilter("전체");
     setAgeGroupFilter("전체");
     setSearch("");
+    fetchMembers(true);
   };
 
   const handleSearch = () => {
@@ -149,7 +145,6 @@ export default function MemberManagement() {
   const handleCloseDetailModal = () => setIsDetailModalOpen(false);
 
   const handleSortChange = (newSortValue: string) => {
-    console.log("정렬 변경 핸들러 호출:", newSortValue);
     setSortValue(newSortValue);
   };
 

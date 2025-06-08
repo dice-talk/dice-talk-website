@@ -32,26 +32,34 @@ export default function DeletedMemberManagement() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] =
     useState<DeletedMemberResponse | null>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const fetchDeletedMembers = async () => {
+  const fetchDeletedMembers = async (isReset: boolean = false) => {
     try {
       const params = {
         page: 1,
         size: 10,
-        search: search.trim() || undefined,
+        search: isReset ? undefined : search.trim() || undefined,
         sort:
           sortValue === "탈퇴일 순 (최신)"
             ? "deletedAt/desc"
             : sortValue === "탈퇴일 순 (오래된)"
             ? "deletedAt/asc"
             : undefined,
-        gender:
-          genderFilter !== "전체"
-            ? ((genderFilter === "남성" ? "MALE" : "FEMALE") as Gender)
-            : undefined,
-        ageGroup: ageGroupFilter !== "전체" ? ageGroupFilter : undefined,
-        reason: reasonFilter !== "전체" ? reasonFilter : undefined,
+        gender: isReset
+          ? undefined
+          : genderFilter !== "전체"
+          ? ((genderFilter === "남성" ? "MALE" : "FEMALE") as Gender)
+          : undefined,
+        ageGroup: isReset
+          ? undefined
+          : ageGroupFilter !== "전체"
+          ? ageGroupFilter
+          : undefined,
+        reason: isReset
+          ? undefined
+          : reasonFilter !== "전체"
+          ? reasonFilter
+          : undefined,
       };
 
       console.log("API 요청 파라미터:", params);
@@ -64,17 +72,7 @@ export default function DeletedMemberManagement() {
   };
 
   useEffect(() => {
-    if (isInitialLoad) {
-      fetchDeletedMembers();
-      setIsInitialLoad(false);
-    }
-  }, [isInitialLoad]);
-
-  useEffect(() => {
-    if (!isInitialLoad) {
-      console.log("정렬 변경 감지:", sortValue);
-      fetchDeletedMembers();
-    }
+    fetchDeletedMembers();
   }, [sortValue]);
 
   const handleResetFilters = () => {
@@ -82,6 +80,7 @@ export default function DeletedMemberManagement() {
     setAgeGroupFilter("전체");
     setReasonFilter("전체");
     setSearch("");
+    fetchDeletedMembers(true);
   };
 
   const handleSearch = () => {
@@ -96,7 +95,6 @@ export default function DeletedMemberManagement() {
   const handleCloseDetailModal = () => setIsDetailModalOpen(false);
 
   const handleSortChange = (newSortValue: string) => {
-    console.log("정렬 변경 핸들러 호출:", newSortValue);
     setSortValue(newSortValue);
   };
 
