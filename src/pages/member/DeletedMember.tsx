@@ -1,195 +1,168 @@
-import { useState, useMemo } from 'react';
-import Sidebar from '../../components/sidebar/Sidebar';
-import Header from '../../components/Header';
-import { DeletedMemberFilterSection } from '../../components/member/DeletedMemberFilterSection';
-import { ReusableTable } from '../../components/common/ReusableTable';
-import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-import { MemberDetailModal, type MemberDetailData } from '../../components/member/MemberDetailModal';
- 
-interface DeletedMember extends MemberDetailData { // MemberDetailData 확장
-  memberId: number;
-  name: string;
-  email: string;
-  birth: string; // YYYY-MM-DD
-  region: string;
-  reason: string; // 탈퇴 사유
-  deletedAt: string; // YYYY-MM-DD HH:MM
-  // gender?: '남성' | '여성'; // MemberDetailData 에서 MALE/FEMALE로 관리
-  // status는 '탈퇴 회원'으로 고정될 것이므로 인터페이스에서 제외하거나, 항상 '탈퇴 회원'으로 설정
-  // 백엔드 응답 필드 추가 (MemberDetailData에 이미 포함된 것은 제외)
-  // phone?: string;
-  // totalDice?: number; // 탈퇴 회원은 0일 가능성 높음
-  // memberStatus?: string; // 백엔드 원본 상태값 (예: MEMBER_WITHDRAWN)
-  // notification?: boolean;
-}
+import { useState, useMemo, useEffect } from "react";
+import Sidebar from "../../components/sidebar/Sidebar";
+import Header from "../../components/Header";
+import { DeletedMemberFilterSection } from "../../components/member/DeletedMemberFilterSection";
+import { ReusableTable } from "../../components/common/ReusableTable";
+import type {
+  ColumnDefinition,
+  TableItem,
+} from "../../components/common/reusableTableTypes";
+import { MemberDetailModal } from "../../components/member/MemberDetailModal";
+import { getDeletedMembers } from "../../api/memberApi";
+import type { DeletedMemberResponse, Gender } from "../../types/memberTypes";
 
-// ReusableTable을 위한 DeletedMember 확장
-interface DeletedMemberTableItem extends DeletedMember, TableItem {
-  id: number; // ReusableTable은 id를 필수로 요구
+interface DeletedMemberTableItem extends DeletedMemberResponse, TableItem {
+  id: number;
 }
 
 const deletedMemberSortOptions = [
-  { value: 'ID 순 (최신)', label: '등록 순 (최신)' },
-  { value: 'ID 순 (오래된)', label: '등록 순 (오래된)' },
-  { value: '탈퇴일 순 (최신)', label: '탈퇴일 순 (최신)' },
-  { value: '탈퇴일 순 (오래된)', label: '탈퇴일 순 (오래된)' },
-];
-
-const mockDeletedMembers: DeletedMember[] = [
-  { memberId: 1, name: '라바', email: 'ravah002@gmail.com', phone: '010-1111-1111', birth: '2000-05-01', gender: 'MALE', region: '서울특별시 강동구', reason: '원하는 기능이 부족해서', deletedAt: '2025-05-30 12:03', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: false },
-  { memberId: 2, name: '강민지', email: 'kmg94611@gmail.com', phone: '010-2222-2222', birth: '1994-06-11', gender: 'FEMALE', region: '경기도 안산시', reason: '더 나은 서비스를 찾아서', deletedAt: '2025-05-01 11:13', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: true },
-  { memberId: 3, name: '태코', email: 'taekho98@gmail.com', phone: '010-3333-3333', birth: '1998-12-25', gender: 'MALE', region: '인천광역시 연수구', reason: '이용 중 불편한 경험이 있어서', deletedAt: '2025-05-01 09:53', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: false },
-  { memberId: 6, name: '박지성', email: 'jisung@example.com', phone: '010-6666-6666', birth: '1981-02-25', gender: 'MALE', region: '전라북도 고창군', reason: '기타', deletedAt: '2025-04-15 10:00', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: true },
-  { memberId: 7, name: '김연아', email: 'yunakim@example.com', phone: '010-7777-7777', birth: '1990-09-05', gender: 'FEMALE', region: '경기도 군포시', reason: '원하는 기능이 부족해서', deletedAt: '2025-03-20 18:30', memberStatus: 'MEMBER_WITHDRAWN', totalDice: 0, notification: false },
+  { value: "탈퇴일 순 (최신)", label: "탈퇴일 순 (최신)" },
+  { value: "탈퇴일 순 (오래된)", label: "탈퇴일 순 (오래된)" },
 ];
 
 export default function DeletedMemberManagement() {
-  // useState를 사용하여 mock 데이터 관리 (실제 API 연동 시 useEffect로 데이터 가져옴)
-  const [deletedMembers] = useState<DeletedMember[]>(mockDeletedMembers); // 실제 앱에서는 API로부터 데이터를 받아오는 로직 필요
-
-  // UI 입력을 위한 필터 상태 (DeletedMemberFilterSection에 전달)
-  const [genderFilter, setGenderFilter] = useState('전체');
-  const [ageGroupFilter, setAgeGroupFilter] = useState('전체');
-  const [reasonFilter, setReasonFilter] = useState('전체');
-  const [nameSearch, setNameSearch] = useState('');
-  const [emailSearch, setEmailSearch] = useState('');
-
-  // API 요청 또는 실제 필터링에 사용될 필터 상태
-  const [appliedFilters, setAppliedFilters] = useState({
-    gender: '전체',
-    ageGroup: '전체',
-    reason: '전체',
-    name: '',
-    email: '',
-  });
-
-  const [sortValue, setSortValue] = useState('탈퇴일 순 (최신)');
-
+  const [deletedMembers, setDeletedMembers] = useState<DeletedMemberResponse[]>(
+    []
+  );
+  const [genderFilter, setGenderFilter] = useState("전체");
+  const [ageGroupFilter, setAgeGroupFilter] = useState("전체");
+  const [reasonFilter, setReasonFilter] = useState("전체");
+  const [search, setSearch] = useState("");
+  const [sortValue, setSortValue] = useState("탈퇴일 순 (최신)");
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<MemberDetailData | null>(null);
+  const [selectedMember, setSelectedMember] =
+    useState<DeletedMemberResponse | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const handleResetFilters = () => {
-    setGenderFilter('전체');
-    setAgeGroupFilter('전체');
-    setReasonFilter('전체');
-    setNameSearch('');
-    setEmailSearch('');
-    // 초기화 시, appliedFilters도 초기화하여 바로 반영합니다.
-    setAppliedFilters({
-      gender: '전체',
-      ageGroup: '전체',
-      reason: '전체',
-      name: '',
-      email: ''
-    });
+  const fetchDeletedMembers = async () => {
+    try {
+      const params = {
+        page: 1,
+        size: 10,
+        search: search.trim() || undefined,
+        sort:
+          sortValue === "탈퇴일 순 (최신)"
+            ? "deletedAt/desc"
+            : sortValue === "탈퇴일 순 (오래된)"
+            ? "deletedAt/asc"
+            : undefined,
+        gender:
+          genderFilter !== "전체"
+            ? ((genderFilter === "남성" ? "MALE" : "FEMALE") as Gender)
+            : undefined,
+        ageGroup: ageGroupFilter !== "전체" ? ageGroupFilter : undefined,
+        reason: reasonFilter !== "전체" ? reasonFilter : undefined,
+      };
+
+      console.log("API 요청 파라미터:", params);
+
+      const response = await getDeletedMembers(params);
+      setDeletedMembers(response.data.data);
+    } catch (error) {
+      console.error("탈퇴 회원 목록을 불러오는데 실패했습니다:", error);
+    }
   };
 
-  const handleOpenDetailModal = (member: DeletedMember) => {
+  useEffect(() => {
+    if (isInitialLoad) {
+      fetchDeletedMembers();
+      setIsInitialLoad(false);
+    }
+  }, [isInitialLoad]);
+
+  useEffect(() => {
+    if (!isInitialLoad) {
+      console.log("정렬 변경 감지:", sortValue);
+      fetchDeletedMembers();
+    }
+  }, [sortValue]);
+
+  const handleResetFilters = () => {
+    setGenderFilter("전체");
+    setAgeGroupFilter("전체");
+    setReasonFilter("전체");
+    setSearch("");
+  };
+
+  const handleSearch = () => {
+    fetchDeletedMembers();
+  };
+
+  const handleOpenDetailModal = (member: DeletedMemberResponse) => {
     setSelectedMember(member);
     setIsDetailModalOpen(true);
   };
 
   const handleCloseDetailModal = () => setIsDetailModalOpen(false);
 
-  const handleSearch = () => {
-    setAppliedFilters({
-      gender: genderFilter,
-      ageGroup: ageGroupFilter,
-      reason: reasonFilter,
-      name: nameSearch,
-      email: emailSearch,
-    });
-  };
-
-  const getAgeGroup = (birthDate: string): string => {
-    const birthYear = new Date(birthDate).getFullYear();
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - birthYear;
-    if (age < 20) return '10대';
-    if (age < 30) return '20대';
-    if (age < 40) return '30대';
-    if (age < 50) return '40대';
-    return '50대 이상';
+  const handleSortChange = (newSortValue: string) => {
+    console.log("정렬 변경 핸들러 호출:", newSortValue);
+    setSortValue(newSortValue);
   };
 
   const filteredAndSortedMembers = useMemo(() => {
-    let filtered = [...deletedMembers];
-
-    // Status 필터는 '탈퇴 회원'만 해당되므로, 실제 필터링 로직은 필요 없을 수 있음
-    // 만약 statusFilter가 '전체'를 포함한다면 아래 로직 필요
-    // if (statusFilter !== '전체') {
-    //   filtered = filtered.filter(member => member.status === statusFilter); // Member 인터페이스에 status가 있다면
-    // }
-
-    if (appliedFilters.gender !== '전체') {
-      // genderFilter는 '남성'/'여성', member.gender는 'MALE'/'FEMALE'
-      const backendGender = appliedFilters.gender === '남성' ? 'MALE' : 'FEMALE';
-      filtered = filtered.filter(member => member.gender === backendGender);
-    }
-    if (appliedFilters.ageGroup !== '전체') {
-      filtered = filtered.filter(member => getAgeGroup(member.birth) === appliedFilters.ageGroup);
-    }
-    if (appliedFilters.reason !== '전체') {
-      filtered = filtered.filter(member => member.reason === appliedFilters.reason);
-    }
-    if (appliedFilters.name) {
-      filtered = filtered.filter(member => member.name.toLowerCase().includes(appliedFilters.name.toLowerCase()));
-    }
-    if (appliedFilters.email) {
-      filtered = filtered.filter(member => member.email.toLowerCase().includes(appliedFilters.email.toLowerCase()));
-    }
-
-    if (sortValue === 'ID 순 (최신)') {
-      filtered.sort((a, b) => b.memberId - a.memberId);
-    } else if (sortValue === 'ID 순 (오래된)') {
-      filtered.sort((a, b) => a.memberId - b.memberId);
-    } else if (sortValue === '탈퇴일 순 (최신)') {
-      filtered.sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
-    } else if (sortValue === '탈퇴일 순 (오래된)') {
-      filtered.sort((a, b) => new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime());
-    }
-
-    return filtered.map(member => ({ ...member, id: member.memberId }));
-  }, [deletedMembers, appliedFilters, sortValue]);
+    return deletedMembers.map((member) => ({ ...member, id: member.memberId }));
+  }, [deletedMembers]);
 
   const columns: ColumnDefinition<DeletedMemberTableItem>[] = [
-    { key: 'no', header: 'No', cellRenderer: (_item, index) => index + 1, headerClassName: 'w-[5%]' },
-    { key: 'name', header: '이름', accessor: 'name', headerClassName: 'w-[10%]' },
-    { key: 'email', header: '이메일', accessor: 'email', headerClassName: 'w-[18%]' },
-    { key: 'birth', header: '생년월일', accessor: 'birth', headerClassName: 'w-[15%]' },
-    { key: 'region', header: '지역', accessor: 'region', headerClassName: 'w-[15%]' },
     {
-      key: 'reason',
-      header: '탈퇴 사유',
-      accessor: 'reason',
-      headerClassName: 'w-[20%] text-left',
-      cellClassName: 'text-left',
-      cellRenderer: (item) => <div className="w-full truncate" title={item.reason}>{item.reason}</div>,
+      key: "no",
+      header: "No",
+      cellRenderer: (item) => item.memberId,
+      headerClassName: "w-[5%]",
     },
-    { key: 'deletedAt', header: '탈퇴 일자', accessor: 'deletedAt', headerClassName: 'w-[15%]' },
+    {
+      key: "name",
+      header: "이름",
+      accessor: "name",
+      headerClassName: "w-[15%]",
+    },
+    {
+      key: "email",
+      header: "이메일",
+      accessor: "email",
+      headerClassName: "w-[25%]",
+    },
+    {
+      key: "birth",
+      header: "생년월일",
+      accessor: "birth",
+      headerClassName: "w-[15%]",
+    },
+    {
+      key: "region",
+      header: "지역",
+      accessor: "region",
+      headerClassName: "w-[15%]",
+    },
+    {
+      key: "deleteReason",
+      header: "탈퇴 사유",
+      accessor: "deleteReason",
+      headerClassName: "w-[25%]",
+    },
   ];
-  
+
   return (
     <div className="min-h-screen flex bg-gradient-to-r from-blue-300 to-purple-300">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 bg-slate-50 p-6 md:p-8 rounded-tl-xl overflow-y-auto">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8">탈퇴 회원 관리</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-8">
+            탈퇴 회원 관리
+          </h2>
 
           <DeletedMemberFilterSection
-            // UI 필터 상태와 핸들러 연결
             genderFilter={genderFilter}
             onGenderFilterChange={setGenderFilter}
             ageGroupFilter={ageGroupFilter}
             onAgeGroupFilterChange={setAgeGroupFilter}
             reasonFilter={reasonFilter}
             onReasonFilterChange={setReasonFilter}
-            nameSearch={nameSearch}
-            onNameSearchChange={setNameSearch}
-            emailSearch={emailSearch}
-            onEmailSearchChange={setEmailSearch}
-            onSearch={handleSearch} // 조회 핸들러 연결
+            search={search}
+            onSearchChange={setSearch}
+            onSearch={handleSearch}
             onResetFilters={handleResetFilters}
           />
 
@@ -198,10 +171,10 @@ export default function DeletedMemberManagement() {
             data={filteredAndSortedMembers}
             totalCount={filteredAndSortedMembers.length}
             sortValue={sortValue}
-            onSortChange={setSortValue}
+            onSortChange={handleSortChange}
             onRowClick={handleOpenDetailModal}
             sortOptions={deletedMemberSortOptions}
-            emptyStateMessage="탈퇴한 회원이 없습니다."
+            emptyStateMessage="검색 결과에 해당하는 탈퇴 회원이 없습니다."
           />
           <MemberDetailModal
             isOpen={isDetailModalOpen}
@@ -214,4 +187,3 @@ export default function DeletedMemberManagement() {
     </div>
   );
 }
-
