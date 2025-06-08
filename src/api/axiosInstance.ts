@@ -2,9 +2,11 @@
 import axios from "axios";
 // import { useUserStore } from '../stores/useUserStore';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // 인증이 필요한 요청을 위한 인스턴스
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -38,7 +40,7 @@ axiosInstance.interceptors.response.use(
 
 // 인증이 필요 없는 공개 요청을 위한 인스턴스
 export const publicAxiosInstance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: BASE_URL,
   timeout: 5000,
 });
 
