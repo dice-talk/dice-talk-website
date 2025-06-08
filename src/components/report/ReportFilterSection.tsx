@@ -12,14 +12,16 @@ interface ReportFilterSectionProps {
   searchTerm: string;
   onSearchTermChange: (term: string) => void;
   onResetFilters: () => void;
+  onSearch: () => void; // 조회 핸들러 prop 추가
 }
-
+ 
 export const ReportFilterSection: React.FC<ReportFilterSectionProps> = ({
   statusFilter,
   onStatusFilterChange,
   searchTerm,
   onSearchTermChange,
   onResetFilters,
+  onSearch, // onSearch prop 받기
 }) => {
   const reportStatusOptions = [
     { value: '전체', label: '전체 상태' },
@@ -57,14 +59,11 @@ export const ReportFilterSection: React.FC<ReportFilterSectionProps> = ({
         </div>
 
         {/* 필터 초기화 버튼 */}
-        <div className="md:col-start-3 lg:col-start-4 flex justify-end">
-          <Button
-            variant="outline"
-            onClick={onResetFilters}
-            className="w-full md:w-auto"
-          >
-            필터 초기화
+        <div className="md:col-start-3 lg:col-start-4 flex justify-end gap-3"> {/* gap-3 추가 */}
+          <Button variant="outline" onClick={onResetFilters} className="w-full md:w-auto">
+            초기화
           </Button>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full md:w-auto" onClick={onSearch}>조회</Button> {/* 조회 버튼 추가 */}
         </div>
       </div>
     </div>

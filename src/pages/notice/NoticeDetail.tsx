@@ -5,6 +5,8 @@ import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import Button from '../../components/ui/Button';
 import { NoticeStatus, formatDate } from '../../components/notice/noticeUtils'
+import axiosInstance from '../../api/axiosInstance'; // axiosInstance 임포트
+import { isAxiosError } from 'axios'; // isAxiosError 임포트
 // NoticeList.tsx와 동일한 NoticeItem 타입 및 mockNotices 데이터를 사용한다고 가정합니다.
 // 실제 애플리케이션에서는 이들을 공유 모듈에서 가져오는 것이 좋습니다.
 
@@ -21,51 +23,113 @@ interface NoticeItem {
   endDate?: string;
 }
 
-// 임시: NoticeList.tsx의 mockNotices를 가져와 사용 (실제로는 API 호출 또는 공유 상태 사용)
-// 이 부분은 NoticeList.tsx의 mockNotices와 동일하게 유지하거나,
-// 별도의 데이터 소스에서 가져오도록 수정해야 합니다.
-export const mockNotices: NoticeItem[] = [ // NoticeNewPage에서도 사용하므로 export
-  { id: 1, type: '공지사항', title: '시스템 점검 안내 (06/15 02:00 ~ 04:00)', content: '보다 안정적인 서비스 제공을 위해 시스템 점검을 실시합니다.\n점검 시간: 2024년 6월 15일 02:00 ~ 04:00 (2시간)\n점검 중에는 서비스 이용이 일시적으로 중단될 수 있습니다. 양해 부탁드립니다.', createdAt: '2024-06-10T10:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED, imageUrls: ["https://via.placeholder.com/600x200.png?text=System+Maintenance"] },
-  { id: 2, type: '이벤트', title: '여름맞이 주사위 증정 이벤트!', content: '무더운 여름, 다이스톡이 시원하게 주사위를 쏩니다!\n이벤트 기간 동안 접속만 해도 매일 주사위 10개 증정!\n\n추가 미션 달성 시 더 많은 보상이 기다리고 있어요!', createdAt: '2024-06-08T14:00:00Z', isImportant: false, status: NoticeStatus.ONGOING, startDate: '2024-06-10', endDate: '2024-06-30', imageUrls: ["https://via.placeholder.com/600x300.png?text=Summer+Event+Banner"] },
-  { id: 3, type: '공지사항', title: '개인정보처리방침 개정 안내', content: '개인정보처리방침이 일부 개정되어 안내드립니다. 변경된 내용은 다음과 같습니다...\n(상세 내용 생략)', createdAt: '2024-06-05T09:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 4, type: '공지사항', title: '서비스 이용약관 변경 사전 안내', content: '서비스 이용약관이 변경될 예정입니다. 주요 변경 사항은 다음과 같습니다...\n(상세 내용 생략)', createdAt: '2024-06-01T11:00:00Z', isImportant: false, status: NoticeStatus.CLOSED },
-  { id: 5, type: '이벤트', title: '친구 초대하고 보상 받자! 시즌2', content: '친구를 다이스톡에 초대하고 푸짐한 보상을 받아가세요! 시즌2에서는 더욱 강력해진 보상이 준비되어 있습니다.', createdAt: '2024-05-28T16:00:00Z', isImportant: true, status: NoticeStatus.CLOSED, startDate: '2024-05-20', endDate: '2024-06-20' },
-  { id: 6, type: '공지사항', title: '다이스톡 v1.2 업데이트 안내', content: '다이스톡 v1.2 업데이트가 완료되었습니다. 새로운 기능과 개선 사항을 확인해보세요!\n- 채팅 UI 개선\n- 새로운 이모티콘 추가\n- 버그 수정 및 안정성 향상', createdAt: '2024-05-25T13:00:00Z', isImportant: false, status: NoticeStatus.ONGOING, imageUrls: ["https://via.placeholder.com/600x250.png?text=Update+v1.2+Details"] },
-  { id: 7, type: '이벤트', title: '새로운 기능 사전 공개 이벤트', content: '곧 출시될 새로운 기능을 미리 체험하고 피드백을 남겨주세요! 참여자분들께는 특별한 혜택을 드립니다.', createdAt: '2024-07-01T00:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED, startDate: '2024-07-05', endDate: '2024-07-15' },
-  { id: 8, type: '공지사항', title: '서버 안정화 작업 완료 안내', content: '서버 안정화 작업이 성공적으로 완료되었습니다. 더욱 쾌적한 환경에서 다이스톡을 이용하실 수 있습니다.', createdAt: '2024-06-15T05:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 9, type: '이벤트', title: '주말 특별 접속 보상 이벤트', content: '주말에는 다이스톡 접속하고 특별 보상 받아가세요!', createdAt: '2024-06-20T00:00:00Z', isImportant: false, status: NoticeStatus.ONGOING, startDate: '2024-06-22', endDate: '2024-06-23' },
-  { id: 10, type: '공지사항', title: '고객센터 운영시간 변경 안내', content: '고객센터 운영시간이 2024년 7월 1일부터 변경됩니다. (기존) 09:00 ~ 18:00 -> (변경) 10:00 ~ 17:00', createdAt: '2024-06-18T09:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 11, type: '이벤트', title: '신규 테마 출시 기념 할인', content: '새로운 채팅 테마 3종 출시! 지금 구매하시면 30% 할인 혜택을 드립니다.', createdAt: '2024-06-22T10:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED, startDate: '2024-06-22', endDate: '2024-07-05' },
-  { id: 12, type: '공지사항', title: '앱 보안 강화 업데이트 안내', content: '사용자 정보 보호를 위해 앱 보안 기능이 강화되었습니다. 최신 버전으로 업데이트해주세요.', createdAt: '2024-06-25T11:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED },
-  { id: 13, type: '이벤트', title: '여름 방학 맞이 출석체크 이벤트', content: '여름 방학 동안 매일 출석하고 다양한 아이템을 받아가세요!', createdAt: '2024-07-05T00:00:00Z', isImportant: false, status: NoticeStatus.SCHEDULED, startDate: '2024-07-08', endDate: '2024-08-18' },
-  { id: 14, type: '공지사항', title: '서비스 점검 연장 안내', content: '금일 진행 예정이었던 시스템 점검이 부득이하게 연장되었습니다. (변경) 02:00 ~ 06:00. 이용에 불편을 드려 죄송합니다.', createdAt: '2024-06-15T03:30:00Z', isImportant: true, status: NoticeStatus.ONGOING },
-  { id: 15, type: '이벤트', title: '깜짝 퀴즈 이벤트! 정답 맞추고 선물받자', content: '매일 오후 3시, 깜짝 퀴즈가 출제됩니다! 정답을 맞추신 분들께는 추첨을 통해 다이스를 드려요.', createdAt: '2024-06-19T15:00:00Z', isImportant: false, status: NoticeStatus.CLOSED, startDate: '2024-06-19', endDate: '2024-06-21' },
-];
+// mockNotices 배열은 여기서 제거됩니다.
+// NoticeNewPage.tsx에서 수정 모드 시 초기 데이터 로딩을 위해 API 호출이 필요합니다.
 
+// 백엔드 응답 DTO의 noticeType을 프론트엔드 type으로 변환하는 함수
+const mapBackendTypeToFrontend = (backendType: 'NOTICE' | 'EVENT'): '공지사항' | '이벤트' => {
+  return backendType === 'NOTICE' ? '공지사항' : '이벤트';
+};
+
+// 백엔드 응답 DTO의 noticeStatus를 프론트엔드 NoticeStatus enum으로 변환하는 함수
+const mapBackendStatusToFrontend = (backendStatus: string): NoticeStatus => {
+  switch (backendStatus) {
+    case 'SCHEDULED': // 백엔드에서 "SCHEDULED"로 온다고 가정
+      return NoticeStatus.SCHEDULED;
+    case 'ONGOING': // 백엔드에서 "ONGOING"로 온다고 가정
+      return NoticeStatus.ONGOING;
+    case 'CLOSED': // 백엔드에서 "CLOSED"로 온다고 가정
+      return NoticeStatus.CLOSED;
+    default:
+      console.warn(`Unhandled backend notice status: ${backendStatus}, defaulting to ONGOING`);
+      return NoticeStatus.ONGOING; // 기본값 또는 오류 처리
+  }
+};
+
+// 백엔드 API 응답 타입 (제공된 DTO 기반)
+interface BackendNoticeImageDto {
+  // 백엔드 NoticeImageDto.Response 구조에 맞게 필드 정의 (예: imageUrl)
+  // 예시: id: number; imageUrl: string; isThumbnail: boolean;
+  imageUrl: string; // 실제 이미지 URL 필드명으로 변경 필요
+}
+interface BackendNoticeResponseDto {
+  noticeId: number;
+  title: string;
+  content: string;
+  noticeImages: BackendNoticeImageDto[];
+  startDate?: string; // LocalDateTime string
+  endDate?: string;   // LocalDateTime string
+  noticeType: 'NOTICE' | 'EVENT';
+  noticeStatus: string; // e.g., "SCHEDULED", "ONGOING", "CLOSED"
+  noticeImportance: number; // 0 or 1
+  createdAt: string;    // LocalDateTime string
+  modifiedAt: string;   // LocalDateTime string
+}
 
 export default function NoticeDetailPage() {
-  const { noticeId } = useParams<{ noticeId: string }>();
+  const { noticeId: noticeIdParam } = useParams<{ noticeId: string }>(); // noticeId 파라미터 값을 직접 가져옵니다.
   const navigate = useNavigate();
   const [noticeItem, setNoticeItem] = useState<NoticeItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   // isEditing 상태와 isSubmitting 상태는 NoticeNewPage (수정 모드)에서 관리됩니다.
   // const [isSubmitting, setIsSubmitting] = useState(false); // 이 컴포넌트에서는 더 이상 필요하지 않음
 
   useEffect(() => {
-    if (noticeId) {
-      const itemId = parseInt(noticeId, 10);
-      const foundItem = mockNotices.find(n => n.id === itemId);
-      if (foundItem) {
-        // content가 undefined일 경우 빈 문자열로 설정
-        setNoticeItem({
-          ...foundItem,
-          content: foundItem.content || '',
-        });
-      } else {
-        console.error("공지/이벤트 항목을 찾을 수 없습니다.");
-        // navigate('/404'); // 또는 목록 페이지로 리디렉션
+    if (noticeIdParam) { // URL에서 가져온 noticeIdParam 문자열을 확인합니다.
+      const itemId = parseInt(noticeIdParam, 10);
+
+      if (isNaN(itemId)) {
+        console.error("Invalid noticeId parameter:", noticeIdParam);
+        setError("잘못된 공지사항 ID입니다. ID는 숫자여야 합니다.");
+        setIsLoading(false);
+        // 필요하다면 목록 페이지나 에러 페이지로 이동시킵니다.
+        // navigate('/notices');
+        return;
       }
+
+      setIsLoading(true);
+      setError(null);
+      const fetchNoticeDetail = async () => {
+        try {
+          const response = await axiosInstance.get<BackendNoticeResponseDto>(`/notices/${itemId}`);
+          const backendData = response.data;
+
+          // 백엔드 데이터를 프론트엔드 NoticeItem으로 변환
+          const transformedItem: NoticeItem = {
+            id: backendData.noticeId,
+            title: backendData.title,
+            content: backendData.content || '',
+            type: mapBackendTypeToFrontend(backendData.noticeType),
+            status: mapBackendStatusToFrontend(backendData.noticeStatus),
+            isImportant: backendData.noticeImportance === 1,
+            createdAt: backendData.createdAt,
+            imageUrls: backendData.noticeImages?.map(img => img.imageUrl) || [], // 실제 이미지 URL 필드명 확인 필요
+            startDate: backendData.startDate,
+            endDate: backendData.endDate,
+          };
+          setNoticeItem(transformedItem);
+        } catch (err) {
+          console.error("Error fetching notice detail:", err);
+          if (isAxiosError(err) && err.response?.status === 404) {
+            setError("공지/이벤트 항목을 찾을 수 없습니다.");
+          } else {
+            setError("공지/이벤트 정보를 불러오는데 실패했습니다.");
+          }
+          // navigate('/404'); 또는 목록 페이지로 리디렉션 고려
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchNoticeDetail();
+    } else {
+      // noticeIdParam이 undefined인 경우 (예: 라우트 설정 오류 또는 ID 없이 직접 접근)
+      console.warn("Notice ID parameter is missing from URL.");
+      setError("공지사항 ID가 URL에 제공되지 않았습니다.");
+      setIsLoading(false);
     }
-  }, [noticeId]);
+  }, [noticeIdParam, navigate]); // 의존성 배열에 noticeIdParam을 사용합니다.
 
   const handleListButton = () => {
     navigate('/notices'); // 공지사항 목록 페이지 경로
@@ -79,20 +143,30 @@ export default function NoticeDetailPage() {
 
   const handleDeleteButton = () => {
     if (noticeItem && window.confirm(`'${noticeItem.title}' 공지/이벤트를 정말 삭제하시겠습니까?`)) {
-      // TODO: 실제 API 호출로 데이터 삭제
-      const itemIndex = mockNotices.findIndex(n => n.id === noticeItem.id);
-      if (itemIndex > -1) {
-        mockNotices.splice(itemIndex, 1); // mockNotices에서 해당 아이템 제거
+      try {
+        // TODO: 실제 API 호출로 데이터 삭제 (예: await axiosInstance.delete(`/notices/${noticeItem.id}`);)
+        // 아래는 mockNotices를 사용하던 코드의 대체 예시입니다. API 연동 후 이 부분을 실제 API 호출로 변경해야 합니다.
+        console.log(`Attempting to delete notice ID: ${noticeItem.id} (API call not implemented)`);
+        // --- API 호출 성공 시 ---
+        alert('공지/이벤트가 삭제되었습니다. (실제 API 연동 필요)');
+        navigate('/notices'); // 목록으로 이동
+        // --------------------
+      } catch (deleteError) {
+        console.error("Error deleting notice:", deleteError);
+        alert('공지/이벤트 삭제에 실패했습니다.');
       }
-      alert('공지/이벤트가 삭제되었습니다.');
-      navigate('/notices'); // 목록으로 이동
     }
   };
 
   // 관리자 여부 (실제로는 useAuthStore 등에서 가져옴)
   const isAdmin = true; 
 
-  if (!noticeItem) {
+  if (isLoading) {
+    return <div className="min-h-screen flex justify-center items-center bg-slate-50"><p>공지/이벤트 정보를 불러오는 중...</p></div>;
+  }
+
+  if (error || !noticeItem) {
+    // 오류 메시지를 표시하거나, noticeItem이 null일 때 (예: 404)도 오류로 간주
     return <div className="min-h-screen flex justify-center items-center bg-slate-50"><p>공지/이벤트 정보를 불러오는 중이거나 찾을 수 없습니다...</p></div>;
   }
 

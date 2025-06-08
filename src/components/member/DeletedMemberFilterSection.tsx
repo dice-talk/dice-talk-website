@@ -25,8 +25,6 @@ const reasonOptions = [
 ];
 
 interface DeletedMemberFilterSectionProps {
-  statusFilter: string;
-  onStatusFilterChange: (value: string) => void;
   genderFilter: string;
   onGenderFilterChange: (value: string) => void;
   ageGroupFilter: string;
@@ -38,6 +36,7 @@ interface DeletedMemberFilterSectionProps {
   emailSearch: string;
   onEmailSearchChange: (value: string) => void;
   onResetFilters: () => void;
+  onSearch: () => void; // onSearch prop 추가
 }
 
 export function DeletedMemberFilterSection({
@@ -52,6 +51,7 @@ export function DeletedMemberFilterSection({
   emailSearch,
   onEmailSearchChange,
   onResetFilters,
+  onSearch, // onSearch prop 받기
 }: DeletedMemberFilterSectionProps) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
@@ -75,7 +75,7 @@ export function DeletedMemberFilterSection({
         />
         <div className="flex justify-end gap-3 md:col-span-1 lg:col-span-2 mt-4 md:mt-0">
           <Button variant="outline" className="px-6 w-full sm:w-auto" onClick={onResetFilters}>초기화</Button>
-          {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto">조회</Button> */}
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto" onClick={onSearch}>조회</Button>
         </div>
       </div>
     </div>

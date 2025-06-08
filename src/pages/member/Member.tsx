@@ -58,13 +58,24 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function MemberManagement() {
-  const members : Member[] = (mockMembers);
+  // UI 입력을 위한 필터 상태
   const [statusFilter, setStatusFilter] = useState('전체');
   const [genderFilter, setGenderFilter] = useState('전체');
   const [ageGroupFilter, setAgeGroupFilter] = useState('전체');
   const [nameSearch, setNameSearch] = useState('');
   const [emailSearch, setEmailSearch] = useState('');
+
+  // API 요청 또는 실제 필터링에 사용될 필터 상태
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: '전체',
+    gender: '전체',
+    ageGroup: '전체',
+    name: '',
+    email: '',
+  });
+
   const [sortValue, setSortValue] = useState('접속순 (최신)');
+  const members : Member[] = (mockMembers); // 실제 앱에서는 API로부터 데이터를 받아오는 로직 필요
   
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MemberDetailData | null>(null);
@@ -75,6 +86,15 @@ export default function MemberManagement() {
     setAgeGroupFilter('전체');
     setNameSearch('');
     setEmailSearch('');
+    // 초기화 시, appliedFilters도 초기화하여 바로 반영합니다.
+    // 이렇게 하면 초기화 버튼 클릭 시 필터가 즉시 해제됩니다.
+    setAppliedFilters({
+      status: '전체',
+      gender: '전체',
+      ageGroup: '전체',
+      name: '',
+      email: '',
+    });
   };
 
   const handleOpenDetailModal = (member: Member) => {
@@ -85,6 +105,16 @@ export default function MemberManagement() {
   };
 
   const handleCloseDetailModal = () => setIsDetailModalOpen(false);
+
+  const handleSearch = () => {
+    setAppliedFilters({
+      status: statusFilter,
+      gender: genderFilter,
+      ageGroup: ageGroupFilter,
+      name: nameSearch,
+      email: emailSearch,
+    });
+  };
 
 
   const getAgeGroup = (birthDate: string): string => {
@@ -101,22 +131,22 @@ export default function MemberManagement() {
   const filteredAndSortedMembers = useMemo(() => {
     let filtered = [...members];
 
-    if (statusFilter !== '전체') {
-      filtered = filtered.filter(member => member.status === statusFilter);
+    if (appliedFilters.status !== '전체') {
+      filtered = filtered.filter(member => member.status === appliedFilters.status);
     }
-    if (genderFilter !== '전체') {
+    if (appliedFilters.gender !== '전체') {
       // genderFilter는 '남성'/'여성', member.gender는 'MALE'/'FEMALE'
-      const backendGender = genderFilter === '남성' ? 'MALE' : 'FEMALE';
+      const backendGender = appliedFilters.gender === '남성' ? 'MALE' : 'FEMALE';
       filtered = filtered.filter(member => member.gender === backendGender);
     }
-    if (ageGroupFilter !== '전체') {
-      filtered = filtered.filter(member => getAgeGroup(member.birth) === ageGroupFilter);
+    if (appliedFilters.ageGroup !== '전체') {
+      filtered = filtered.filter(member => getAgeGroup(member.birth) === appliedFilters.ageGroup);
     }
-    if (nameSearch) {
-      filtered = filtered.filter(member => member.name.toLowerCase().includes(nameSearch.toLowerCase()));
+    if (appliedFilters.name) {
+      filtered = filtered.filter(member => member.name.toLowerCase().includes(appliedFilters.name.toLowerCase()));
     }
-    if (emailSearch) {
-      filtered = filtered.filter(member => member.email.toLowerCase().includes(emailSearch.toLowerCase()));
+    if (appliedFilters.email) {
+      filtered = filtered.filter(member => member.email.toLowerCase().includes(appliedFilters.email.toLowerCase()));
     }
 
     // 정렬 로직 (ReusableTable에서 처리하므로 여기서는 id 매핑만)
@@ -129,7 +159,7 @@ export default function MemberManagement() {
     }
 
     return filtered.map(member => ({ ...member, id: member.memberId }));
-  }, [members, statusFilter, genderFilter, ageGroupFilter, nameSearch, emailSearch, sortValue]);
+  }, [members, appliedFilters, sortValue]);
 
   const columns: ColumnDefinition<MemberTableItem>[] = [
     {
@@ -170,6 +200,7 @@ export default function MemberManagement() {
             onNameSearchChange={setNameSearch}
             emailSearch={emailSearch}
             onEmailSearchChange={setEmailSearch}
+            onSearch={handleSearch} // 조회 핸들러 연결
             onResetFilters={handleResetFilters}
           />
 

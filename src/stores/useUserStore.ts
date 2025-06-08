@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 interface UserState {
   username: string;
-  token: string;
+  token: string | null;
   setUser: (username: string, token: string) => void;
   reset: () => void;
 }
@@ -19,9 +19,9 @@ export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       username: '',
-      token: '',
+      token: null, //초기값 설정 
       setUser: (username, token) => set({ username, token }),
-      reset: () => set({ username: '', token: '' }),
+      reset: () => set({ username: '', token: null }),
     }),
     {
       name: 'user-storage', // localStorage 키 이름

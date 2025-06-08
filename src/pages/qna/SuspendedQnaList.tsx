@@ -13,7 +13,7 @@ import { type QnaItem,type QuestionStatusType, mockQnas, formatDate } from '../q
 // ReusableTable을 위한 QnaItem 확장 (TableItem의 id와 매핑)
 interface SuspendedQnaTableItem extends QnaItem, TableItem {
   id: number; // questionId를 id로 사용
-};
+}; 
 
 const guestQnaSortOptions = [
   { value: 'questionId_desc', label: '등록 최신순' },
@@ -36,38 +36,64 @@ export default function SuspendedQnaListPage() { // 컴포넌트 이름은 이�
   // 비회원 QnA는 별도의 상태 관리나 API 호출이 필요할 수 있음
   // 여기서는 mockQnas를 그대로 사용
   const qnas: QnaItem[] = useMemo(() => mockQnas, []); // mockQnas는 변경되지 않으므로 useMemo로 감싸기
+  // UI 입력을 위한 필터 상태
   const [statusFilter, setStatusFilter] = useState('전체');
   const [searchType, setSearchType] = useState('제목');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [sortValue, setSortValue] = useState('questionId_desc');
+
+  // 실제 필터링에 사용될 필터 상태
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: '전체',
+    searchType: '제목',
+    searchKeyword: '',
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const navigate = useNavigate();
 
   const handleResetFilters = () => {
+    // UI 필터 상태 초기화
     setStatusFilter('전체');
     setSearchType('제목');
     setSearchKeyword('');
+    // 적용된 필터 상태도 초기화
+    setAppliedFilters({
+      status: '전체',
+      searchType: '제목',
+      searchKeyword: '',
+    });
+    setCurrentPage(1); // 초기화 시 첫 페이지로 이동
+  };
+
+  const handleSearch = () => {
+    setAppliedFilters({
+      status: statusFilter,
+      searchType: searchType,
+      searchKeyword: searchKeyword,
+    });
+    setCurrentPage(1); // 검색 시 첫 페이지로 이동
   };
 
   const filteredAndSortedQnas = useMemo(() => {
     let filtered = [...qnas];
 
-    if (statusFilter !== '전체') {
+    if (appliedFilters.status !== '전체') {
       filtered = filtered.filter(qna => {
-        if (statusFilter === '답변 완료') return qna.questionStatus === 'QUESTION_ANSWERED';
-        if (statusFilter === '답변 미등록') return qna.questionStatus === 'QUESTION_REGISTERED' || qna.questionStatus === 'QUESTION_UPDATED';
+        if (appliedFilters.status === '답변 완료') return qna.questionStatus === 'QUESTION_ANSWERED';
+        if (appliedFilters.status === '답변 미등록') return qna.questionStatus === 'QUESTION_REGISTERED' || qna.questionStatus === 'QUESTION_UPDATED';
         return true;
       });
     }
 
-    if (searchKeyword) {
-      const keyword = searchKeyword.toLowerCase();
+    if (appliedFilters.searchKeyword) {
+      const keyword = appliedFilters.searchKeyword.toLowerCase();
       filtered = filtered.filter(qna => {
-        if (searchType === '작성자') return qna.authorEmail.toLowerCase().includes(keyword);
-        if (searchType === '제목') return qna.title.toLowerCase().includes(keyword);
-        if (searchType === '내용') return qna.content.toLowerCase().includes(keyword);
-        if (searchType === '제목+내용') return qna.title.toLowerCase().includes(keyword) || qna.content.toLowerCase().includes(keyword);
+        if (appliedFilters.searchType === '작성자') return qna.authorEmail.toLowerCase().includes(keyword);
+        if (appliedFilters.searchType === '제목') return qna.title.toLowerCase().includes(keyword);
+        if (appliedFilters.searchType === '내용') return qna.content.toLowerCase().includes(keyword);
+        if (appliedFilters.searchType === '작성자+제목') return qna.authorEmail.toLowerCase().includes(keyword) || qna.title.toLowerCase().includes(keyword); // '제목+내용' -> '작성자+제목' 및 필터 로직 수정
         return true;
       });
     }
@@ -78,7 +104,7 @@ export default function SuspendedQnaListPage() { // 컴포넌트 이름은 이�
       filtered.sort((a, b) => a.questionId - b.questionId);
     }
     return filtered.map(qna => ({ ...qna, id: qna.questionId } as SuspendedQnaTableItem));
-  }, [qnas, statusFilter, searchType, searchKeyword, sortValue]);
+  }, [qnas, appliedFilters, sortValue]);
   // Note: filteredAndSortedQnas의 타입은 GuestQnaTableItem[] 이지만, SuspendedQnaTableItem과 구조가 동일하므로 여기서는 그대로 사용합니다.
   const paginatedQnas = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -150,6 +176,7 @@ export default function SuspendedQnaListPage() { // 컴포넌트 이름은 이�
             searchKeyword={searchKeyword}
             onSearchKeywordChange={setSearchKeyword}
             onResetFilters={handleResetFilters}
+            onSearch={handleSearch} // 조회 핸들러 연결
             // 비회원 QnA에 특화된 검색 옵션이 있다면 추가 가능 (예: 이메일만 검색)
           />
 

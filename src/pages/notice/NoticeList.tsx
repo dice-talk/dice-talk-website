@@ -18,7 +18,7 @@ interface NoticeItem extends TableItem { // TableItem을 직접 확장
   type: '공지사항' | '이벤트';
   status: NoticeStatus; // 상태 필드 추가
 }
-
+ 
 // NoticeItem이 이미 TableItem을 확장하므로, NoticeTableItem은 NoticeItem의 별칭으로 사용
 type NoticeTableItem = NoticeItem; 
 
@@ -49,39 +49,65 @@ const noticeSortOptions = [
 
 export default function NoticeListPage() {
   const notices: NoticeItem[] = mockNotices;
+  // UI 입력을 위한 필터 상태
   const [typeFilter, setTypeFilter] = useState('전체');
   const [importanceFilter, setImportanceFilter] = useState('전체'); // statusFilter -> importanceFilter
   const [currentNoticeStatusFilter, setCurrentNoticeStatusFilter] = useState('전체'); // 새로운 공지 상태 필터
   const [titleSearch, setTitleSearch] = useState(''); // searchKeyword -> titleSearch
   const [sortValue, setSortValue] = useState('id_desc'); // 정렬 기본값 변경
+
+  // API 요청 또는 실제 필터링에 사용될 필터 상태
+  const [appliedFilters, setAppliedFilters] = useState({
+    type: '전체',
+    importance: '전체',
+    noticeStatus: '전체',
+    title: '',
+  });
+
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태 추가
   const itemsPerPage = 10; // 페이지당 보여줄 아이템 수
   const navigate = useNavigate();
 
   const handleResetFilters = () => {
+    // UI 필터 상태 초기화
     setTypeFilter('전체');
     setImportanceFilter('전체');
     setCurrentNoticeStatusFilter('전체');
     setTitleSearch('');
+    // 적용된 필터 상태도 초기화
+    setAppliedFilters({
+      type: '전체',
+      importance: '전체',
+      noticeStatus: '전체',
+      title: '',
+    });
+    setCurrentPage(1); // 초기화 시 첫 페이지로 이동
+  };
+
+  const handleSearch = () => {
+    setAppliedFilters({
+      type: typeFilter,
+      importance: importanceFilter,
+      noticeStatus: currentNoticeStatusFilter,
+      title: titleSearch,
+    });
+    setCurrentPage(1); // 검색 시 첫 페이지로 이동
   };
 
   const filteredAndSortedNotices = useMemo(() => {
     let filtered = [...notices];
 
-    if (typeFilter !== '전체') {
-      filtered = filtered.filter(notice => notice.type === typeFilter);
+    if (appliedFilters.type !== '전체') {
+      filtered = filtered.filter(notice => notice.type === appliedFilters.type);
     }
-    // NoticeFilterSection의 '중요도' 필터에 맞춰 isImportant 기준으로 필터링
-    if (importanceFilter !== '전체') {
-      filtered = filtered.filter(notice =>
-        importanceFilter === '중요' ? notice.isImportant : !notice.isImportant
-      );
+    if (appliedFilters.importance !== '전체') {
+      filtered = filtered.filter(notice => appliedFilters.importance === '중요' ? notice.isImportant : !notice.isImportant);
     }
-    if (currentNoticeStatusFilter !== '전체') {
-      filtered = filtered.filter(notice => notice.status === currentNoticeStatusFilter);
+    if (appliedFilters.noticeStatus !== '전체') {
+      filtered = filtered.filter(notice => notice.status === appliedFilters.noticeStatus);
     }
-    if (titleSearch) { // titleSearch로 제목 검색
-      filtered = filtered.filter(notice => notice.title.toLowerCase().includes(titleSearch.toLowerCase()));
+    if (appliedFilters.title) {
+      filtered = filtered.filter(notice => notice.title.toLowerCase().includes(appliedFilters.title.toLowerCase()));
     }
 
     // id 기준으로 정렬
@@ -101,7 +127,7 @@ export default function NoticeListPage() {
     }
 
     return filtered.map(notice => ({ ...notice, id: notice.id }));
-  }, [notices, typeFilter, importanceFilter, currentNoticeStatusFilter, titleSearch, sortValue]);
+  }, [notices, appliedFilters, sortValue]);
 
   // 페이지네이션을 위한 데이터 계산
   const paginatedNotices = useMemo(() => {
@@ -191,6 +217,7 @@ export default function NoticeListPage() {
             titleSearch={titleSearch} // searchKeyword -> titleSearch
             onTitleSearchChange={setTitleSearch} // onSearchKeywordChange -> onTitleSearchChange
             onResetFilters={handleResetFilters}
+            onSearch={handleSearch} // 조회 핸들러 연결
           />
           <ReusableTable
             columns={columns}

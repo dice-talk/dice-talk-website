@@ -14,7 +14,7 @@ const importanceOptions = [
   { value: '중요', label: '중요' },
   { value: '일반', label: '일반' },
 ];
-
+ 
 // NoticeStatus enum을 사용하여 공지 상태 옵션 생성
 const noticeStatusOptions = [
   { value: '전체', label: '전체 (공지 상태)' },
@@ -31,6 +31,7 @@ interface NoticeFilterSectionProps {
   onResetFilters: () => void;
   noticeStatusFilter: string; // 새로운 prop
   onNoticeStatusFilterChange: (value: string) => void; // 새로운 prop
+  onSearch: () => void; // 조회 버튼 클릭 핸들러 prop 추가
 }
 
 export function NoticeFilterSection({
@@ -43,6 +44,7 @@ export function NoticeFilterSection({
   onResetFilters,
   noticeStatusFilter,
   onNoticeStatusFilterChange,
+  onSearch, // onSearch prop 받기
 }: NoticeFilterSectionProps) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
@@ -62,7 +64,7 @@ export function NoticeFilterSection({
         </div>
         <div className="flex justify-end gap-3 md:col-span-1 lg:col-span-2 mt-4 md:mt-0">
           <Button variant="outline" className="px-6 w-full sm:w-auto" onClick={onResetFilters}>초기화</Button>
-          {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto">조회</Button> */}
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto" onClick={onSearch}>조회</Button>
         </div>
       </div>
     </div>
