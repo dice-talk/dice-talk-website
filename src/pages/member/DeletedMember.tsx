@@ -45,25 +45,43 @@ const mockDeletedMembers: DeletedMember[] = [
 
 export default function DeletedMemberManagement() {
   // useState를 사용하여 mock 데이터 관리 (실제 API 연동 시 useEffect로 데이터 가져옴)
-  const [deletedMembers] = useState<DeletedMember[]>(mockDeletedMembers);
-  const [statusFilter, setStatusFilter] = useState('탈퇴 회원'); // 기본값 '탈퇴 회원'
+  const [deletedMembers] = useState<DeletedMember[]>(mockDeletedMembers); // 실제 앱에서는 API로부터 데이터를 받아오는 로직 필요
+
+  // UI 입력을 위한 필터 상태 (DeletedMemberFilterSection에 전달)
   const [genderFilter, setGenderFilter] = useState('전체');
   const [ageGroupFilter, setAgeGroupFilter] = useState('전체');
   const [reasonFilter, setReasonFilter] = useState('전체');
   const [nameSearch, setNameSearch] = useState('');
   const [emailSearch, setEmailSearch] = useState('');
+
+  // API 요청 또는 실제 필터링에 사용될 필터 상태
+  const [appliedFilters, setAppliedFilters] = useState({
+    gender: '전체',
+    ageGroup: '전체',
+    reason: '전체',
+    name: '',
+    email: '',
+  });
+
   const [sortValue, setSortValue] = useState('탈퇴일 순 (최신)');
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MemberDetailData | null>(null);
 
   const handleResetFilters = () => {
-    setStatusFilter('탈퇴 회원'); // 초기화 시에도 '탈퇴 회원' 유지 또는 '전체'로 변경 가능
     setGenderFilter('전체');
     setAgeGroupFilter('전체');
     setReasonFilter('전체');
     setNameSearch('');
     setEmailSearch('');
+    // 초기화 시, appliedFilters도 초기화하여 바로 반영합니다.
+    setAppliedFilters({
+      gender: '전체',
+      ageGroup: '전체',
+      reason: '전체',
+      name: '',
+      email: ''
+    });
   };
 
   const handleOpenDetailModal = (member: DeletedMember) => {
@@ -73,6 +91,15 @@ export default function DeletedMemberManagement() {
 
   const handleCloseDetailModal = () => setIsDetailModalOpen(false);
 
+  const handleSearch = () => {
+    setAppliedFilters({
+      gender: genderFilter,
+      ageGroup: ageGroupFilter,
+      reason: reasonFilter,
+      name: nameSearch,
+      email: emailSearch,
+    });
+  };
 
   const getAgeGroup = (birthDate: string): string => {
     const birthYear = new Date(birthDate).getFullYear();
@@ -94,22 +121,22 @@ export default function DeletedMemberManagement() {
     //   filtered = filtered.filter(member => member.status === statusFilter); // Member 인터페이스에 status가 있다면
     // }
 
-    if (genderFilter !== '전체') {
+    if (appliedFilters.gender !== '전체') {
       // genderFilter는 '남성'/'여성', member.gender는 'MALE'/'FEMALE'
-      const backendGender = genderFilter === '남성' ? 'MALE' : 'FEMALE';
+      const backendGender = appliedFilters.gender === '남성' ? 'MALE' : 'FEMALE';
       filtered = filtered.filter(member => member.gender === backendGender);
     }
-    if (ageGroupFilter !== '전체') {
-      filtered = filtered.filter(member => getAgeGroup(member.birth) === ageGroupFilter);
+    if (appliedFilters.ageGroup !== '전체') {
+      filtered = filtered.filter(member => getAgeGroup(member.birth) === appliedFilters.ageGroup);
     }
-    if (reasonFilter !== '전체') {
-      filtered = filtered.filter(member => member.reason === reasonFilter);
+    if (appliedFilters.reason !== '전체') {
+      filtered = filtered.filter(member => member.reason === appliedFilters.reason);
     }
-    if (nameSearch) {
-      filtered = filtered.filter(member => member.name.toLowerCase().includes(nameSearch.toLowerCase()));
+    if (appliedFilters.name) {
+      filtered = filtered.filter(member => member.name.toLowerCase().includes(appliedFilters.name.toLowerCase()));
     }
-    if (emailSearch) {
-      filtered = filtered.filter(member => member.email.toLowerCase().includes(emailSearch.toLowerCase()));
+    if (appliedFilters.email) {
+      filtered = filtered.filter(member => member.email.toLowerCase().includes(appliedFilters.email.toLowerCase()));
     }
 
     if (sortValue === 'ID 순 (최신)') {
@@ -123,7 +150,7 @@ export default function DeletedMemberManagement() {
     }
 
     return filtered.map(member => ({ ...member, id: member.memberId }));
-  }, [deletedMembers, genderFilter, ageGroupFilter, reasonFilter, nameSearch, emailSearch, sortValue]);
+  }, [deletedMembers, appliedFilters, sortValue]);
 
   const columns: ColumnDefinition<DeletedMemberTableItem>[] = [
     { key: 'no', header: 'No', cellRenderer: (_item, index) => index + 1, headerClassName: 'w-[5%]' },
@@ -151,8 +178,7 @@ export default function DeletedMemberManagement() {
           <h2 className="text-3xl font-bold text-gray-800 mb-8">탈퇴 회원 관리</h2>
 
           <DeletedMemberFilterSection
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
+            // UI 필터 상태와 핸들러 연결
             genderFilter={genderFilter}
             onGenderFilterChange={setGenderFilter}
             ageGroupFilter={ageGroupFilter}
@@ -163,6 +189,7 @@ export default function DeletedMemberManagement() {
             onNameSearchChange={setNameSearch}
             emailSearch={emailSearch}
             onEmailSearchChange={setEmailSearch}
+            onSearch={handleSearch} // 조회 핸들러 연결
             onResetFilters={handleResetFilters}
           />
 
@@ -187,3 +214,4 @@ export default function DeletedMemberManagement() {
     </div>
   );
 }
+

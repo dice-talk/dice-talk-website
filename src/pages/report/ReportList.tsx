@@ -9,7 +9,7 @@ import { Pagination } from '../../components/common/Pagination';
 import { type ReportItem, ReportStatus } from '../../types/reportTypes';
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
 import { formatDate, getReportStatusLabel, getReportStatusBadgeStyle } from '../../lib/ReportUtils';
-
+ 
 // mockReports는 실제 API 호출로 대체되어야 합니다.
 // ReportDetailPage와 상태를 공유하려면 Zustand, Redux 또는 Context API 사용을 고려하세요.
 export const mockReports: ReportItem[] = [
@@ -58,29 +58,50 @@ export default function ReportListPage() {
   useEffect(() => {
     setReports([...mockReports]); // mockReports 배열의 복사본으로 상태 업데이트
   }, []); // 최초 마운트 시에만 실행되도록 설정. 상세 페이지에서 변경 후 돌아올 때 반영되려면 다른 방식 필요.
-          // 또는 navigate 시 특정 상태를 전달하여 강제 리프레시
 
+  // UI 입력을 위한 필터 상태
   const [statusFilter, setStatusFilter] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortValue, setSortValue] = useState('createdAt_desc');
+
+  // 실제 필터링에 사용될 필터 상태
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: '전체',
+    term: '',
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const handleResetFilters = () => {
+    // UI 필터 상태 초기화
     setStatusFilter('전체');
     setSearchTerm('');
     setSortValue('createdAt_desc');
+    // 적용된 필터 상태도 초기화
+    setAppliedFilters({
+      status: '전체',
+      term: '',
+    });
+    setCurrentPage(1); // 초기화 시 첫 페이지로 이동
+  };
+
+  const handleSearch = () => {
+    setAppliedFilters({
+      status: statusFilter,
+      term: searchTerm,
+    });
+    setCurrentPage(1); // 검색 시 첫 페이지로 이동
   };
 
   const filteredAndSortedReports = useMemo(() => {
     let filtered = [...reports];
 
-    if (statusFilter !== '전체') {
-      filtered = filtered.filter(report => report.reportStatus === statusFilter);
+    if (appliedFilters.status !== '전체') {
+      filtered = filtered.filter(report => report.reportStatus === appliedFilters.status);
     }
-
-    if (searchTerm) {
-      const lowerSearchTerm = searchTerm.toLowerCase();
+    if (appliedFilters.term) {
+      const lowerSearchTerm = appliedFilters.term.toLowerCase();
       filtered = filtered.filter(report =>
         report.reporterEmail.toLowerCase().includes(lowerSearchTerm) ||
         report.reporterId.toString().includes(lowerSearchTerm) ||
@@ -101,7 +122,7 @@ export default function ReportListPage() {
       reporterInfo: `${r.reporterEmail} (ID: ${r.reporterId})`,
       reportedInfo: `${r.reportedEmail} (ID: ${r.reportedMemberId})`,
     }));
-  }, [reports, statusFilter, searchTerm, sortValue]);
+  }, [reports, appliedFilters, sortValue]);
 
   const paginatedReports = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -151,6 +172,7 @@ export default function ReportListPage() {
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
             onResetFilters={handleResetFilters}
+            onSearch={handleSearch} // 조회 핸들러 연결
           />
           <ReusableTable
             columns={columns}

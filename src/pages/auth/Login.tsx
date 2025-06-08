@@ -2,34 +2,46 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/auth';
-import { useAuthStore } from '../../stores/useUserStore';
+// import { useAuthStore, useUserStore } from '../../stores/useUserStore'; // useUserStore 임포트 추가
+import { useAuthStore } from '../../stores/useUserStore'; // useUserStore 임포트 추가
 import Button from '../../components/ui/Button'; // Button 컴포넌트 임포트
 import { Input } from '../../components/ui/Input'; // Input 컴포넌트 임포트
 import SignupForm from '../../components/auth/SignupForm'; // SignupForm 컴포넌트 임포트 (새로 생성될 파일)
-
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login'); // 'login' 또는 'signup'
   const [loginId, setLoginId] = useState(''); // 아이디 또는 이메일
   const [loginPassword, setLoginPassword] = useState(''); // 비밀번호
-  const { login: setLoginStatus } = useAuthStore(); // 스토어에서 로그인 상태 변경 함수 가져오기
+  const authLoginAction = useAuthStore((state) => state.login); // useAuthStore의 login (isLoggedIn 설정용)
+  // const userSetUserAction = useUserStore((state) => state.setUser); // useUserStore의 setUser (사용자 정보 및 토큰 저장용)
   const navigate = useNavigate(); //페이지 이동 
 
   const handleLogin = async () => {
     try {
-      await login({ username: loginId, password: loginPassword }); // loginId와 loginPassword 사용
-      setLoginStatus(); //로그인 상태 true 변경
-      // setLoginStatus(); // 로그인 상태 true 변경
-      alert('로그인 성공!');
-      navigate('/home'); //로그인 성공 시 /home 으로 이동
+      // login API 함수가 서버 응답을 반환한다고 가정합니다.
+      // 서버 응답에는 accessToken 또는 Authorization 헤더에 토큰이 포함되어야 합니다.
+      await login({ username: loginId, password: loginPassword });
+
+      // 서버 응답 구조에 따라 토큰을 추출합니다.
+      // 예시1: 응답 바디에 { accessToken: "..." } 형태로 토큰이 오는 경우
+      // const tokenFromBody = response.data?.accessToken;
+      // 예시2: 응답 헤더에 'Authorization: Bearer ...' 형태로 토큰이 오는 경우
+      // const tokenFromHeader = response.headers?.authorization?.replace('Bearer ', '') || response.headers?.Authorization?.replace('Bearer ', '');
+      // const token = tokenFromBody || tokenFromHeader;
+      // const token = tokenFromHeader;
+      const isToken = localStorage.getItem("accessToken")?.length !== 0;
+      if (isToken) {
+        authLoginAction(); // useAuthStore의 login 액션을 호출하여 isLoggedIn 상태를 true로 변경
+        alert('로그인 성공!');
+        navigate('/home');
+      } else {
+        // 실제로는 이 부분에 도달하기 전에 login API 함수 내부나 catch 블록에서 오류 처리될 가능성이 높습니다.
+        alert('로그인 실패: 서버로부터 토큰을 받지 못했습니다.');
+      }
     } catch (error) {
       console.error(error);
       alert('로그인 실패');
     }
-    // TODO: 실제 로그인 로직 구현
-    // console.log('로그인 시도:', { loginId, loginPassword });
-    // 로그인 성공 시 메인 페이지 등으로 이동
-    // navigate('/');
   };
 
   return (

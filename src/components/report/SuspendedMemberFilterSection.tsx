@@ -16,7 +16,7 @@ interface SuspendedMemberFilterSectionProps {
   emailSearch: string;
   onEmailSearchChange: (value: string) => void;
   onResetFilters: () => void;
-  onApplyFilters: () => void; 
+  onSearch: () => void; // onApplyFilters -> onSearch로 변경
   // 정지 기간 필터는 필요시 추가 (예: startDate, endDate)
 }
 
@@ -56,6 +56,7 @@ export const SuspendedMemberFilterSection: React.FC<SuspendedMemberFilterSection
   emailSearch,
   onEmailSearchChange,
   onResetFilters,
+  onSearch, // onApplyFilters -> onSearch로 변경
 }) => {
   return (
     <div className="mb-6 p-4 bg-white rounded-lg shadow border border-gray-200/75">
@@ -101,19 +102,15 @@ export const SuspendedMemberFilterSection: React.FC<SuspendedMemberFilterSection
           onChange={onEmailSearchChange}
         />
         <div className="flex items-end justify-end md:col-start-3 space-x-2"> {/* 버튼들을 오른쪽 끝으로 정렬하고 간격 추가 */}
-          {/* <Button
-            variant="default" // 조회 버튼은 default variant
-            onClick={onApplyFilters}
-            className="w-full sm:w-auto"
-          >
-            조회
-          </Button> */}
           <Button
             variant="outline"
             onClick={onResetFilters}
             className="w-full sm:w-auto" // 작은 화면에서는 전체 너비, sm 이상에서는 자동 너비
           >
             초기화
+          </Button>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto" onClick={onSearch}> {/* 조회 버튼 활성화 및 onSearch 연결 */}
+            조회
           </Button>
         </div>
       </div>

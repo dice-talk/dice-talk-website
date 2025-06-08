@@ -1,5 +1,5 @@
 // src/api/auth.ts
-import axiosInstance from "./axiosInstance";
+import axiosInstance, { publicAxiosInstance } from "./axiosInstance";
 
 interface SignupRequest {
   email: string;
@@ -18,18 +18,26 @@ interface LoginRequest {
 
 //회원가입 api
 export const adminSignup = async (data: SignupRequest) => {
-  const response = await axiosInstance.post('/admin/register', data);
+  const response = await publicAxiosInstance.post('/admin/register', data);
+              console.log(`❤️ baseURL: `+ axiosInstance.defaults.baseURL)
+
   return response.data;
 };
 
 //로그인 api
 export const login = async (data: LoginRequest) => {
-  const response = await axiosInstance.post('/auth/login', data, {
+  const response = await publicAxiosInstance.post('/auth/login', data, {
     headers: {
       'Content-Type': 'application/json',
     },
     withCredentials: true, // 세션 기반 로그인 시 필수
   });
+  console.log(response.data);
+  console.log(response.headers);
+  const accessToken: string = response.headers.authorization;
+  const pureToken: string = accessToken.slice(7)
+  console.log(pureToken);
+  localStorage.setItem("accessToken", pureToken)
   return response.data;
 };
 
@@ -42,4 +50,3 @@ export const logout = async (token : string) => {
     withCredentials: true,
   });
 };
-

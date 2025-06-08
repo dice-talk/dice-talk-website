@@ -11,12 +11,14 @@ export default function Signup() {
   const [phone, setPhone] = useState('');
 
   const handleSignup = async () => {
+      console.log('📦 전송할 데이터:', adminSignup); // ✅ 요기!
+
     try {
       await adminSignup({
         email,
         name, 
-        password, 
-        phone, 
+        password,  
+        phone,
         birth: '2000-01-01',
         gender: null,
         region: '서울시 강남구' 

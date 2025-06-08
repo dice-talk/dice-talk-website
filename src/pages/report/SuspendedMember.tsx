@@ -17,7 +17,7 @@ interface SuspendedMember extends MemberDetailData { // MemberDetailData 확장
 interface SuspendedMemberTableItem extends SuspendedMember, TableItem {
   id: number;
 }
-
+ 
 const suspendedMemberSortOptions = [
   { value: 'suspensionStartDate_desc', label: '정지 시작일 (최신)' },
   { value: 'suspensionStartDate_asc', label: '정지 시작일 (오래된)' },
@@ -62,12 +62,23 @@ const mockSuspendedMembers: SuspendedMember[] = [
 export default function SuspendedMemberManagement() {
   // useState를 사용하여 mock 데이터 관리 (실제 API 연동 시 useEffect로 데이터 가져옴)
   const [suspendedMembers] = useState<SuspendedMember[]>(mockSuspendedMembers);
+  // UI 입력을 위한 필터 상태
   const [genderFilter, setGenderFilter] = useState('전체');
   const [ageGroupFilter, setAgeGroupFilter] = useState('전체');
   const [suspensionReasonFilter, setSuspensionReasonFilter] = useState('전체');
   const [nameSearch, setNameSearch] = useState('');
   const [emailSearch, setEmailSearch] = useState('');
   const [sortValue, setSortValue] = useState('suspensionStartDate_desc');
+
+  // 실제 필터링에 사용될 필터 상태
+  const [appliedFilters, setAppliedFilters] = useState({
+    gender: '전체',
+    ageGroup: '전체',
+    suspensionReason: '전체',
+    name: '',
+    email: '',
+  });
+
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MemberDetailData | null>(null);
@@ -85,17 +96,33 @@ export default function SuspendedMemberManagement() {
   };
 
   const handleResetFilters = () => {
+    // UI 필터 상태 초기화
     setGenderFilter('전체');
     setAgeGroupFilter('전체');
     setSuspensionReasonFilter('전체');
     setNameSearch('');
     setEmailSearch('');
     setSortValue('suspensionStartDate_desc');
+    // 적용된 필터 상태도 초기화
+    setAppliedFilters({
+      gender: '전체',
+      ageGroup: '전체',
+      suspensionReason: '전체',
+      name: '',
+      email: '',
+    });
+    // setCurrentPage(1); // 페이지가 있다면 첫 페이지로 이동 (현재 페이지 상태 없음)
   };
 
-  const handleApplyFilters = () => {
-    // 실제로는 여기서 API를 호출하여 필터링된 데이터를 가져올 수 있습니다.
-    console.log("조회 버튼 클릭됨 - 필터 값:", { genderFilter, ageGroupFilter, suspensionReasonFilter, nameSearch, emailSearch });
+  const handleSearch = () => { // handleApplyFilters -> handleSearch
+    setAppliedFilters({
+      gender: genderFilter,
+      ageGroup: ageGroupFilter,
+      suspensionReason: suspensionReasonFilter,
+      name: nameSearch,
+      email: emailSearch,
+    });
+    // setCurrentPage(1); // 페이지가 있다면 첫 페이지로 이동
   };
 
   const getAgeGroup = (birthDate: string): string => {
@@ -112,21 +139,21 @@ export default function SuspendedMemberManagement() {
   const filteredAndSortedMembers = useMemo(() => {
     let filtered = [...suspendedMembers];
 
-    if (genderFilter !== '전체') {
-      const backendGender = genderFilter === '남성' ? 'MALE' : 'FEMALE';
+    if (appliedFilters.gender !== '전체') {
+      const backendGender = appliedFilters.gender === '남성' ? 'MALE' : 'FEMALE';
       filtered = filtered.filter(member => member.gender === backendGender);
     }
-    if (ageGroupFilter !== '전체') {
-      filtered = filtered.filter(member => getAgeGroup(member.birth) === ageGroupFilter);
+    if (appliedFilters.ageGroup !== '전체') {
+      filtered = filtered.filter(member => getAgeGroup(member.birth) === appliedFilters.ageGroup);
     }
-    if (suspensionReasonFilter !== '전체') {
-      filtered = filtered.filter(member => member.suspensionReason === suspensionReasonFilter);
+    if (appliedFilters.suspensionReason !== '전체') {
+      filtered = filtered.filter(member => member.suspensionReason === appliedFilters.suspensionReason);
     }
-    if (nameSearch) {
-      filtered = filtered.filter(member => member.name.toLowerCase().includes(nameSearch.toLowerCase()));
+    if (appliedFilters.name) {
+      filtered = filtered.filter(member => member.name.toLowerCase().includes(appliedFilters.name.toLowerCase()));
     }
-    if (emailSearch) {
-      filtered = filtered.filter(member => member.email.toLowerCase().includes(emailSearch.toLowerCase()));
+    if (appliedFilters.email) {
+      filtered = filtered.filter(member => member.email.toLowerCase().includes(appliedFilters.email.toLowerCase()));
     }
 
     // 정렬 로직
@@ -136,7 +163,7 @@ export default function SuspendedMemberManagement() {
     else if (sortValue === 'memberId_asc') filtered.sort((a, b) => a.memberId - b.memberId);
 
     return filtered.map(member => ({ ...member, id: member.memberId }));
-  }, [suspendedMembers, genderFilter, ageGroupFilter, suspensionReasonFilter, nameSearch, emailSearch, sortValue]);
+  }, [suspendedMembers, appliedFilters, sortValue]);
 
   const columns: ColumnDefinition<SuspendedMemberTableItem>[] = [
     { key: 'no', header: 'No', cellRenderer: (_item, index) => index + 1, headerClassName: 'w-[5%]' },
@@ -162,7 +189,7 @@ export default function SuspendedMemberManagement() {
             nameSearch={nameSearch} onNameSearchChange={setNameSearch}
             emailSearch={emailSearch} onEmailSearchChange={setEmailSearch}
             onResetFilters={handleResetFilters}
-            onApplyFilters={handleApplyFilters} // onApplyFilters prop 추가
+            onSearch={handleSearch} // onApplyFilters -> onSearch로 변경 및 핸들러 연결
           />
           <ReusableTable
             columns={columns}

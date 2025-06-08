@@ -12,7 +12,7 @@ const statusOptions = [
 const genderOptions = [
   { value: '전체', label: '전체 성별' },
   { value: '남성', label: '남성' },
-  { value: '여성', label: '여성' },
+  { value: '여성', label: '여성' }, 
 ];
 const ageGroupOptions = [
   { value: '전체', label: '전체 연령대' },
@@ -35,6 +35,7 @@ interface MemberFilterSectionProps {
   emailSearch: string;
   onEmailSearchChange: (value: string) => void;
   onResetFilters: () => void;
+  onSearch: () => void;
 }
 
 export function MemberFilterSection({
@@ -49,6 +50,7 @@ export function MemberFilterSection({
   emailSearch,
   onEmailSearchChange,
   onResetFilters,
+  onSearch,
 }: MemberFilterSectionProps) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
@@ -72,7 +74,7 @@ export function MemberFilterSection({
         />
         <div className="flex justify-end gap-3 md:col-span-1 lg:col-span-2 mt-4 md:mt-0">
           <Button variant="outline" className="px-6 w-full sm:w-auto" onClick={onResetFilters}>초기화</Button>
-          {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto" onClick={onSearch}>조회</Button> */}
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto" onClick={onSearch}>조회</Button>
         </div>
       </div>
     </div>

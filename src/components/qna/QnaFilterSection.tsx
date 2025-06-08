@@ -23,7 +23,8 @@ interface QnaFilterSectionProps {
   searchKeyword: string;
   onSearchKeywordChange: (value: string) => void;
   onResetFilters: () => void;
-}
+  onSearch: () => void; // 조회 핸들러 prop 추가
+} 
 
 export function QnaFilterSection({
   statusFilter,
@@ -33,6 +34,7 @@ export function QnaFilterSection({
   searchKeyword,
   onSearchKeywordChange,
   onResetFilters,
+  onSearch, // onSearch prop 받기
 }: QnaFilterSectionProps) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
@@ -64,7 +66,7 @@ export function QnaFilterSection({
         </div>
         <div className="flex justify-end gap-3 lg:col-span-2 mt-4 md:mt-auto"> {/* md:mt-auto 추가 */}
           <Button variant="outline" className="px-6 w-full sm:w-auto" onClick={onResetFilters}>초기화</Button>
-          {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto">조회</Button> */}
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full sm:w-auto" onClick={onSearch}>조회</Button>
         </div>
       </div>
     </div>
