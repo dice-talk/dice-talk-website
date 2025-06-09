@@ -1,54 +1,117 @@
-// // src/api/noticeApi.ts
-// import axiosInstance from './axiosInstance';
-// // BackendNoticeResponseDto 타입을 공유 위치로 옮기는 것이 좋지만, 여기서는 NoticeDetail에서 가져옵니다.
-// // import type BackendNoticeResponseDto from '../pages/notice/NoticeDetail';
+// src/api/noticeApi.ts
+import { axiosInstance } from "./axiosInstance"; // axiosInstance 경로 확인 필요
+import type {
+  NoticeResponseDto,
+  NoticeTypeBack,
+  NoticeStatusBack,
+} from "../types/noticeTypes"; // 타입 경로 확인 필요
+import type { MultiResponse } from "../types/common"; // 공통 타입 경로 확인 필요
 
-// /**
-//  * 새 공지/이벤트 생성 (POST /notices)
-//  * @param requestFormData FormData (noticePostDto: string, images?: File[])
-//  * @returns 생성된 공지/이벤트 ID 또는 null
-//  */
-// export const createNotice = async (requestFormData: FormData): Promise<string | null> => {
-//   const response = await axiosInstance.post<void>('/notices', requestFormData, {
-//     headers: {
-//       'Content-Type': 'multipart/form-data',
-//     },
-//   });
-//   const locationHeader = response.headers.location;
-//   if (locationHeader) {
-//     return locationHeader.substring(locationHeader.lastIndexOf('/') + 1);
-//   }
-//   console.error("Location header is missing in createNotice response.");
-//   return null;
-// };
+/**
+ * 공지/이벤트 생성 (POST /notices)
+ * @param noticePostDtoString JSON 문자열 형태의 NoticePostDtoP
+ * @param imageFiles 이미지 파일 목록 (optional)
+ * @param thumbnailFlagsStr 썸네일 플래그 문자열 목록 (optional)
+ * @returns 생성된 공지/이벤트의 ID (Location 헤더에서 추출)
+ */
+export const createNotice = async (
+  noticePostDtoString: string,
+  imageFiles?: File[],
+  thumbnailFlagsStr?: string[]
+): Promise<string | null> => {
+  const formData = new FormData();
+  formData.append("noticePostDto", noticePostDtoString);
 
-// /**
-//  * 공지/이벤트 상세 정보 조회 (GET /notices/{noticeId})
-//  * @param noticeId 조회할 공지/이벤트 ID
-//  * @returns 공지/이벤트 상세 정보
-//  */
-// export const fetchNoticeDetail = async (noticeId: number): Promise<BackendNoticeResponseDto> => {
-//   const response = await axiosInstance.get<BackendNoticeResponseDto>(`/notices/${noticeId}`);
-//   return response.data;
-// };
+  if (imageFiles) {
+    imageFiles.forEach((file) => formData.append("images", file));
+  }
+  if (thumbnailFlagsStr) {
+    thumbnailFlagsStr.forEach((flag) => formData.append("thumbnailFlags", flag));
+  }
 
-// /**
-//  * 공지/이벤트 수정 (PUT /notices/{noticeId})
-//  * @param noticeId 수정할 공지/이벤트 ID
-//  * @param requestFormData FormData (noticePutDto: string, images?: File[], removedImageUrls?: string[])
-//  */
-// export const updateNotice = async (noticeId: number, requestFormData: FormData): Promise<void> => {
-//   await axiosInstance.put(`/notices/${noticeId}`, requestFormData, {
-//     headers: {
-//       'Content-Type': 'multipart/form-data',
-//     },
-//   });
-// };
+  const response = await axiosInstance.post<void>("/notices", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  
+  const locationHeader = response.headers.location || response.headers['Location']; // Axios는 헤더 키를 소문자로 정규화하지만, 대문자도 확인
+  console.log("[API] Location Header from server:", locationHeader); // 실제 헤더 값 로깅
+  if (locationHeader) {
+    const parts = locationHeader.split('/');
+    return parts[parts.length -1];
+  }
+  console.error("Location header is missing in createNotice response."); // 이 메시지가 현재 발생 중
+  return null;
+};
 
-// /**
-//  * 공지/이벤트 삭제 (DELETE /notices/{noticeId})
-//  * @param noticeId 삭제할 공지/이벤트 ID
-//  */
-// export const deleteNotice = async (noticeId: number): Promise<void> => {
-//   await axiosInstance.delete(`/notices/${noticeId}`);
-// };
+/**
+ * 공지/이벤트 수정 (PATCH /notices/{noticeId})
+ * @param noticeId 수정할 공지/이벤트 ID
+ * @param noticePatchDtoString JSON 문자열 형태의 NoticePatchDtoP
+ * @param imageFiles 이미지 파일 목록 (optional)
+ * @param thumbnailFlags 썸네일 플래그 목록 (optional)
+ * @returns 수정된 공지/이벤트 정보
+ */
+export const updateNotice = async (
+  noticeId: number,
+  noticePatchDtoString: string,
+  imageFiles?: File[],
+  thumbnailFlags?: boolean[]
+): Promise<NoticeResponseDto> => {
+  const formData = new FormData();
+  formData.append("noticePatchDto", noticePatchDtoString);
+
+  if (imageFiles) {
+    imageFiles.forEach((file) => formData.append("images", file));
+  }
+  if (thumbnailFlags) {
+    thumbnailFlags.forEach((flag) => formData.append("thumbnailFlags", flag.toString()));
+  }
+
+  const response = await axiosInstance.patch<{ data: NoticeResponseDto }>( // 백엔드가 SingleResponseDto로 감싸서 반환
+    `/notices/${noticeId}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return response.data.data; // SingleResponseDto의 data 필드 접근
+};
+
+/**
+ * 공지/이벤트 상세 조회 (GET /notices/{noticeId})
+ * @param noticeId 조회할 공지/이벤트 ID
+ * @returns 공지/이벤트 상세 정보
+ */
+export const getNoticeDetail = async (noticeId: number): Promise<NoticeResponseDto> => {
+  const response = await axiosInstance.get<{ data: NoticeResponseDto }>(`/notices/${noticeId}`); // SingleResponseDto
+  return response.data.data;
+};
+
+/**
+ * 공지/이벤트 목록 조회 (GET /notices)
+ * @param params 조회 파라미터 (type, status, keyword, page, size, sort)
+ * @returns 공지/이벤트 목록 및 페이지 정보
+ */
+export const getNotices = async (params: {
+  type?: NoticeTypeBack;
+  status?: NoticeStatusBack;
+  keyword?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}): Promise<MultiResponse<NoticeResponseDto>> => {
+  const response = await axiosInstance.get<MultiResponse<NoticeResponseDto>>("/notices", { params });
+  return response.data;
+};
+
+/**
+ * 공지/이벤트 삭제 (DELETE /notices/{noticeId})
+ * @param noticeId 삭제할 공지/이벤트 ID
+ */
+export const deleteNotice = async (noticeId: number): Promise<void> => {
+  await axiosInstance.delete(`/notices/${noticeId}`);
+};
