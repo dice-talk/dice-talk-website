@@ -34,7 +34,7 @@ export const createNotice = async (
       "Content-Type": "multipart/form-data",
     },
   });
-  
+
   const locationHeader = response.headers.location || response.headers['Location']; // Axios는 헤더 키를 소문자로 정규화하지만, 대문자도 확인
   console.log("[API] Location Header from server:", locationHeader); // 실제 헤더 값 로깅
   if (locationHeader) {
@@ -103,6 +103,7 @@ export const getNotices = async (params: {
   page?: number;
   size?: number;
   sort?: string;
+  importance?: number
 }): Promise<MultiResponse<NoticeResponseDto>> => {
   const response = await axiosInstance.get<MultiResponse<NoticeResponseDto>>("/notices", { params });
   return response.data;

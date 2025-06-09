@@ -5,63 +5,25 @@ import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import Button from '../../components/ui/Button';
 import { NoticeForm, type NoticeFormData } from '../../components/notice/NoticeForm';
-// import { NoticeStatus } from '../../components/notice/noticeUtils';
+import { 
+  formatDateToLocalDateTimeString, 
+  mapFrontendStatusToBackend, 
+  mapFrontendTypeToBackend,
+  mapBackendTypeToFrontend, 
+  mapBackendStatusToFrontend
+  } from '../../lib/NoticeUtils';
 import { isAxiosError } from 'axios';
 import { createNotice, getNoticeDetail, updateNotice } from '../../api/noticeApi'; // API 함수 임포트 (fetchNoticeDetail -> getNoticeDetail)
 import {
   type NoticePostDto,
   type NoticePatchDto,
-  type NoticeTypeBack,
+  // type NoticeTypeBack,
   type NoticeStatusBack,
   type NoticeItemView,
   type NoticeImageDto,
   NoticeStatus, 
 } from '../../types/noticeTypes'; // 타입 경로 수정
 
-// Backend DTO의 noticeType을 프론트엔드 type으로 변환 (NoticeDetail.tsx와 유사하게)
-const mapBackendTypeToFrontend = (backendType: NoticeTypeBack): NoticeItemView['type'] => {
-  return backendType === 'NOTICE' ? '공지사항' : '이벤트';
-};
-
-// Helper function to map frontend NoticeStatus to backend string values
-const mapFrontendStatusToBackend = (status: NoticeStatus): NoticeStatusBack => {
-  switch (status) {
-    case NoticeStatus.SCHEDULED:
-      return "SCHEDULED"; // As per DTO example "PUBLISHED"
-    case NoticeStatus.ONGOING:
-      return "ONGOING";
-    case NoticeStatus.CLOSED:
-      return "CLOSED";
-    default:
-      console.warn(`Unhandled notice status: ${status}, defaulting to SCHEDULED`);
-      return "SCHEDULED";
-  }
-};
-
-// Helper function to map backend NoticeStatus to frontend NoticeStatusFrontend
-const mapBackendStatusToFrontendForPage = (backendStatus: NoticeStatusBack): NoticeStatus => {
-  switch (backendStatus) {
-    case 'SCHEDULED':
-      return NoticeStatus.SCHEDULED;
-    case 'ONGOING':
-      return NoticeStatus.ONGOING;
-    case 'CLOSED':
-      return NoticeStatus.CLOSED;
-    default:
-      return NoticeStatus.ONGOING;
-  }
-};
-
-// Helper function to map frontend notice type to backend string values
-const mapFrontendTypeToBackend = (type: NoticeItemView['type']): NoticeTypeBack => {
-  return type === '공지사항' ? 'NOTICE' : 'EVENT';
-};
-
-// Helper function to format date string (YYYY-MM-DD) to LocalDateTime string (YYYY-MM-DDTHH:mm:ss)
-const formatDateToLocalDateTimeString = (dateString?: string): string | undefined => {
-  if (!dateString) return undefined;
-  return `${dateString}T00:00:00`; // Assuming time is 00:00:00 for date-only inputs
-};
 
 export default function NoticeNewPage() {
   const navigate = useNavigate();
@@ -86,7 +48,7 @@ export default function NoticeNewPage() {
           title: itemToEdit.title,
           content: itemToEdit.content || '',
           type: mapBackendTypeToFrontend(itemToEdit.noticeType)!, // Non-null assertion if type is guaranteed
-          status: mapBackendStatusToFrontendForPage(itemToEdit.noticeStatus as NoticeStatusBack),
+          status: mapBackendStatusToFrontend(itemToEdit.noticeStatus as NoticeStatusBack), // 공통 유틸리티 함수 사용 (이름 변경에 주의)
           isImportant: itemToEdit.noticeImportance === 1,
           imageUrls: itemToEdit.noticeImages?.map((img: NoticeImageDto) => img.imageUrl) || [], // img 타입 지정
           startDate: itemToEdit.startDate ? itemToEdit.startDate.split('T')[0] : undefined,

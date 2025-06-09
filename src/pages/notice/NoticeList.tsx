@@ -6,7 +6,7 @@ import { NoticeFilterSection } from '../../components/notice/NoticeFilterSection
 import { ReusableTable } from '../../components/common/ReusableTable';
 import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
 import Button from '../../components/ui/Button'; // Button 컴포넌트 임포트
-import { formatDate } from '../../components/notice/noticeUtils'; // formatDate 추가 및 경로 수정 확인
+import { formatDate, mapFrontendStatusToBackendForFilter } from '../../lib/NoticeUtils'; // mapFrontendStatusToBackendForFilter 추가
 import type { ColumnDefinition } from '../../components/common/reusableTableTypes';
 import { getNotices } from '../../api/noticeApi'
 import { type NoticeResponseDto, type NoticeImageDto, type NoticeTypeBack, type NoticeStatusBack, NoticeStatus, type NoticeItemView } from '../../types/noticeTypes'; 
@@ -35,7 +35,7 @@ const mapBackendStatusToFrontendList = (backendStatus?: NoticeStatusBack): Notic
 };
 
 const noticeSortOptions = [
-  { value: 'id_desc', label: '최신 등록순 (ID)' }, // noticeId 대신 id 사용
+  { value: 'id_desc', label: '최신 등록순 (ID)' }, 
   { value: 'id_asc', label: '오래된 등록순 (ID)' },
   { value: 'importance_desc', label: '중요도순' },
 ];
@@ -73,16 +73,18 @@ export default function NoticeListPage() {
         sort: sortValue === 'id_desc' 
           ? 'noticeId,desc' 
           : sortValue === 'id_asc' 
-          ? 'noticeId,asc' 
-          : sortValue.replace('_', ','), // 'id'를 'noticeId'로 변경, 다른 정렬 옵션은 그대로 유지
+          ? 'noticeId,asc'
+          : sortValue === 'importance_desc'
+          ? 'noticeImportance,desc' // 'importance_desc'를 'noticeImportance,desc'로 변경
+          : sortValue.replace('_', ','), 
         type: isReset || appliedFilters.type === '전체'
           ? undefined
           : (appliedFilters.type === '공지사항' ? 'NOTICE' : 'EVENT') as NoticeTypeBack,
-        status: isReset || appliedFilters.noticeStatus === '전체'
-          ? undefined
-          : appliedFilters.noticeStatus.toUpperCase() as NoticeStatusBack, // '예정' -> 'SCHEDULED'
-        // importance 필터는 백엔드 API에 따라 추가 구현 필요
-        // 예: importance: appliedFilters.importance === '중요' ? 1 : (appliedFilters.importance === '일반' ? 0 : undefined),
+        status: mapFrontendStatusToBackendForFilter(appliedFilters.noticeStatus as NoticeStatus | '전체'), // status 매핑 함수 사용
+        // 중요도 필터링을 위한 파라미터 추가
+        importance: isReset || appliedFilters.importance === '전체' 
+          ? undefined 
+          : (appliedFilters.importance === '중요' ? 1 : 0),
       };
 
       console.log("Fetching notices with params:", params);
@@ -94,7 +96,7 @@ export default function NoticeListPage() {
         createdAt: notice.createdAt,
         isImportant: notice.noticeImportance === 1,
         type: mapBackendTypeToFrontendList(notice.noticeType)!, // Non-null assertion if type is guaranteed
-        status: mapBackendStatusToFrontendList(notice.noticeStatus)!, // Non-null assertion
+        status: mapBackendStatusToFrontendList(notice.noticeStatus)!, 
         imageUrls: notice.noticeImages?.map((img: NoticeImageDto) => img.imageUrl),
         startDate: notice.startDate,
         endDate: notice.endDate,
@@ -199,7 +201,7 @@ export default function NoticeListPage() {
     { 
       key: 'createdAt', 
       header: '등록일', 
-      accessor: (item) => formatDate(item.createdAt),
+      cellRenderer: (item) => formatDate(item.createdAt), // accessor 대신 cellRenderer 사용
       headerClassName: 'w-[15%]', // 제목 컬럼 너비 감소에 따라 등록일 컬럼 너비 소폭 증가
       cellClassName: 'text-gray-700'
     },

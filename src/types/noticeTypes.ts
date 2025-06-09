@@ -7,7 +7,7 @@
 export const NoticeStatus = {
   ONGOING: '진행중',
   CLOSED: '종료',
-  SCHEDULED: '예정',
+  SCHEDULED: '진행예정',
 } as const; // 'as const'를 사용하여 각 프로퍼티를 리터럴 타입으로 만듭니다.
 export type NoticeStatus = typeof NoticeStatus[keyof typeof NoticeStatus];
 
