@@ -47,8 +47,7 @@ export const adminSignup = async (data: AdminSignupRequest) => {
  * @returns Promise<void>
  */
 export const logout = async (): Promise<void> => {
-  // 예시: 서버에 로그아웃 요청을 보내는 경우
-  // await axiosInstance.post("/auth/logout");
+  await axiosInstance.post("/auth/logout");
   // 클라이언트 측에서 토큰 제거 및 상태 변경
   localStorage.removeItem("accessToken");
   // useAuthStore.getState().logout(); // Zustand 스토어의 logout 액션 호출

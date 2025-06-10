@@ -1,16 +1,31 @@
-export const EventIdValues = {
-  HEART_MESSAGE: 'HEART_MESSAGE',
-  CUPIDS_ARROW: 'CUPIDS_ARROW',
-} as const;
-export type EventId = typeof EventIdValues[keyof typeof EventIdValues];
+/**
+ * 이벤트 상태 (백엔드와 동일)
+ * - EVENT_OPEN: 활성화
+ * - EVENT_CLOSE: 비활성화
+ */
+export type EventStatus = "EVENT_OPEN" | "EVENT_CLOSE";
 
-export interface EventItem {
-  id: EventId;
-  name: string; // 이벤트 제목 (예: "하트 메시지")
-  description: string; // 이벤트 설명
-  activationTimeHours: number; // 채팅방 참여 후 활성화까지 걸리는 시간 (시간 단위)
-  durationHours?: number; // 이벤트 지속 시간 (시간 단위, 예: 큐피트 화살)
-  isModificationPaid?: boolean; // 수정 유료 여부 (예: 큐피트 화살)
-  paidModificationDetails?: string; // 유료 수정 관련 설명 (예: "다이스 10개 필요")
-  isActive: boolean; // 이벤트 전체 활성화 여부
+export interface EventResponseDto {
+  eventId: number;
+  eventName: string;
+  eventStatus: EventStatus;
+  themeId: number;
 }
+export interface EventPostDto {
+  eventName: string;
+  themeId: number;
+}
+
+export interface EventPatchDto {
+  eventId?: number; // 경로 변수로도 사용되지만, DTO에 포함될 수 있음
+  eventName?: string;
+  eventStatus?: EventStatus;
+  themeId?: number;
+}
+
+// UI에서 사용할 이벤트 아이템 타입 (EventResponseDto를 기반으로 확장 가능)
+export type EventItem = EventResponseDto & {
+  // UI에 필요한 추가적인 필드가 있다면 여기에 정의할 수 있습니다.
+  // 예를 들어, themeName을 별도로 관리하고 싶다면 추가할 수 있습니다.
+  // themeName?: string; 
+};

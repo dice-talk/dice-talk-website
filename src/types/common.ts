@@ -5,6 +5,10 @@ export interface PageInfo {
   totalPages: number;
 }
 
+export interface SingleResponse<T> {
+  data: T[];
+}
+
 export interface MultiResponse<T> {
   data: T[];
   pageInfo: PageInfo;

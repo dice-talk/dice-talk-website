@@ -2,57 +2,68 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
-import { type EventItem, EventIdValues } from '../../types/eventTypes';
+// import { Textarea } from '../ui/Textarea'; // Event DTO에 description이 없으므로 주석 처리 또는 제거
+import { type EventItem, type EventPatchDto, type EventStatus } from '../../types/eventTypes'; // EventIdValues 제거, EventPatchDto, EventStatus 추가
 
 interface EventEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  eventItem: EventItem | null;
-  onSave: (updatedEvent: EventItem) => void;
+  eventItem: EventItem | null; // 수정 시 기존 이벤트 정보, 생성 시 null
+  onSave: (updatedFields: EventPatchDto, eventId?: number) => void; // API에 전달할 필드와 ID
 }
 
 export const EventEditModal: React.FC<EventEditModalProps> = ({ isOpen, onClose, eventItem, onSave }) => {
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [activationTimeHours, setActivationTimeHours] = useState(0);
-  const [durationHours, setDurationHours] = useState<number | undefined>(undefined);
-  const [isModificationPaid, setIsModificationPaid] = useState<boolean | undefined>(false);
-  const [paidModificationDetails, setPaidModificationDetails] = useState<string | undefined>('');
-  const [isActive, setIsActive] = useState(true);
+  const [themeId, setThemeId] = useState<number | ''>(''); // 테마 ID는 숫자 또는 빈 문자열
+  const [eventStatus, setEventStatus] = useState<EventStatus>('EVENT_OPEN');
+  // description, activationTimeHours 등은 백엔드 DTO에 없으므로 제거 또는 주석 처리
+  // const [description, setDescription] = useState('');
+  // const [activationTimeHours, setActivationTimeHours] = useState(0);
 
   useEffect(() => {
     if (eventItem) {
-      setName(eventItem.name);
-      setDescription(eventItem.description);
-      setActivationTimeHours(eventItem.activationTimeHours);
-      setDurationHours(eventItem.durationHours);
-      setIsModificationPaid(eventItem.isModificationPaid);
-      setPaidModificationDetails(eventItem.paidModificationDetails || '');
-      setIsActive(eventItem.isActive);
+      // 수정 모드: 기존 값으로 상태 초기화
+      setName(eventItem.eventName);
+      setThemeId(eventItem.themeId);
+      setEventStatus(eventItem.eventStatus);
+      // setDescription(eventItem.description || '');
+      // setActivationTimeHours(eventItem.activationTimeHours || 0);
+    } else {
+      // 생성 모드: 상태 초기화
+      setName('');
+      setThemeId('');
+      setEventStatus('EVENT_OPEN');
+      // setDescription('');
+      // setActivationTimeHours(0);
     }
-  }, [eventItem]);
+  }, [eventItem, isOpen]); // isOpen 추가하여 모달 열릴 때마다 상태 재설정
 
   const handleSave = () => {
-    if (eventItem) {
-      const updatedEvent: EventItem = {
-        ...eventItem,
-        name,
-        description,
-        activationTimeHours: Number(activationTimeHours) || 0,
-        durationHours: durationHours !== undefined ? Number(durationHours) : undefined,
-        isModificationPaid,
-        paidModificationDetails: isModificationPaid ? paidModificationDetails : undefined,
-        isActive,
-      };
-      onSave(updatedEvent);
+    const parsedThemeId = Number(themeId);
+    if (!name.trim()) {
+      alert("이벤트명은 필수입니다.");
+      return;
     }
+    if (isNaN(parsedThemeId) || parsedThemeId <= 0) {
+      alert("유효한 테마 ID를 입력해주세요.");
+      return;
+    }
+
+    const updatedFields: EventPatchDto = {
+      eventName: name,
+      themeId: parsedThemeId,
+      eventStatus: eventStatus,
+      // description, activationTimeHours 등은 DTO에 맞게 제거 또는 수정
+    };
+
+    onSave(updatedFields, eventItem?.eventId); // 수정 시에는 eventId 전달
   };
 
   if (!isOpen || !eventItem) return null;
+  const modalTitle = eventItem ? `'${eventItem.eventName}' 이벤트 수정` : '새 이벤트 등록';
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`'${eventItem.name}' 이벤트 수정`} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="md">
       <div className="space-y-4">
         <div>
           <label htmlFor="eventName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -60,77 +71,36 @@ export const EventEditModal: React.FC<EventEditModalProps> = ({ isOpen, onClose,
           </label>
           <Input id="eventName" type="text" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
+        
         <div>
-          <label htmlFor="eventDescription" className="block text-sm font-medium text-gray-700 mb-1">
-            설명
+          <label htmlFor="themeId" className="block text-sm font-medium text-gray-700 mb-1">
+            테마 ID
           </label>
-          <Textarea
-            id="eventDescription"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="이벤트 설명을 입력하세요."
-            rows={3}
-          />
+          <Input id="themeId" type="number" value={themeId} onChange={(e) => setThemeId(Number(e.target.value))} placeholder="연결할 테마의 ID를 입력하세요" />
         </div>
-        <div>
-          <label htmlFor="eventActivationTime" className="block text-sm font-medium text-gray-700 mb-1">
-            활성화 시간 (채팅방 참여 후, 시간 단위)
-          </label>
-          <Input id="eventActivationTime" type="number" value={activationTimeHours} onChange={(e) => setActivationTimeHours(parseInt(e.target.value, 10))} min="0" />
-        </div>
-
-        {eventItem.id === EventIdValues.CUPIDS_ARROW && (
-          <>
-            <div>
-              <label htmlFor="eventDuration" className="block text-sm font-medium text-gray-700 mb-1">
-                지속 시간 (시간 단위, 큐피트 화살 전용)
-              </label>
-              <Input id="eventDuration" type="number" value={durationHours || ''} onChange={(e) => setDurationHours(e.target.value ? parseInt(e.target.value, 10) : undefined)} min="0" placeholder="예: 8"/>
-            </div>
-            <div className="flex items-center space-x-3 mt-2">
-              <input
-                type="checkbox"
-                id="isModificationPaid"
-                checked={!!isModificationPaid}
-                onChange={(e) => setIsModificationPaid(e.target.checked)}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-              />
-              <label htmlFor="isModificationPaid" className="text-sm font-medium text-gray-700">
-                수정 유료 여부 (큐피트 화살 전용)
-              </label>
-            </div>
-            {isModificationPaid && (
-              <div>
-                <label htmlFor="paidModificationDetails" className="block text-sm font-medium text-gray-700 mb-1">
-                  유료 수정 상세 (예: 다이스 10개)
-                </label>
-                <Input id="paidModificationDetails" type="text" value={paidModificationDetails || ''} onChange={(e) => setPaidModificationDetails(e.target.value)} placeholder="예: 다이스 10개 필요"/>
-              </div>
-            )}
-          </>
-        )}
         
         <div className="mt-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             이벤트 활성 상태
           </label>
           <div className="flex space-x-2 mt-1">
-            <Button
-              onClick={() => setIsActive(true)}
-              variant={isActive ? 'default' : 'outline'}
-              size="sm"
-              className={isActive ? 'bg-green-600 hover:bg-green-700' : ''}
-            >
-              활성화
-            </Button>
-            <Button
-              onClick={() => setIsActive(false)}
-              variant={!isActive ? 'default' : 'outline'}
-              size="sm"
-              className={!isActive ? 'bg-red-600 hover:bg-red-700' : ''}
-            >
-              비활성화
-            </Button>
+            {(['EVENT_OPEN', 'EVENT_CLOSE'] as EventStatus[]).map(statusValue => (
+              <Button
+                key={statusValue}
+                onClick={() => setEventStatus(statusValue)}
+                variant={eventStatus === statusValue ? 'default' : 'outline'}
+                size="sm"
+                className={
+                  eventStatus === statusValue
+                    ? statusValue === 'EVENT_OPEN'
+                      ? 'bg-green-600 hover:bg-green-700'
+                      : 'bg-red-600 hover:bg-red-700'
+                    : ''
+                }
+              >
+                {statusValue === 'EVENT_OPEN' ? '활성' : '비활성'}
+              </Button>
+            ))}
           </div>
         </div>
 
