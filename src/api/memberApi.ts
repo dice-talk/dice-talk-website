@@ -101,9 +101,11 @@ export const getBannedMembers = async (params: BannedMemberListParams) => {
   return response;
 };
 
-export const getBannedMemberDetail = async (memberId: number) => {
-  const response = await axiosInstance.get<BannedMemberDetailResponse>(
-    `/admin/banned-members/${memberId}`
-  );
-  return response;
+export const getBannedMemberDetail = async (
+  memberId: number
+): Promise<BannedMemberDetailResponse> => {
+  const response = await axiosInstance.get<{
+    data: BannedMemberDetailResponse;
+  }>(`/admin/banned-members/${memberId}`);
+  return response.data.data;
 };

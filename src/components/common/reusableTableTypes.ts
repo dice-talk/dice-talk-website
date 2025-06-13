@@ -10,7 +10,7 @@ export interface ColumnDefinition<T extends TableItem> {
   key: string; // 데이터 객체의 키 또는 고유 식별자
   header: string; // 테이블 헤더에 표시될 텍스트
   cellRenderer?: (item: T, index: number) => React.ReactNode; // 셀 내용을 커스텀 렌더링하는 함수
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   accessor?: keyof T | ((item: T) => any); // 셀 데이터에 접근하는 방법
   headerClassName?: string; // 헤더 th에 적용될 추가 클래스
   cellClassName?: string; // 각 셀 td에 적용될 추가 클래스
@@ -29,6 +29,7 @@ export interface ReusableTableProps<T extends TableItem> {
   onSortChange: (value: string) => void;
   sortOptions: { value: string; label: string }[];
   emptyStateMessage?: string;
-   onRowClick?: (item: T) => void; // 행 클릭 핸들러 타입 추가
+  onRowClick?: (item: T) => void;
+  isLoading?: boolean;
   // 필요에 따라 추가적인 props (예: 페이지네이션 관련)를 정의할 수 있습니다.
 }
