@@ -2,8 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/auth';
-// import { useAuthStore, useUserStore } from '../../stores/useUserStore'; // useUserStore 임포트 추가
-import { useAuthStore } from '../../stores/useUserStore'; // useUserStore 임포트 추가
+import { useAuthStore, useUserStore } from '../../stores/useUserStore'; // useUserStore 임포트 추가
 import Button from '../../components/ui/Button'; // Button 컴포넌트 임포트
 import { Input } from '../../components/ui/Input'; // Input 컴포넌트 임포트
 import SignupForm from '../../components/auth/SignupForm'; // SignupForm 컴포넌트 임포트 (새로 생성될 파일)
@@ -13,24 +12,21 @@ const Login = () => {
   const [loginId, setLoginId] = useState(''); // 아이디 또는 이메일
   const [loginPassword, setLoginPassword] = useState(''); // 비밀번호
   const authLoginAction = useAuthStore((state) => state.login); // useAuthStore의 login (isLoggedIn 설정용)
-  // const userSetUserAction = useUserStore((state) => state.setUser); // useUserStore의 setUser (사용자 정보 및 토큰 저장용)
+  const userSetUserAction = useUserStore((state) => state.setUser); // useUserStore의 setUser (사용자 정보 및 토큰 저장용)
   const navigate = useNavigate(); //페이지 이동 
 
   const handleLogin = async () => {
     try {
       // login API 함수가 서버 응답을 반환한다고 가정합니다.
       // 서버 응답에는 accessToken 또는 Authorization 헤더에 토큰이 포함되어야 합니다.
-      await login({ username: loginId, password: loginPassword });
+      const token = await login({ username: loginId, password: loginPassword });
 
       // 서버 응답 구조에 따라 토큰을 추출합니다.
       // 예시1: 응답 바디에 { accessToken: "..." } 형태로 토큰이 오는 경우
       // const tokenFromBody = response.data?.accessToken;
-      // 예시2: 응답 헤더에 'Authorization: Bearer ...' 형태로 토큰이 오는 경우
-      // const tokenFromHeader = response.headers?.authorization?.replace('Bearer ', '') || response.headers?.Authorization?.replace('Bearer ', '');
-      // const token = tokenFromBody || tokenFromHeader;
-      // const token = tokenFromHeader;
-      const isToken = localStorage.getItem("accessToken")?.length !== 0;
-      if (isToken) {
+      if (token) {
+        localStorage.setItem("accessToken", token); // localStorage에도 저장 (선택 사항, axiosInstance 인터셉터가 이미 할 수도 있음)
+        userSetUserAction(loginId, token); // Zustand 스토어에 사용자 정보와 토큰 저장
         authLoginAction(); // useAuthStore의 login 액션을 호출하여 isLoggedIn 상태를 true로 변경
         alert('로그인 성공!');
         navigate('/home');
@@ -51,13 +47,18 @@ const Login = () => {
         <div className="flex border-b border-gray-200 mb-6"> {/* 하단 경계선 추가 */}
           <button
             className={`flex-1 py-3 text-center font-semibold transition-colors ${activeTab === 'login' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveTab('login')}
+            onClick={() => {
+              setActiveTab('login');
+              // navigate('/login'); // 현재 페이지이므로 명시적 이동 불필요
+            }}
           >
             로그인
           </button>
           <button
             className={`flex-1 py-3 text-center font-semibold transition-colors ${activeTab === 'signup' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveTab('signup')}
+            onClick={() => {
+              setActiveTab('signup'); // 탭 상태만 변경
+            }}
           >
             회원가입
           </button>
@@ -77,11 +78,6 @@ const Login = () => {
             </div>
             <Button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white">로그인</Button>
 
-            {/* 추가 링크/버튼 */}
-            <div className="flex justify-center gap-4 text-sm mt-4"> {/* 중앙 정렬 및 간격 조정 */}
-              <button onClick={() => console.log('ID 찾기')} className="text-blue-600 hover:underline">ID 찾기</button> {/* ID 찾기 추가 */}
-              <button onClick={() => console.log('비밀번호 찾기')} className="text-blue-600 hover:underline">비밀번호 찾기</button>
-            </div>
           </div>
         ) : (
           <div className="space-y-6"> {/* 폼 요소 간 간격 */}

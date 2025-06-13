@@ -10,7 +10,7 @@ import { menuItems } from './menuItems';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar() {
-  const { token, reset } = useUserStore();
+  const { reset } = useUserStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   // 애니메이션 적용 여부를 제어하는 상태
@@ -48,7 +48,7 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await logout(token);
+      await logout();
     } catch (e) {
       console.warn('서버 로그아웃 실패:', e);
     } finally {
