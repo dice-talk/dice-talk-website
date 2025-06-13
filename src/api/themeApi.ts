@@ -1,6 +1,6 @@
 // src/api/themeApi.ts
 import { axiosInstance } from "./axiosInstance"; // axiosInstance 경로 확인
-import type { ThemePatchDto, ThemeResponseDto, ThemeStatus } from '../types/themeTypes';
+import type { ThemePatchDto, ThemeResponseDto, ThemeStatus } from '../types/chatroom/themeTypes';
 import type { MultiResponse } from "../types/common";
 
 

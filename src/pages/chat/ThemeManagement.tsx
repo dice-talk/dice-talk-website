@@ -5,7 +5,7 @@ import { ReusableTable } from '../../components/common/ReusableTable';
 import Button from '../../components/ui/Button';
 import { ThemeEditModal } from '../../components/chat/ThemeEditModal';
 // Import types from themeTypes.ts
-import type { ThemeResponseDto, ThemePatchDto, ThemeStatus } from '../../types/themeTypes';
+import type { ThemeResponseDto, ThemePatchDto, ThemeStatus } from '../../types/chatroom/themeTypes';
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
 import { getThemesForAdmin, updateTheme } from '../../api/themeApi';
 import type { MultiResponse, PageInfo } from '../../types/common';

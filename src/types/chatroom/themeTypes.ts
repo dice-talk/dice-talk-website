@@ -1,5 +1,3 @@
-// src/types/themeTypes.ts
-
 /**
  * 테마 상태 (백엔드와 동일)
  * - THEME_PLANNED: 진행 예정

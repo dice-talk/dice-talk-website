@@ -3,7 +3,7 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input } from '../ui/Input';
 // import { Textarea } from '../ui/Textarea'; // Event DTO에 description이 없으므로 주석 처리 또는 제거
-import { type EventItem, type EventPatchDto, type EventStatus } from '../../types/eventTypes'; // EventIdValues 제거, EventPatchDto, EventStatus 추가
+import { type EventItem, type EventPatchDto, type EventStatus } from '../../types/chatroom/eventTypes'; // EventIdValues 제거, EventPatchDto, EventStatus 추가
 
 interface EventEditModalProps {
   isOpen: boolean;

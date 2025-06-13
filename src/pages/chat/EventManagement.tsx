@@ -5,9 +5,9 @@ import Header from '../../components/Header';
 import { ReusableTable } from '../../components/common/ReusableTable';
 import Button from '../../components/ui/Button';
 import { EventEditModal } from '../../components/chat/EventEditModal';
-import { type EventItem, type EventResponseDto, type EventPatchDto, type EventStatus } from '../../types/eventTypes'; // EventIdValues, EventId 제거, EventResponseDto, EventPatchDto, EventStatus 추가
+import { type EventItem, type EventResponseDto, type EventPatchDto, type EventStatus } from '../../types/chatroom/eventTypes'; // EventIdValues, EventId 제거, EventResponseDto, EventPatchDto, EventStatus 추가
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-import { getEvents, updateEvent, createEvent, deleteEvent } from '../../api/eventApi'; // API 함수 임포트
+import { getEvents, updateEvent, createEvent } from '../../api/eventApi'; // API 함수 임포트
 import type { MultiResponse, PageInfo } from '../../types/common'; // PageInfo 임포트
 import { Pagination } from '../../components/common/Pagination'; // Pagination 임포트
 

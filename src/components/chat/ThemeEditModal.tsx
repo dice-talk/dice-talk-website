@@ -4,7 +4,7 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input } from '../ui/Input'; // Input 컴포넌트 사용
 import { Textarea } from '../ui/Textarea'; // Textarea 컴포넌트 추가 가정 (없다면 Input으로 대체)
-import type { ThemeItem, ThemeStatus } from '../../types/themeTypes'; // ThemeStatus 추가
+import type { ThemeItem, ThemeStatus } from '../../types/chatroom/themeTypes'; // ThemeStatus 추가
 
 interface ThemeEditModalProps {
   isOpen: boolean;
