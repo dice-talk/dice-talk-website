@@ -21,6 +21,14 @@ export const RoomStatus = {
 
 export type RoomStatus = typeof RoomStatus[keyof typeof RoomStatus];
 
+export interface ChatRoomParticipant {
+  userId: number;
+  nickname: string;
+  profileImageUrl?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER'; // 예시 필드
+  // ... 기타 필요한 참가자 정보 필드 ...
+}
+
 // ChatRoomDto.SingleResponse
 export interface ChatRoomSingleResponseDto {
   chatRoomId: number; // 채팅방 ID

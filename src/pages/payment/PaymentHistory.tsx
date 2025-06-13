@@ -6,7 +6,9 @@ import type { ColumnDefinition, TableItem } from '../../components/common/reusab
 import type { PaymentHistoryItem, PaymentStatus, PaymentMethod } from '../../types/paymentTypes';
 import { PaymentHistoryFilterSection } from '../../components/payment/PaymentHIstoryFilterSection';
 import { formatDate } from '../../lib/ReportUtils'; // formatDate 유틸리티 경로 확인
+import { paymentSortOptions } from '../../lib/PaymentUtils'; // paymentSortOptions 임포트
 import { Pagination } from '../../components/common/Pagination';
+import StatusBadge from '../../components/ui/StatusBadge'; // StatusBadge 임포트
 
 interface PaymentHistoryTableItem extends PaymentHistoryItem, TableItem {
   id: string; // ReusableTable 호환용, paymentId 사용
@@ -24,24 +26,6 @@ const mockPayments: PaymentHistoryItem[] = [
     paymentId: `pay_mock_${i + 6}`, orderId: `order_mock_${i + 6}`, userId: 200 + i, userEmail: `mockuser${i+6}@example.com`, productId: (i % 3) + 1, productName: `다이스 ${( (i % 3) + 1) * 100}개`, quantity: ((i % 3) + 1) * 100, amount: ((i % 3) + 1) * 10000 - (i%2 === 0 ? 0 : 1000), paymentMethod: (['신용카드', '카카오페이', '네이버페이'] as PaymentMethod[])[i % 3], paymentStatus: (['결제 완료', '결제 실패', '환불 완료', '취소됨', '결제 대기중'] as PaymentStatus[])[i % 5], transactionDate: new Date(Date.now() - i * 1000 * 60 * 60 * 24).toISOString().replace('T', ' ').substring(0, 19)
   }))
 ];
-
-const paymentSortOptions = [
-  { value: 'transactionDate_desc', label: '결제일시 (최신순)' },
-  { value: 'transactionDate_asc', label: '결제일시 (오래된순)' },
-  { value: 'amount_desc', label: '결제금액 (높은순)' },
-  { value: 'amount_asc', label: '결제금액 (낮은순)' },
-];
-
-const getStatusBadgeStyle = (status: PaymentStatus): string => {
-  switch (status) {
-    case '결제 완료': return 'bg-green-100 text-green-700';
-    case '결제 실패': return 'bg-red-100 text-red-700';
-    case '환불 완료': return 'bg-blue-100 text-blue-700';
-    case '취소됨': return 'bg-yellow-100 text-yellow-700';
-    case '결제 대기중': return 'bg-gray-100 text-gray-700';
-    default: return 'bg-gray-100 text-gray-700';
-  }
-};
 
 export default function PaymentHistoryPage() {
   const [payments] = useState<PaymentHistoryItem[]>(mockPayments);
@@ -124,7 +108,7 @@ export default function PaymentHistoryPage() {
     { key: 'paymentMethod', header: '결제수단', accessor: 'paymentMethod', headerClassName: 'w-[10%]' },
     {
       key: 'paymentStatus', header: '결제상태', headerClassName: 'w-[10%]',
-      cellRenderer: (item) => <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusBadgeStyle(item.paymentStatus)}`}>{item.paymentStatus}</span>
+      cellRenderer: (item) => <StatusBadge status={item.paymentStatus} type="payment" />
     },
     { key: 'transactionDate', header: '결제일시', accessor: (item) => formatDate(item.transactionDate.split(' ')[0]) + ' ' + item.transactionDate.split(' ')[1] , headerClassName: 'w-[15%]' },
     // { key: 'pgTransactionId', header: 'PG 거래 ID', accessor: 'pgTransactionId', headerClassName: 'w-[10%]' }, // 필요시 추가

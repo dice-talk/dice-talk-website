@@ -3,12 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
 import Button from "../../components/ui/Button";
-import type { ReportResponse } from "../../types/reportTypes";
-import type { ReportStatus } from "../../types/reportTypes";
+import type { ReportResponse, ReportStatus  } from "../../types/reportTypes";
 import {
   formatDateTime,
   getReportStatusLabel,
-  getReportStatusBadgeStyle,
+  getReportStatusBadgeStyleSwitch,
 } from "../../lib/ReportUtils";
 import { getReport, completeReport, rejectReport } from "../../api/reportApi";
 
@@ -121,11 +120,11 @@ export default function ReportDetailPage() {
               <div>
                 <h3 className="text-sm font-medium text-gray-500">신고 상태</h3>
                 <p
-                  className={`mt-1 text-lg font-semibold px-3 py-1.5 rounded-full inline-block ${getReportStatusBadgeStyle(
+                  className={`mt-1 text-lg font-semibold px-3 py-1.5 rounded-full inline-block ${getReportStatusBadgeStyleSwitch(
                     reportItem.reportStatus
                   )}`}
                 >
-                  {reportItem.reportStatus}
+                  {getReportStatusLabel(reportItem.reportStatus)}
                 </p>
               </div>
               <div>

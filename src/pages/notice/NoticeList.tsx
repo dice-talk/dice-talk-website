@@ -4,35 +4,23 @@ import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import { NoticeFilterSection } from '../../components/notice/NoticeFilterSection';
 import { ReusableTable } from '../../components/common/ReusableTable';
-import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
-import Button from '../../components/ui/Button'; // Button 컴포넌트 임포트
-import { formatDate, mapFrontendStatusToBackendForFilter } from '../../lib/NoticeUtils'; // mapFrontendStatusToBackendForFilter 추가
+import { Pagination } from '../../components/common/Pagination';
+import Button from '../../components/ui/Button';
+import StatusBadge from '../../components/ui/StatusBadge'; // StatusBadge 임포트
+import {
+  formatDate,
+  mapFrontendStatusToBackendForFilter,
+  mapFrontendStatusToBackend, // mapFrontendStatusToBackend 임포트 추가
+  mapBackendTypeToFrontendList, // 이전 단계에서 이동된 함수
+  mapBackendStatusToFrontendList // 이전 단계에서 이동된 함수
+} from '../../lib/NoticeUtils';
 import type { ColumnDefinition } from '../../components/common/reusableTableTypes';
 import { getNotices } from '../../api/noticeApi'
-import { type NoticeResponseDto, type NoticeImageDto, type NoticeTypeBack, type NoticeStatusBack, NoticeStatus, type NoticeItemView } from '../../types/noticeTypes'; 
+import { type NoticeResponseDto, type NoticeImageDto, type NoticeTypeBack,  NoticeStatus, type NoticeItemView } from '../../types/noticeTypes'; 
 import type { PageInfo } from '../../types/common';
 
 // 프론트엔드 표시용 NoticeItemView를 테이블 아이템으로 사용
 type NoticeTableItem = NoticeItemView;
-
-// 백엔드 NoticeType을 프론트엔드 NoticeTypeFrontend로 변환
-const mapBackendTypeToFrontendList = (backendType?: NoticeTypeBack): NoticeItemView['type'] | undefined => {
-  if (!backendType) return undefined;
-  return backendType === 'NOTICE' ? '공지사항' : '이벤트';
-};
-
-// 백엔드 NoticeStatus를 프론트엔드 NoticeStatusFrontend로 변환
-const mapBackendStatusToFrontendList = (backendStatus?: NoticeStatusBack): NoticeStatus | undefined => {
-  if (!backendStatus) return undefined;
-  switch (backendStatus) {
-    case 'SCHEDULED': return NoticeStatus.SCHEDULED;
-    case 'ONGOING':
-      return NoticeStatus.ONGOING;
-    case 'CLOSED': return NoticeStatus.CLOSED;
-    // DRAFT 등 다른 상태는 여기서 처리하거나 기본값 설정
-    default: return NoticeStatus.ONGOING; // 혹은 undefined
-  }
-};
 
 const noticeSortOptions = [
   { value: 'id_desc', label: '최신 등록순 (ID)' }, 
@@ -187,16 +175,7 @@ export default function NoticeListPage() {
       key: 'status',
       header: '상태',
       headerClassName: 'w-[15%]',
-      cellRenderer: (item) => (
-        <span className={
-          `px-2.5 py-1 text-xs font-semibold rounded-full
-          ${item.status === NoticeStatus.ONGOING ? 'bg-green-100 text-green-700' : ''}
-          ${item.status === NoticeStatus.SCHEDULED ? 'bg-blue-100 text-blue-700' : ''}
-          ${item.status === NoticeStatus.CLOSED ? 'bg-gray-100 text-gray-700' : ''}
-        `}>
-          {item.status}
-        </span>
-      ),
+      cellRenderer: (item: NoticeTableItem) => <StatusBadge status={mapFrontendStatusToBackend(item.status)} type="notice" />,
     },
     { 
       key: 'createdAt', 
