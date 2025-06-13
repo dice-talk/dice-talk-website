@@ -18,3 +18,4 @@ export interface MultiResponse<T> {
 // export interface SingleResponse<T> {
 //   data: T;
 // }
+
