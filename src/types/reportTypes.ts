@@ -1,18 +1,9 @@
 // import { PageInfo } from "../types/common";
 import type { ChatResponse } from "./chatTypes";
 
-export type ReportStatus =
-  | "REPORT_RECEIVED"
-  | "REPORT_REJECTED"
-  | "REPORT_COMPLETED"
-  | "REPORT_DELETED";
+export type ReportStatus = string;
 
-export type ReportReason =
-  | "SPAM"
-  | "HARASSMENT"
-  | "SCAM"
-  | "ABUSE"
-  | "PRIVACY_VIOLATION";
+export type ReportReason = string;
 
 export interface ReportPostDto {
   reportReason: ReportReason;
@@ -27,7 +18,7 @@ export interface ChatReportPost {
 
 export interface ReportResponse {
   reportId: number;
-  reportReason: ReportReason;
+  reportReason: string;
   reporterId: number;
   reporterEmail: string;
   reportedMemberId: number;

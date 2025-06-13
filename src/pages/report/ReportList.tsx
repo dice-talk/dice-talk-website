@@ -16,12 +16,7 @@ import type {
   ColumnDefinition,
   TableItem,
 } from "../../components/common/reusableTableTypes";
-import {
-  formatDate,
-  getReportStatusLabel,
-  getReportStatusBadgeStyle,
-  getReportReasonLabel,
-} from "../../lib/ReportUtils";
+import { formatDate } from "../../lib/ReportUtils";
 import { getReports } from "../../api/reportApi";
 
 interface ReportTableItem extends TableItem {
@@ -148,16 +143,7 @@ export default function ReportListPage() {
     {
       key: "reportReason",
       header: "신고 사유",
-      accessor: "reportReason",
-      cellRenderer: (item) => (
-        <span
-          className="truncate"
-          title={getReportReasonLabel(item.reportReason)}
-        >
-          {getReportReasonLabel(item.reportReason)}
-        </span>
-      ),
-      headerClassName: "w-[25%]",
+      cellRenderer: (item) => item.reportReason,
     },
     {
       key: "reporterInfo",
@@ -174,17 +160,7 @@ export default function ReportListPage() {
     {
       key: "reportStatus",
       header: "상태",
-      accessor: "reportStatus",
-      headerClassName: "w-[10%]",
-      cellRenderer: (item) => (
-        <span
-          className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getReportStatusBadgeStyle(
-            item.reportStatus
-          )}`}
-        >
-          {getReportStatusLabel(item.reportStatus)}
-        </span>
-      ),
+      cellRenderer: (item) => item.reportStatus,
     },
     {
       key: "createdAt",

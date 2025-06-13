@@ -125,7 +125,7 @@ export default function ReportDetailPage() {
                     reportItem.reportStatus
                   )}`}
                 >
-                  {getReportStatusLabel(reportItem.reportStatus)}
+                  {reportItem.reportStatus}
                 </p>
               </div>
               <div>

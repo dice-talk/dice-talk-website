@@ -96,7 +96,7 @@ export interface BannedMemberDetailResponse extends BannedMemberListResponse {
 
 export interface ReportResponse {
   reportId: number;
-  reason: string;
+  reportReason: string;
   createdAt: string;
 }
 
