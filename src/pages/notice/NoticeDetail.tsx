@@ -4,35 +4,27 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import Button from '../../components/ui/Button';
-import { NoticeStatus, formatDate } from '../../components/notice/noticeUtils'
-import axiosInstance from '../../api/axiosInstance'; // axiosInstance 임포트
+import { formatDate } from '../../components/notice/noticeUtils'
 import { isAxiosError } from 'axios'; // isAxiosError 임포트
+import { getNoticeDetail, deleteNotice } from '../../api/noticeApi'; // updateNotice -> getNoticeDetail
+import {
+  type NoticeResponseDto as NoticeResponseDto, // Alias for consistency if needed, or use NoticeResponseDto directly
+  type NoticeImageDto,
+  type NoticeTypeBack,
+  type NoticeStatusBack,
+  NoticeStatus,
+  type NoticeItemView // Import NoticeItemView
+} from '../../types/noticeTypes';
 // NoticeList.tsx와 동일한 NoticeItem 타입 및 mockNotices 데이터를 사용한다고 가정합니다.
 // 실제 애플리케이션에서는 이들을 공유 모듈에서 가져오는 것이 좋습니다.
 
-interface NoticeItem {
-  id: number;
-  type: '공지사항' | '이벤트';
-  title: string;
-  content: string; // NoticeForm 호환을 위해 content를 string으로 변경
-  createdAt: string;
-  isImportant: boolean;
-  status: NoticeStatus;
-  imageUrls?: string[];
-  startDate?: string;
-  endDate?: string;
-}
-
-// mockNotices 배열은 여기서 제거됩니다.
-// NoticeNewPage.tsx에서 수정 모드 시 초기 데이터 로딩을 위해 API 호출이 필요합니다.
-
 // 백엔드 응답 DTO의 noticeType을 프론트엔드 type으로 변환하는 함수
-const mapBackendTypeToFrontend = (backendType: 'NOTICE' | 'EVENT'): '공지사항' | '이벤트' => {
+const mapBackendTypeToFrontend = (backendType: NoticeTypeBack): NoticeItemView['type'] => {
   return backendType === 'NOTICE' ? '공지사항' : '이벤트';
 };
 
 // 백엔드 응답 DTO의 noticeStatus를 프론트엔드 NoticeStatus enum으로 변환하는 함수
-const mapBackendStatusToFrontend = (backendStatus: string): NoticeStatus => {
+const mapBackendStatusToFrontend = (backendStatus: NoticeStatusBack): NoticeStatus => {
   switch (backendStatus) {
     case 'SCHEDULED': // 백엔드에서 "SCHEDULED"로 온다고 가정
       return NoticeStatus.SCHEDULED;
@@ -47,29 +39,12 @@ const mapBackendStatusToFrontend = (backendStatus: string): NoticeStatus => {
 };
 
 // 백엔드 API 응답 타입 (제공된 DTO 기반)
-interface BackendNoticeImageDto {
-  // 백엔드 NoticeImageDto.Response 구조에 맞게 필드 정의 (예: imageUrl)
-  // 예시: id: number; imageUrl: string; isThumbnail: boolean;
-  imageUrl: string; // 실제 이미지 URL 필드명으로 변경 필요
-}
-interface BackendNoticeResponseDto {
-  noticeId: number;
-  title: string;
-  content: string;
-  noticeImages: BackendNoticeImageDto[];
-  startDate?: string; // LocalDateTime string
-  endDate?: string;   // LocalDateTime string
-  noticeType: 'NOTICE' | 'EVENT';
-  noticeStatus: string; // e.g., "SCHEDULED", "ONGOING", "CLOSED"
-  noticeImportance: number; // 0 or 1
-  createdAt: string;    // LocalDateTime string
-  modifiedAt: string;   // LocalDateTime string
-}
+// BackendNoticeResponseDto, BackendNoticeImageDto는 noticeTypes.ts에서 import
 
 export default function NoticeDetailPage() {
   const { noticeId: noticeIdParam } = useParams<{ noticeId: string }>(); // noticeId 파라미터 값을 직접 가져옵니다.
   const navigate = useNavigate();
-  const [noticeItem, setNoticeItem] = useState<NoticeItem | null>(null);
+  const [noticeItem, setNoticeItem] = useState<NoticeItemView | null>(null); // NoticeItem -> NoticeItemView
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // isEditing 상태와 isSubmitting 상태는 NoticeNewPage (수정 모드)에서 관리됩니다.
@@ -90,13 +65,12 @@ export default function NoticeDetailPage() {
 
       setIsLoading(true);
       setError(null);
-      const fetchNoticeDetail = async () => {
+      const loadNoticeDetail = async () => {
         try {
-          const response = await axiosInstance.get<BackendNoticeResponseDto>(`/notices/${itemId}`);
-          const backendData = response.data;
+          const backendData: NoticeResponseDto = await getNoticeDetail(itemId); // getNoticeDetail 사용 및 타입 명시
 
           // 백엔드 데이터를 프론트엔드 NoticeItem으로 변환
-          const transformedItem: NoticeItem = {
+          const transformedItem: NoticeItemView = { // NoticeItem -> NoticeItemView
             id: backendData.noticeId,
             title: backendData.title,
             content: backendData.content || '',
@@ -104,7 +78,7 @@ export default function NoticeDetailPage() {
             status: mapBackendStatusToFrontend(backendData.noticeStatus),
             isImportant: backendData.noticeImportance === 1,
             createdAt: backendData.createdAt,
-            imageUrls: backendData.noticeImages?.map(img => img.imageUrl) || [], // 실제 이미지 URL 필드명 확인 필요
+            imageUrls: backendData.noticeImages?.map((img: NoticeImageDto) => img.imageUrl) || [], // img 타입 지정
             startDate: backendData.startDate,
             endDate: backendData.endDate,
           };
@@ -122,7 +96,7 @@ export default function NoticeDetailPage() {
         }
       };
 
-      fetchNoticeDetail();
+      loadNoticeDetail();
     } else {
       // noticeIdParam이 undefined인 경우 (예: 라우트 설정 오류 또는 ID 없이 직접 접근)
       console.warn("Notice ID parameter is missing from URL.");
@@ -141,16 +115,12 @@ export default function NoticeDetailPage() {
     }
   };
 
-  const handleDeleteButton = () => {
+  const handleDeleteButton = async () => { // async 키워드 추가
     if (noticeItem && window.confirm(`'${noticeItem.title}' 공지/이벤트를 정말 삭제하시겠습니까?`)) {
-      try {
-        // TODO: 실제 API 호출로 데이터 삭제 (예: await axiosInstance.delete(`/notices/${noticeItem.id}`);)
-        // 아래는 mockNotices를 사용하던 코드의 대체 예시입니다. API 연동 후 이 부분을 실제 API 호출로 변경해야 합니다.
-        console.log(`Attempting to delete notice ID: ${noticeItem.id} (API call not implemented)`);
-        // --- API 호출 성공 시 ---
-        alert('공지/이벤트가 삭제되었습니다. (실제 API 연동 필요)');
-        navigate('/notices'); // 목록으로 이동
-        // --------------------
+      try { // API 함수 사용
+        await deleteNotice(noticeItem.id);
+        alert('공지/이벤트가 삭제되었습니다.');
+        navigate('/notices');
       } catch (deleteError) {
         console.error("Error deleting notice:", deleteError);
         alert('공지/이벤트 삭제에 실패했습니다.');

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // useCallback 추가
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
@@ -6,49 +6,44 @@ import { NoticeFilterSection } from '../../components/notice/NoticeFilterSection
 import { ReusableTable } from '../../components/common/ReusableTable';
 import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
 import Button from '../../components/ui/Button'; // Button 컴포넌트 임포트
-import { NoticeStatus, formatDate } from '../../components/notice/noticeUtils'; // formatDate 추가 및 경로 수정 확인
-import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
+import { formatDate, mapFrontendStatusToBackendForFilter } from '../../lib/NoticeUtils'; // mapFrontendStatusToBackendForFilter 추가
+import type { ColumnDefinition } from '../../components/common/reusableTableTypes';
+import { getNotices } from '../../api/noticeApi'
+import { type NoticeResponseDto, type NoticeImageDto, type NoticeTypeBack, type NoticeStatusBack, NoticeStatus, type NoticeItemView } from '../../types/noticeTypes'; 
+import type { PageInfo } from '../../types/common';
 
-interface NoticeItem extends TableItem { // TableItem을 직접 확장
-  id: number;
-  title: string;
-  createdAt: string;
-  // views: number; // 조회수 필드 제거 또는 주석 처리 (테이블에서만 제거)
-  isImportant: boolean;
-  type: '공지사항' | '이벤트';
-  status: NoticeStatus; // 상태 필드 추가
-}
- 
-// NoticeItem이 이미 TableItem을 확장하므로, NoticeTableItem은 NoticeItem의 별칭으로 사용
-type NoticeTableItem = NoticeItem; 
+// 프론트엔드 표시용 NoticeItemView를 테이블 아이템으로 사용
+type NoticeTableItem = NoticeItemView;
 
-const mockNotices: NoticeItem[] = [
-  { id: 1, type: '공지사항', title: '[중요] 시스템 점검 안내 (06/15 02:00 ~ 04:00)', createdAt: '2024-06-10T10:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED },
-  { id: 2, type: '이벤트', title: '여름맞이 주사위 증정 이벤트!', createdAt: '2024-06-08T14:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 3, type: '공지사항', title: '개인정보처리방침 개정 안내', createdAt: '2024-06-05T09:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 4, type: '공지사항', title: '서비스 이용약관 변경 사전 안내', createdAt: '2024-06-01T11:00:00Z', isImportant: false, status: NoticeStatus.CLOSED },
-  { id: 5, type: '이벤트', title: '친구 초대하고 보상 받자! 시즌2', createdAt: '2024-05-28T16:00:00Z', isImportant: true, status: NoticeStatus.CLOSED },
-  { id: 6, type: '공지사항', title: '다이스톡 v1.2 업데이트 안내', createdAt: '2024-05-25T13:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 7, type: '이벤트', title: '새로운 기능 사전 공개 이벤트', createdAt: '2024-07-01T00:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED },
-  { id: 8, type: '공지사항', title: '서버 안정화 작업 완료 안내', createdAt: '2024-06-15T05:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  // 페이지네이션 테스트를 위한 추가 데이터
-  { id: 9, type: '이벤트', title: '주말 특별 접속 보상 이벤트', createdAt: '2024-06-20T00:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 10, type: '공지사항', title: '고객센터 운영시간 변경 안내', createdAt: '2024-06-18T09:00:00Z', isImportant: false, status: NoticeStatus.ONGOING },
-  { id: 11, type: '이벤트', title: '신규 테마 출시 기념 할인', createdAt: '2024-06-22T10:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED },
-  { id: 12, type: '공지사항', title: '앱 보안 강화 업데이트 안내', createdAt: '2024-06-25T11:00:00Z', isImportant: true, status: NoticeStatus.SCHEDULED },
-  { id: 13, type: '이벤트', title: '여름 방학 맞이 출석체크 이벤트', createdAt: '2024-07-05T00:00:00Z', isImportant: false, status: NoticeStatus.SCHEDULED },
-  { id: 14, type: '공지사항', title: '서비스 점검 연장 안내', createdAt: '2024-06-15T03:30:00Z', isImportant: true, status: NoticeStatus.ONGOING },
-  { id: 15, type: '이벤트', title: '깜짝 퀴즈 이벤트! 정답 맞추고 선물받자', createdAt: '2024-06-19T15:00:00Z', isImportant: false, status: NoticeStatus.CLOSED },
-];
+// 백엔드 NoticeType을 프론트엔드 NoticeTypeFrontend로 변환
+const mapBackendTypeToFrontendList = (backendType?: NoticeTypeBack): NoticeItemView['type'] | undefined => {
+  if (!backendType) return undefined;
+  return backendType === 'NOTICE' ? '공지사항' : '이벤트';
+};
+
+// 백엔드 NoticeStatus를 프론트엔드 NoticeStatusFrontend로 변환
+const mapBackendStatusToFrontendList = (backendStatus?: NoticeStatusBack): NoticeStatus | undefined => {
+  if (!backendStatus) return undefined;
+  switch (backendStatus) {
+    case 'SCHEDULED': return NoticeStatus.SCHEDULED;
+    case 'ONGOING':
+      return NoticeStatus.ONGOING;
+    case 'CLOSED': return NoticeStatus.CLOSED;
+    // DRAFT 등 다른 상태는 여기서 처리하거나 기본값 설정
+    default: return NoticeStatus.ONGOING; // 혹은 undefined
+  }
+};
 
 const noticeSortOptions = [
-  { value: 'id_desc', label: '최신 등록순 (ID)' }, // noticeId 대신 id 사용
+  { value: 'id_desc', label: '최신 등록순 (ID)' }, 
   { value: 'id_asc', label: '오래된 등록순 (ID)' },
   { value: 'importance_desc', label: '중요도순' },
 ];
 
 export default function NoticeListPage() {
-  const notices: NoticeItem[] = mockNotices;
+  const [notices, setNotices] = useState<NoticeItemView[]>([]);
+  const [pageInfo, setPageInfo] = useState<PageInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   // UI 입력을 위한 필터 상태
   const [typeFilter, setTypeFilter] = useState('전체');
   const [importanceFilter, setImportanceFilter] = useState('전체'); // statusFilter -> importanceFilter
@@ -68,6 +63,59 @@ export default function NoticeListPage() {
   const itemsPerPage = 10; // 페이지당 보여줄 아이템 수
   const navigate = useNavigate();
 
+  const fetchNotices = useCallback(async (isReset: boolean = false) => {
+    setIsLoading(true);
+    try {
+      const params: Parameters<typeof getNotices>[0] = {
+        page: isReset ? 1 : currentPage,
+        size: itemsPerPage,
+        keyword: isReset ? undefined : appliedFilters.title.trim() || undefined,
+        sort: sortValue === 'id_desc' 
+          ? 'noticeId,desc' 
+          : sortValue === 'id_asc' 
+          ? 'noticeId,asc'
+          : sortValue === 'importance_desc'
+          ? 'noticeImportance,desc' // 'importance_desc'를 'noticeImportance,desc'로 변경
+          : sortValue.replace('_', ','), 
+        type: isReset || appliedFilters.type === '전체'
+          ? undefined
+          : (appliedFilters.type === '공지사항' ? 'NOTICE' : 'EVENT') as NoticeTypeBack,
+        status: mapFrontendStatusToBackendForFilter(appliedFilters.noticeStatus as NoticeStatus | '전체'), // status 매핑 함수 사용
+        // 중요도 필터링을 위한 파라미터 추가
+        importance: isReset || appliedFilters.importance === '전체' 
+          ? undefined 
+          : (appliedFilters.importance === '중요' ? 1 : 0),
+      };
+
+      console.log("Fetching notices with params:", params);
+      const response = await getNotices(params);
+      const transformedNotices = response.data.map((notice: NoticeResponseDto): NoticeItemView => ({
+        id: notice.noticeId,
+        title: notice.title,
+        content: notice.content,
+        createdAt: notice.createdAt,
+        isImportant: notice.noticeImportance === 1,
+        type: mapBackendTypeToFrontendList(notice.noticeType)!, // Non-null assertion if type is guaranteed
+        status: mapBackendStatusToFrontendList(notice.noticeStatus)!, 
+        imageUrls: notice.noticeImages?.map((img: NoticeImageDto) => img.imageUrl),
+        startDate: notice.startDate,
+        endDate: notice.endDate,
+      }));
+      setNotices(transformedNotices);
+      setPageInfo(response.pageInfo);
+    } catch (error) {
+      console.error("공지 목록을 불러오는데 실패했습니다:", error);
+      setNotices([]); // 오류 발생 시 목록 비우기
+      setPageInfo(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, itemsPerPage, appliedFilters, sortValue, setIsLoading, setNotices, setPageInfo]); // fetchNotices가 의존하는 값들을 배열에 추가
+
+  useEffect(() => {
+    fetchNotices();
+  }, [fetchNotices]); // 의존성 배열에 fetchNotices 추가
+
   const handleResetFilters = () => {
     // UI 필터 상태 초기화
     setTypeFilter('전체');
@@ -81,7 +129,7 @@ export default function NoticeListPage() {
       noticeStatus: '전체',
       title: '',
     });
-    setCurrentPage(1); // 초기화 시 첫 페이지로 이동
+    if (currentPage !== 1) setCurrentPage(1); else fetchNotices(true); // 이미 1페이지면 바로 fetch
   };
 
   const handleSearch = () => {
@@ -91,52 +139,16 @@ export default function NoticeListPage() {
       noticeStatus: currentNoticeStatusFilter,
       title: titleSearch,
     });
-    setCurrentPage(1); // 검색 시 첫 페이지로 이동
+    if (currentPage !== 1) setCurrentPage(1); // 검색 시 첫 페이지로 이동 (이미 1페이지면 useEffect가 처리)
   };
 
-  const filteredAndSortedNotices = useMemo(() => {
-    let filtered = [...notices];
+  // 서버에서 받아온 데이터를 바로 사용하므로, 클라이언트 사이드 필터링/정렬 로직 제거
+  // const filteredAndSortedNotices = useMemo(() => { ... });
+  // const paginatedNotices = useMemo(() => { ... });
 
-    if (appliedFilters.type !== '전체') {
-      filtered = filtered.filter(notice => notice.type === appliedFilters.type);
-    }
-    if (appliedFilters.importance !== '전체') {
-      filtered = filtered.filter(notice => appliedFilters.importance === '중요' ? notice.isImportant : !notice.isImportant);
-    }
-    if (appliedFilters.noticeStatus !== '전체') {
-      filtered = filtered.filter(notice => notice.status === appliedFilters.noticeStatus);
-    }
-    if (appliedFilters.title) {
-      filtered = filtered.filter(notice => notice.title.toLowerCase().includes(appliedFilters.title.toLowerCase()));
-    }
-
-    // id 기준으로 정렬
-    if (sortValue === 'id_desc') {
-      filtered.sort((a, b) => b.id - a.id);
-    } else if (sortValue === 'id_asc') {
-      filtered.sort((a, b) => a.id - b.id);
-    } else if (sortValue === 'importance_desc') {
-      filtered.sort((a, b) => {
-        // isImportant가 true인 항목을 우선 정렬 (true는 1, false는 0으로 간주하여 내림차순)
-        if (a.isImportant !== b.isImportant) {
-          return (b.isImportant ? 1 : 0) - (a.isImportant ? 1 : 0);
-        }
-        // isImportant가 같으면 id 내림차순 (최신순)으로 정렬
-        return b.id - a.id;
-      });
-    }
-
-    return filtered.map(notice => ({ ...notice, id: notice.id }));
-  }, [notices, appliedFilters, sortValue]);
-
-  // 페이지네이션을 위한 데이터 계산
-  const paginatedNotices = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredAndSortedNotices.slice(startIndex, endIndex);
-  }, [filteredAndSortedNotices, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(filteredAndSortedNotices.length / itemsPerPage);
+  const totalPages = pageInfo ? pageInfo.totalPages : 0;
+  // const currentItemsCount = notices.length; // 현재 페이지에 표시된 아이템 수 (API 응답 기반)
+  const totalItemsCount = pageInfo ? pageInfo.totalElements : 0; // 전체 아이템 수
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -144,13 +156,12 @@ export default function NoticeListPage() {
 
   const handleRowClick = (item: NoticeTableItem) => {
     // TODO: 공지사항 상세 페이지 경로로 변경 필요
-    navigate(`/notices/${item.id}`); 
+    navigate(`/notices/${item.id}`);
     console.log("Navigating to notice detail:", item.id);
   };
 
   const columns: ColumnDefinition<NoticeTableItem>[] = [
-    { key: 'no', header: 'No', cellRenderer: (_item, index) => (currentPage - 1) * itemsPerPage + index + 1, headerClassName: 'w-[5%]' },
-    { 
+    { key: 'no', header: 'No', cellRenderer: (_item, index) => (pageInfo ? (pageInfo.page - 1) * pageInfo.size + index + 1 : index + 1), headerClassName: 'w-[5%]' },    { 
       key: 'type', 
       header: '유형', 
       accessor: 'type', 
@@ -190,7 +201,7 @@ export default function NoticeListPage() {
     { 
       key: 'createdAt', 
       header: '등록일', 
-      accessor: (item) => formatDate(item.createdAt),
+      cellRenderer: (item) => formatDate(item.createdAt), // accessor 대신 cellRenderer 사용
       headerClassName: 'w-[15%]', // 제목 컬럼 너비 감소에 따라 등록일 컬럼 너비 소폭 증가
       cellClassName: 'text-gray-700'
     },
@@ -219,23 +230,31 @@ export default function NoticeListPage() {
             onResetFilters={handleResetFilters}
             onSearch={handleSearch} // 조회 핸들러 연결
           />
-          <ReusableTable
-            columns={columns}
-            data={paginatedNotices} // 페이지네이션된 데이터 사용
-            totalCount={filteredAndSortedNotices.length}
-            sortValue={sortValue}
-            onSortChange={setSortValue}
-            sortOptions={noticeSortOptions}
-            emptyStateMessage="등록된 공지사항이나 이벤트가 없습니다."
-            onRowClick={handleRowClick} // 상세 페이지 이동
-          />
-          {/* 페이지네이션 컴포넌트 추가 */}
-          {totalPages > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-10">
+              <p className="text-gray-500">목록을 불러오는 중입니다...</p>
+            </div>
+          ) : (
+            <>
+            <ReusableTable
+              columns={columns}
+              data={notices} // API에서 받아온 현재 페이지 데이터 사용
+              totalCount={totalItemsCount} // 전체 아이템 수
+              sortValue={sortValue}
+              onSortChange={setSortValue}
+              sortOptions={noticeSortOptions}
+              emptyStateMessage="등록된 공지사항이나 이벤트가 없습니다."
+              onRowClick={handleRowClick} // 상세 페이지 이동
             />
+            {/* 페이지네이션 컴포넌트 추가 */}
+            {totalPages > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+            </>
           )}
         </main>
       </div>

@@ -4,8 +4,8 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/dist/style.css'; // react-day-picker CSS import
-import { ImageUpload } from '../ui/ImageUpload';
-import { NoticeStatus } from './noticeUtils';
+import { ImageUpload } from '../ui/ImageUpload'; // NoticeStatus import 제거
+import { NoticeStatus } from '../../types/noticeTypes'; // NoticeStatusFrontend import
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/Select'; // 커스텀 Select 컴포넌트 임포트
 import Button from '../ui/Button'; // Button 컴포넌트 임포트
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/Popover'; // Popover 컴포넌트 임포트 (가정)
@@ -18,7 +18,7 @@ interface NoticeItemForForm {
   title: string;
   content?: string;
   isImportant: boolean;
-  status: NoticeStatus;
+  status: NoticeStatus; // NoticeStatusFrontend 사용
   imageUrls?: string[];
   startDate?: string;
   endDate?: string;
@@ -28,7 +28,7 @@ export interface NoticeFormData {
   title: string;
   content: string;
   isImportant: boolean;
-  status: NoticeStatus;
+  status: NoticeStatus; // NoticeStatusFrontend 사용
   type: '공지사항' | '이벤트';
   imageFiles: File[];
   removedImageUrls: string[];
@@ -69,7 +69,7 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isImportant, setIsImportant] = useState(false);
-  const [status, setStatus] = useState<NoticeStatus>(NoticeStatus.ONGOING);
+  const [status, setStatus] = useState<NoticeStatus>(NoticeStatus.ONGOING); // NoticeStatusFrontend 사용
   const [type, setType] = useState<'공지사항' | '이벤트'>('공지사항');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [removedImageUrls, setRemovedImageUrls] = useState<string[]>([]);
@@ -81,7 +81,7 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
     setTitle(initialData.title || '');
     setContent(initialData.content || '');
     setIsImportant(initialData.isImportant || false);
-    setStatus(initialData.status || NoticeStatus.ONGOING);
+    setStatus(initialData.status || NoticeStatus.ONGOING); // NoticeStatusFrontend 사용
     setType(initialData.type || '공지사항');
     setStartDate(initialData.startDate || '');
     setEndDate(initialData.endDate || '');
@@ -172,7 +172,7 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
             <SelectValue placeholder="상태 선택" />
           </SelectTrigger>
           <SelectContent>
-            {Object.values(NoticeStatus).map(sVal => (<SelectItem key={sVal} value={sVal}>{sVal}</SelectItem>))}
+            {(Object.values(NoticeStatus) as NoticeStatus[]).map(sVal => (<SelectItem key={sVal} value={sVal}>{sVal}</SelectItem>))}
           </SelectContent>
         </Select>
       </div>

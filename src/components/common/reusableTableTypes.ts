@@ -16,6 +16,10 @@ export interface ColumnDefinition<T extends TableItem> {
   cellClassName?: string; // 각 셀 td에 적용될 추가 클래스
 }
 
+export interface TableItem { // TableItem 정의
+  id: number | string; 
+}
+
 // ReusableTable 컴포넌트의 props 인터페이스
 export interface ReusableTableProps<T extends TableItem> {
   data: T[];
