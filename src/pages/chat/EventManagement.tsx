@@ -5,29 +5,13 @@ import Header from '../../components/Header';
 import { ReusableTable } from '../../components/common/ReusableTable';
 import Button from '../../components/ui/Button';
 import { EventEditModal } from '../../components/chat/EventEditModal';
-import { type EventItem, type EventResponseDto, type EventPatchDto, type EventStatus } from '../../types/chatroom/eventTypes'; // EventIdValues, EventId 제거, EventResponseDto, EventPatchDto, EventStatus 추가
+import type { EventItem, EventResponseDto, EventPatchDto } from '../../types/chatroom/eventTypes'; // EventIdValues, EventId 제거, EventResponseDto, EventPatchDto, EventStatus 추가
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
 import { getEvents, updateEvent, createEvent } from '../../api/eventApi'; // API 함수 임포트
 import type { MultiResponse, PageInfo } from '../../types/common'; // PageInfo 임포트
 import { Pagination } from '../../components/common/Pagination'; // Pagination 임포트
+import StatusBadge from '../../components/ui/StatusBadge';
 
-// 백엔드 EventStatus를 프론트엔드 표시용 문자열로 변환 (필요시)
-const mapBackendStatusToFrontendLabel = (status: EventStatus): string => {
-  switch (status) {
-    case 'EVENT_OPEN': return '활성';
-    case 'EVENT_CLOSE': return '비활성';
-    default: return status;
-  }
-};
-
-// 백엔드 EventStatus에 따른 스타일 (ReusableTable에서 사용)
-const getEventStatusBadgeStyle = (status: EventStatus): string => {
-  switch (status) {
-    case 'EVENT_OPEN': return 'bg-green-100 text-green-700 border border-green-300';
-    case 'EVENT_CLOSE': return 'bg-gray-100 text-gray-700 border border-gray-300';
-    default: return 'bg-yellow-100 text-yellow-700 border border-yellow-300'; // 예: 알 수 없는 상태
-  }
-};
 
 // EventResponseDto를 EventItem (UI용)으로 변환하는 함수
 const transformEventResponseToItem = (dto: EventResponseDto): EventItem => {
@@ -211,13 +195,8 @@ export default function EventManagementPage() {
       accessor: 'eventStatus',
       headerClassName: 'w-[15%] text-center', // 너비 조정
       cellClassName: 'text-center',
-      cellRenderer: (item) => (
-        <span
-          className={`px-3 py-1 text-xs font-semibold rounded-full ${getEventStatusBadgeStyle(item.eventStatus)}`}
-        >
-          {mapBackendStatusToFrontendLabel(item.eventStatus)}
-        </span>
-      ),
+      cellRenderer: (item: EventTableItem) => <StatusBadge status={item.eventStatus} type="event" />,
+
     },
     {
       key: 'actions',

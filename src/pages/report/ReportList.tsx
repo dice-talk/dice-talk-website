@@ -1,5 +1,5 @@
 // src/pages/report/ReportListPage.tsx
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback} from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
@@ -16,8 +16,9 @@ import type {
   ColumnDefinition,
   TableItem,
 } from "../../components/common/reusableTableTypes";
-import { formatDate } from "../../lib/ReportUtils";
+import { formatDate, getReportReasonLabel } from "../../lib/ReportUtils";
 import { getReports } from "../../api/reportApi";
+import StatusBadge from "../../components/ui/StatusBadge";
 
 interface ReportTableItem extends TableItem {
   reportId: number;
@@ -54,7 +55,7 @@ export default function ReportListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getReports(currentPage, itemsPerPage);
@@ -65,11 +66,29 @@ export default function ReportListPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchReports();
-  }, [currentPage, itemsPerPage]);
+  }, [fetchReports]);
+
+
+  // const fetchReports = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await getReports(currentPage, itemsPerPage);
+  //     setReports(response.data.data);
+  //     setTotalCount(response.data.pageInfo.totalElements);
+  //   } catch (error) {
+  //     console.error("신고 목록을 불러오는데 실패했습니다:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchReports();
+  // }, [currentPage, itemsPerPage]);
 
   const handleResetFilters = () => {
     setStatusFilter("전체");
@@ -143,7 +162,7 @@ export default function ReportListPage() {
     {
       key: "reportReason",
       header: "신고 사유",
-      cellRenderer: (item) => item.reportReason,
+      cellRenderer: (item) => getReportReasonLabel(item.reportReason),
     },
     {
       key: "reporterInfo",
@@ -160,7 +179,7 @@ export default function ReportListPage() {
     {
       key: "reportStatus",
       header: "상태",
-      cellRenderer: (item) => item.reportStatus,
+      cellRenderer: (item) => <StatusBadge status={item.reportStatus} type="report" />
     },
     {
       key: "createdAt",

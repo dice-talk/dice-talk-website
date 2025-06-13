@@ -10,6 +10,8 @@ import type { ColumnDefinition, TableItem } from '../../components/common/reusab
 import { getThemesForAdmin, updateTheme } from '../../api/themeApi';
 import type { MultiResponse, PageInfo } from '../../types/common';
 import { Pagination } from '../../components/common/Pagination';
+import StatusBadge from '../../components/ui/StatusBadge';
+import { themeSortOptions } from '../../lib/ThemeUtile'; // themeUtils에서 임포트
 
 interface ThemeTableItem extends Omit<ThemeResponseDto, 'rules'>, TableItem { 
   id: number; 
@@ -98,16 +100,6 @@ export default function ThemeManagementPage() {
     }
   };
   
-  // 테마 정렬 옵션
-  const themeSortOptions = [
-    { value: 'id_desc', label: '최신 등록순' },
-    { value: 'id_asc', label: '오래된 등록순' },
-    { value: 'name_asc', label: '테마명 (오름차순)' },
-    { value: 'name_desc', label: '테마명 (내림차순)' },
-    { value: 'status_on_first', label: '상태순 (진행중 우선)' },
-    { value: 'status_close_first', label: '상태순 (종료 우선)' },
-  ];
-
   const tableData = useMemo((): ThemeTableItem[] => {
     // THEME_ON: 1 (진행중), THEME_PLANNED: 2 (예정), THEME_CLOSE: 3 (종료)
     const statusOrder: Record<ThemeStatus, number> = {
@@ -192,28 +184,7 @@ export default function ThemeManagementPage() {
       accessor: 'themeStatus',
       headerClassName: 'w-[12%]', // 너비 조정
       cellClassName: 'text-center',
-      cellRenderer: (item) => {
-        let statusText = '';
-        let statusClass = '';
-        switch (item.themeStatus) {
-          case 'THEME_ON':
-            statusText = '진행중';
-            statusClass = 'bg-green-100 text-green-700 border border-green-300';
-            break;
-          case 'THEME_PLANNED':
-            statusText = '예정';
-            statusClass = 'bg-blue-100 text-blue-700 border border-blue-300';
-            break;
-          case 'THEME_CLOSE':
-            statusText = '종료';
-            statusClass = 'bg-gray-100 text-gray-700 border border-gray-300';
-            break;
-          default:
-            statusText = item.themeStatus;
-            statusClass = 'bg-gray-100 text-gray-700 border border-gray-300';
-        }
-        return <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusClass}`}>{statusText}</span>;
-      },
+      cellRenderer: (item) => <StatusBadge status={item.themeStatus} type="theme" />,
     },
     {
       key: 'actions',

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
 import { MemberFilterSection } from "../../components/member/MemberFilterSection";
@@ -11,9 +11,10 @@ import { MemberDetailModal } from "../../components/member/MemberDetailModal";
 import { getMembers } from "../../api/memberApi";
 import type {
   MemberMyInfoResponse,
-  MemberStatus,
   Gender,
 } from "../../types/memberTypes";
+import StatusBadge from "../../components/ui/StatusBadge";
+import { mapFrontendStatusToBackend } from "../../lib/memberUtils"; // 유틸리티 함수 임포트
 
 interface MemberTableItem extends MemberMyInfoResponse, TableItem {
   id: number;
@@ -23,54 +24,6 @@ const memberSortOptions = [
   { value: "가입 순 (최신)", label: "가입 순 (최신)" },
   { value: "가입 순 (오래된)", label: "가입 순 (오래된)" },
 ];
-
-const formatMemberStatus = (status: MemberStatus): string => {
-  switch (status) {
-    case "MEMBER_ACTIVE":
-      return "활동 중";
-    case "MEMBER_BANNED":
-      return "정지 회원";
-    case "MEMBER_DELETED":
-      return "탈퇴 회원";
-    default:
-      return "정보 없음";
-  }
-};
-
-const convertStatusFilterToEnum = (
-  status: string
-): MemberStatus | undefined => {
-  switch (status) {
-    case "활동 중":
-      return "MEMBER_ACTIVE";
-    case "정지 회원":
-      return "MEMBER_BANNED";
-    case "탈퇴 회원":
-      return "MEMBER_DELETED";
-    default:
-      return undefined;
-  }
-};
-
-const StatusBadge = ({ status }: { status: string }) => {
-  let badgeColor = "bg-gray-100 text-gray-700";
-  if (status === "활동 중") {
-    badgeColor = "bg-green-100 text-green-700";
-  } else if (status === "휴면 회원") {
-    badgeColor = "bg-gray-100 text-gray-700";
-  } else if (status === "정지 회원") {
-    badgeColor = "bg-red-100 text-red-700";
-  } else if (status === "탈퇴 회원") {
-    badgeColor = "bg-yellow-100 text-yellow-700";
-  }
-  return (
-    <span
-      className={`px-2 py-0.5 text-xs font-medium rounded-full ${badgeColor}`}
-    >
-      {status}
-    </span>
-  );
-};
 
 export default function MemberManagement() {
   const [members, setMembers] = useState<MemberMyInfoResponse[]>([]);
@@ -83,47 +36,50 @@ export default function MemberManagement() {
   const [selectedMember, setSelectedMember] =
     useState<MemberMyInfoResponse | null>(null);
 
-  const fetchMembers = async (isReset: boolean = false) => {
-    try {
-      const params = {
-        page: 1,
-        size: 10,
-        search: isReset ? undefined : search.trim() || undefined,
-        sort:
-          sortValue === "가입 순 (최신)"
-            ? "memberId/desc"
-            : sortValue === "가입 순 (오래된)"
-            ? "memberId/asc"
+  const fetchMembers = useCallback(
+    async (isReset: boolean = false) => {
+      try {
+        const params = {
+          page: 1,
+          size: 10,
+          search: isReset ? undefined : search.trim() || undefined,
+          sort:
+            sortValue === "가입 순 (최신)"
+              ? "memberId/desc"
+              : sortValue === "가입 순 (오래된)"
+              ? "memberId/asc"
+              : undefined,
+          memberStatus: isReset
+            ? undefined
+            : statusFilter !== "전체"
+            ? mapFrontendStatusToBackend(statusFilter) // 유틸리티 함수 사용
             : undefined,
-        memberStatus: isReset
-          ? undefined
-          : statusFilter !== "전체"
-          ? convertStatusFilterToEnum(statusFilter)
-          : undefined,
-        gender: isReset
-          ? undefined
-          : genderFilter !== "전체"
-          ? ((genderFilter === "남성" ? "MALE" : "FEMALE") as Gender)
-          : undefined,
-        ageGroup: isReset
-          ? undefined
-          : ageGroupFilter !== "전체"
-          ? ageGroupFilter
-          : undefined,
-      };
+          gender: isReset
+            ? undefined
+            : genderFilter !== "전체"
+            ? ((genderFilter === "남성" ? "MALE" : "FEMALE") as Gender)
+            : undefined,
+          ageGroup: isReset
+            ? undefined
+            : ageGroupFilter !== "전체"
+            ? ageGroupFilter
+            : undefined,
+        };
 
-      console.log("API 요청 파라미터:", params);
+        console.log("API 요청 파라미터:", params);
 
-      const response = await getMembers(params);
-      setMembers(response.data.data);
-    } catch (error) {
-      console.error("회원 목록을 불러오는데 실패했습니다:", error);
-    }
-  };
+        const response = await getMembers(params);
+        setMembers(response.data.data);
+      } catch (error) {
+        console.error("회원 목록을 불러오는데 실패했습니다:", error);
+      }
+    },
+    [search, sortValue, statusFilter, genderFilter, ageGroupFilter]
+  ); // useCallback 의존성 배열에 fetchMembers가 사용하는 상태값 추가
 
   useEffect(() => {
     fetchMembers();
-  }, [sortValue]);
+  }, [fetchMembers]); // useEffect 의존성 배열에 fetchMembers 추가
 
   const handleResetFilters = () => {
     setStatusFilter("전체");
@@ -186,9 +142,8 @@ export default function MemberManagement() {
     {
       key: "memberStatus",
       header: "상태",
-      cellRenderer: (item) => (
-        <StatusBadge status={formatMemberStatus(item.memberStatus)} />
-      ),
+      // item.memberStatus는 'MEMBER_ACTIVE'와 같은 백엔드 상태 값입니다.
+      cellRenderer: (item: MemberTableItem) => <StatusBadge status={item.memberStatus} type="member" />,
       headerClassName: "w-[15%]",
     },
   ];
