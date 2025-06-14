@@ -15,6 +15,12 @@ export interface AnswerResponse {
 }
 
 export interface AnswerPostRequest {
-  content: string;
-  image?: File; // 이미지 파일(선택)
+  answerPostDtoString: string;
+  images?: File[]; // 이미지 파일(선택)
+}
+
+export interface AnswerPatchRequest {
+  answerPatchDtoString: string;
+  images?: File[]; // 이미지 파일(선택)
+  keepImageIds?: number[];
 }

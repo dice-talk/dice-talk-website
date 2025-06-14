@@ -32,5 +32,5 @@ export interface QuestionListParams {
   status?: string;
   search?: string;
   searchType?: "TITLE" | "AUTHOR" | "TITLE_AUTHOR" | "CONTENT";
-  sort?: string;
+  sort?: "asc" | "desc";
 }

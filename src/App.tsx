@@ -19,8 +19,9 @@ import PaymentHistoryPage from "./pages/payment/PaymentHistory";
 // import ChatRoomManagementPage from "./pages/chat/ChatRoomManagementPage";
 import ThemeManagementPage from "./pages/chat/ThemeManagement";
 import EventManagementPage from "./pages/chat/EventManagement";
-import SuspendedQnaListPage from "./pages/qna/SuspendedQnaList";
-import SuspendedQnaDetailPage from "./pages/qna/SuspendedQnaDetail"; // SuspendedQnaDetailPage 임포트
+// import SuspendedQnaDetailPage from "./pages/qna/SuspendedQnaDetail"; // SuspendedQnaDetailPage 임포트
+import GuestQnaList from "./pages/qna/GuestQnaList";
+import GuestQnaDetailPage from "./pages/qna/GuestQnaDetail";
 
 export default function App() {
   return (
@@ -53,11 +54,12 @@ export default function App() {
       {/* <Route path="/chatrooms" element={<ChatRoomManagementPage />} /> */}
       <Route path="/themes" element={<ThemeManagementPage />} />
       <Route path="/events" element={<EventManagementPage />} />
-      <Route path="/suspendedqnalist" element={<SuspendedQnaListPage />} />
-      <Route
+      <Route path="/guestqnalist" element={<GuestQnaList />} />
+      <Route path="/guestqna/:questionId" element={<GuestQnaDetailPage />} />
+      {/* <Route
         path="/suspended-qna/:questionId"
         element={<SuspendedQnaDetailPage />}
-      />
+      /> */}
     </Routes>
   );
 }
