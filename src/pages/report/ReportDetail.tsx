@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
 import Button from "../../components/ui/Button";
-import type { ReportResponse, ReportStatus  } from "../../types/reportTypes";
+import type { ReportResponse, ReportStatus } from "../../types/reportTypes";
 import {
   formatDateTime,
   getReportStatusLabel,
@@ -92,7 +92,7 @@ export default function ReportDetailPage() {
       className: "bg-green-600 hover:bg-green-700 text-white",
     },
     {
-      label: "신고 기각",
+      label: "신고 반려",
       status: "REPORT_REJECTED",
       variant: "ghost",
       className: "text-red-600 hover:bg-red-50",
