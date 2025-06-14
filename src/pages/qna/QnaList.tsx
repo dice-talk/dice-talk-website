@@ -27,6 +27,11 @@ const qnaSortOptions = [
   { value: "asc", label: "등록 오래된순" },
 ];
 
+// 한글 상태값을 API 코드값으로 변환
+const getStatusParam = (status: string) => {
+  return status === "전체" ? undefined : status;
+};
+
 export default function QnaList() {
   const [qnas, setQnas] = useState<QuestionResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,26 +61,28 @@ export default function QnaList() {
     const fetchQnas = async () => {
       setLoading(true);
       try {
-        // 필터가 적용된 경우에만 파라미터 추가
-        const params =
-          appliedFilters.status !== "전체" ||
-          appliedFilters.searchKeyword ||
-          sortValue !== "desc"
-            ? {
-                page: pageInfo.page - 1,
-                size: pageInfo.size,
-                status:
-                  appliedFilters.status !== "전체"
-                    ? appliedFilters.status
-                    : undefined,
-                search: appliedFilters.searchKeyword || undefined,
-                searchType: getSearchTypeValue(appliedFilters.searchType),
-                sort: sortValue as "desc" | "asc",
-              }
-            : {};
-
+        const statusParam = getStatusParam(appliedFilters.status);
+        const params: {
+          page: number;
+          size: number;
+          status?: string;
+          sort: "desc" | "asc";
+          keyword?: string;
+          searchType?: "TITLE" | "AUTHOR" | "TITLE_AUTHOR" | "CONTENT";
+        } = {
+          page: pageInfo.page,
+          size: pageInfo.size,
+          sort: sortValue as "desc" | "asc",
+        };
+        if (statusParam) {
+          params.status = statusParam;
+        }
+        if (appliedFilters.searchKeyword) {
+          params.keyword = appliedFilters.searchKeyword;
+          params.searchType = getSearchTypeValue(appliedFilters.searchType);
+        }
+        console.log("QnA 목록 요청 URL:", `/questions/admin`, params);
         const response = await getQuestions(params);
-
         if (response.data) {
           setQnas(response.data.data);
           setPageInfo(response.data.pageInfo);
@@ -87,7 +94,6 @@ export default function QnaList() {
         setLoading(false);
       }
     };
-
     fetchQnas();
   }, [pageInfo.page, pageInfo.size, appliedFilters, sortValue]);
 

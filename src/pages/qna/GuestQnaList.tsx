@@ -27,6 +27,15 @@ const qnaSortOptions = [
   { value: "asc", label: "등록 오래된순" },
 ];
 
+// 한글 상태값을 API 코드값으로 변환
+const getStatusParam = (
+  status: string
+): "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED" | undefined => {
+  return status === "전체"
+    ? undefined
+    : (status as "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED");
+};
+
 export default function GuestQnaList() {
   const [qnas, setQnas] = useState<QuestionResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,20 +65,28 @@ export default function GuestQnaList() {
     const fetchQnas = async () => {
       setLoading(true);
       try {
-        const params = {
-          page: pageInfo.page, // 0-based pagination
+        const statusParam = getStatusParam(appliedFilters.status);
+        const params: {
+          page: number;
+          size: number;
+          status?: "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED";
+          sort: "desc" | "asc";
+          keyword?: string;
+          searchType?: "TITLE" | "AUTHOR" | "TITLE_AUTHOR" | "CONTENT";
+        } = {
+          page: pageInfo.page,
           size: pageInfo.size,
-          status:
-            appliedFilters.status !== "전체"
-              ? appliedFilters.status
-              : undefined,
-          search: appliedFilters.searchKeyword || undefined,
-          searchType: getSearchTypeValue(appliedFilters.searchType),
-          sort: sortValue as "desc" | "asc", // 타입 단언 추가
+          sort: sortValue as "desc" | "asc",
         };
-
+        if (statusParam) {
+          params.status = statusParam;
+        }
+        if (appliedFilters.searchKeyword) {
+          params.keyword = appliedFilters.searchKeyword;
+          params.searchType = getSearchTypeValue(appliedFilters.searchType);
+        }
+        console.log("비회원 문의 목록 요청 URL:", `/questions/guest`, params);
         const response = await getGuestQuestions(params);
-        console.log(response.data);
         if (response.data) {
           setQnas(response.data.data);
           setPageInfo(response.data.pageInfo);
@@ -81,7 +98,6 @@ export default function GuestQnaList() {
         setLoading(false);
       }
     };
-
     fetchQnas();
   }, [pageInfo.page, pageInfo.size, appliedFilters, sortValue]);
 
