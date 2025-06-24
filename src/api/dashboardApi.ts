@@ -1,5 +1,6 @@
 import axiosInstance from './axiosInstance';
 import type { MainDashboardResponse } from '../types/dashboardTypes';
+import type { SingleResponse } from '../types/common';
 
 const DASHBOARD_BASE_URL = "/admin";
 
@@ -8,6 +9,6 @@ const DASHBOARD_BASE_URL = "/admin";
  * @returns MainDashboardResponse 타입의 대시보드 데이터
  */
 export const getDashboardData = async (): Promise<MainDashboardResponse> => {
-  const response = await axiosInstance.get<MainDashboardResponse>(`${DASHBOARD_BASE_URL}/dashboard`);
-  return response.data;
+  const response = await axiosInstance.get<SingleResponse<MainDashboardResponse>>(`${DASHBOARD_BASE_URL}/dashboard`);
+  return response.data.data;
 };

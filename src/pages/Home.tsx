@@ -62,6 +62,14 @@ export default function Home() {
     `아이템 사용 건수: ${formatNumber(dashboardData.dashboardPayments[0].todayItemUsageCount)}건`
   ] : ['데이터를 불러오는 중입니다...'];
 
+  const topPayersPanelItems = dashboardData?.dashboardPayments?.[0]
+    ? (dashboardData.dashboardPayments[0].topPayers?.length > 0
+      ? dashboardData.dashboardPayments[0].topPayers.slice(0, 3).map(
+          (payer) => `${payer.email}, ${formatNumber(payer.totalAmount)}원`
+        )
+      : ['최다 결제 회원 정보가 없습니다.'])
+    : ['데이터를 불러오는 중입니다...'];
+
   // NEW: Chat Room Panel Items
   const chatRoomPanelItems = dashboardData?.dashboardChatRooms?.[0] ? [
     `활성화 중인 전체 채팅방: ${formatNumber(dashboardData.dashboardChatRooms[0].activeChatRoom)}개`,
@@ -136,23 +144,30 @@ export default function Home() {
 
           {/* 상세 영역 */}
           {/* Changed grid to md:grid-cols-2 lg:grid-cols-4 to accommodate 4 panels */}
-          <section className="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-8 mt-8 mb-8">
+          {/* 3열 패널 섹션 */}
+          <section className="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-8 mt-8">
             <Panel
-              title="QnA 관리"
+              title="💳 결제 현황 요약"
+              items={paymentPanelItems}
+            />
+            <Panel
+              title="🏆 최다 결제 회원 TOP3"
+              items={topPayersPanelItems}
+            />
+            <Panel
+              title="💬 실시간 채팅방"
+              items={chatRoomPanelItems}
+            />
+          </section>
+          {/* 2열 패널 섹션 */}
+          <section className="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 mt-8 mb-8">
+            <Panel
+              title="❓ QnA 현황"
               items={qnaPanelItems}
             />
             <Panel
-              title="공지사항"
+              title="📢 최근 공지 및 이벤트"
               items={noticePanelItems}
-            />
-            <Panel
-              title="결제"
-              items={paymentPanelItems}
-            />
-            {/* NEW: Chat Room Panel */}
-            <Panel
-              title="채팅방 관리"
-              items={chatRoomPanelItems}
             />
            </section>
 
@@ -160,7 +175,7 @@ export default function Home() {
            {/* <section className="mt-6"> */}
            <section className="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto mt-8">
             <Panel
-              title="최근 활동 로그" // The backend DTO doesn't provide a direct "activity log" list. I'll construct it from available data.
+              title="📝 회원 활동 로그" // The backend DTO doesn't provide a direct "activity log" list. I'll construct it from available data.
               items={recentActivityLogItems.length > 0 ? recentActivityLogItems : ['최근 활동 로그가 없습니다.']}
             />
           </section>

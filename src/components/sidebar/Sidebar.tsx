@@ -134,7 +134,7 @@ export default function Sidebar() {
       </div>
 
       <div className="flex space-x-6 mt-2 mb-6">
-        <img src={homeIcon} alt="Home Icon" className="w-5 h-5 invert cursor-pointer" onClick={() => navigate('/')} />
+        <img src={homeIcon} alt="Home Icon" className="w-5 h-5 invert cursor-pointer" onClick={() => navigate('/home')} />
         <img src={logoutIcon} alt="Logout Icon" className="w-5 h-5 invert cursor-pointer" onClick={handleLogout} />
       </div>
 

@@ -277,7 +277,11 @@ export default function QnaDetailPage() {
                   <div className="mt-4">
                     <ImageUpload 
                       onImagesChange={handleAnswerImageChange} 
-                      existingImageUrls={isEditingAnswer ? (qnaItem.answerImageUrls || []) : []} // 수정 모드일 때만 기존 이미지 로드
+                      existingImageUrls={
+                        isEditingAnswer 
+                          ? (qnaItem.answerImageUrls || []).map((url, index) => ({ url, isThumbnail: index === 0 })) 
+                          : []
+                      }
                       maxFiles={5}
                       label="답변 이미지 첨부 (선택 사항)" />
                   </div>

@@ -6,7 +6,7 @@ export interface PageInfo {
 }
 
 export interface SingleResponse<T> {
-  data: T[];
+  data: T;
 }
 
 export interface MultiResponse<T> {
