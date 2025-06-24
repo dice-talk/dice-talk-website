@@ -56,22 +56,22 @@ export default function ReportListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const fetchReports = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await getReports(currentPage, itemsPerPage);
-      setReports(response.data.data);
-      setTotalCount(response.data.pageInfo.totalElements);
-    } catch (error) {
-      console.error("신고 목록을 불러오는데 실패했습니다:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, itemsPerPage]);
+  // const fetchReports = useCallback(async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await getReports(currentPage, itemsPerPage);
+  //     setReports(response.data.data);
+  //     setTotalCount(response.data.pageInfo.totalElements);
+  //   } catch (error) {
+  //     console.error("신고 목록을 불러오는데 실패했습니다:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [currentPage, itemsPerPage]);
 
-  useEffect(() => {
-    fetchReports();
-  }, [fetchReports]);
+  // useEffect(() => {
+  //   fetchReports();
+  // }, [fetchReports]);
 
   // const fetchReports = async () => {
 
@@ -95,33 +95,34 @@ export default function ReportListPage() {
   //   }
   // }, [currentPage, itemsPerPage, appliedFilters, sortValue]); // appliedFilters와 sortValue를 의존성에 추가
 
-const fetchReports = useCallback(async () => {
-  try {
-    setLoading(true);
+  const fetchReports = useCallback(async () => {
+    try {
+      setLoading(true);
 
-  const cleanParams: GetReportsParams = {
-    page: currentPage,
-    size: itemsPerPage,
-    ...(appliedFilters.status !== "전체" ? { status: appliedFilters.status as ReportStatus } : {}),
-    ...(appliedFilters.term ? { searchTerm: appliedFilters.term } : {}),
-    ...(sortValue ? { sort: sortValue } : {}),
-  };
-  console.log("🔍 필터 파라미터", cleanParams);
+      const cleanParams: GetReportsParams = {
+        page: currentPage,
+        size: itemsPerPage,
+        ...(appliedFilters.status !== "전체"
+          ? { status: appliedFilters.status as ReportStatus }
+          : {}),
+        ...(appliedFilters.term ? { searchTerm: appliedFilters.term } : {}),
+        ...(sortValue ? { sort: sortValue } : {}),
+      };
+      console.log("🔍 필터 파라미터", cleanParams);
 
-    const response = await getReports(cleanParams);
-    setReports(response.data.data);
-    setTotalCount(response.data.pageInfo.totalElements);
-  } catch (error) {
-    console.error("신고 목록을 불러오는데 실패했습니다:", error);
-  } finally {
-    setLoading(false);
-  }
-}, [currentPage, itemsPerPage, appliedFilters, sortValue]);
+      const response = await getReports(cleanParams);
+      setReports(response.data.data);
+      setTotalCount(response.data.pageInfo.totalElements);
+    } catch (error) {
+      console.error("신고 목록을 불러오는데 실패했습니다:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, itemsPerPage, appliedFilters, sortValue]);
 
   useEffect(() => {
     fetchReports();
   }, [fetchReports]);
-
 
   const handleResetFilters = () => {
     setStatusFilter("전체");

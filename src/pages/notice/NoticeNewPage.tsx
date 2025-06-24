@@ -21,7 +21,6 @@ import {
   getNoticeDetail,
   updateNotice,
 } from "../../api/noticeApi"; // API 함수 임포트 (fetchNoticeDetail -> getNoticeDetail)
-
 import {
   type NoticePostDto,
   type NoticePatchDto,
@@ -29,53 +28,22 @@ import {
   type NoticeStatusBack,
   type NoticeItemView,
   type NoticeImageDto,
-
-  NoticeStatus, 
-} from '../../types/noticeTypes';
-import { type ExistingImage } from '../../components/ui/ImageUpload'; // ImageUpload에서 ExistingImage 타입 가져오기
-
-// NoticeForm이 반환할 것으로 예상되는 FormData 확장
-interface ExtendedNoticeFormData extends NoticeFormData {
-  newImageFiles: File[];
-  keptExistingImageIds: number[]; // 유지될 기존 이미지의 ID 목록 (백엔드 DTO에 맞춤)
-  allImageThumbnailFlags: boolean[]; // 현재 표시되는 모든 이미지의 썸네일 상태 배열
-}
-
-// 프론트엔드에서 사용될 공지/이벤트 타입을 정의합니다. (오류 메시지에 따라 '공지사항' | '이벤트'로 가정)
-type FrontendNoticeType = '공지사항' | '이벤트';
+  NoticeStatus,
+} from "../../types/noticeTypes"; // 타입 경로 수정
 
 export default function NoticeNewPage() {
   const navigate = useNavigate();
   const { noticeId } = useParams<{ noticeId?: string }>(); // 수정 모드를 위해 noticeId 받기
   const [isSubmitting, setIsSubmitting] = useState(false);
-// <<<<<<< feat/member
-//   const [mode, setMode] = useState<"create" | "edit">("create");
-//   const [initialFormData, setInitialFormData] = useState<
-//     Partial<NoticeItemView>
-//   >({
-//     // NoticeItemView 사용
-//     type: "공지사항",
-//     status: NoticeStatus.SCHEDULED,
-//     isImportant: false,
-//     content: "",
-// =======
-  const [mode, setMode] = useState<'create' | 'edit'>('create');
-  // NoticeForm에 전달할 초기 데이터 타입 정의
-  // NoticeItemView에서 'type'도 Omit하여 InitialFormDataTypeForNoticeForm에서 FrontendNoticeType으로 재정의합니다.
-  interface InitialFormDataTypeForNoticeForm extends Partial<Omit<NoticeItemView, 'noticeImages' | 'imageUrls' | 'thumbnailFlags' | 'type'>> {
-    existingImages?: ExistingImage[];
-    type?: FrontendNoticeType; // string 대신 구체적인 프론트엔드 타입 사용
-    status?: NoticeStatus;
-    isImportant?: boolean;
-    title?: string;
-  }
-
-  const [initialFormData, setInitialFormData] = useState<InitialFormDataTypeForNoticeForm>({
-    type: '공지사항',
-    status: NoticeStatus.SCHEDULED, // NoticeStatus가 프론트엔드 상태 표현으로 적합하다고 가정
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [initialFormData, setInitialFormData] = useState<
+    Partial<NoticeItemView>
+  >({
+    // NoticeItemView 사용
+    type: "공지사항",
+    status: NoticeStatus.SCHEDULED,
     isImportant: false,
-    content: '',
-    existingImages: [],
+    content: "",
   });
   const [pageTitle, setPageTitle] = useState("새 공지/이벤트 등록");
   const [submitButtonText, setSubmitButtonText] = useState("등록");
@@ -84,12 +52,6 @@ export default function NoticeNewPage() {
     const loadNoticeForEdit = async (id: number) => {
       try {
         const itemToEdit = await getNoticeDetail(id); // API 함수 사용 (fetchNoticeDetail -> getNoticeDetail)
-        const existingImages: ExistingImage[] = itemToEdit.noticeImages?.map((img: NoticeImageDto) => ({
-          url: img.imageUrl,
-          isThumbnail: img.isThumbnail,
-          id: img.noticeImageId, // ImageUpload에서 제거 시 ID를 사용하기 위함
-        })) || [];
-
         setInitialFormData({
           id: itemToEdit.noticeId,
           title: itemToEdit.title,
@@ -109,7 +71,6 @@ export default function NoticeNewPage() {
           endDate: itemToEdit.endDate
             ? itemToEdit.endDate.split("T")[0]
             : undefined,
-
           createdAt: itemToEdit.createdAt,
         });
         setMode("edit");
@@ -146,10 +107,9 @@ export default function NoticeNewPage() {
         title: "",
       });
     }
-
   }, [noticeId, navigate]);
 
-  const handleSaveNotice = async (formData: ExtendedNoticeFormData) => { // 타입 변경
+  const handleSaveNotice = async (formData: NoticeFormData) => {
     setIsSubmitting(true);
 
     if (mode === "create") {
@@ -173,25 +133,18 @@ export default function NoticeNewPage() {
 
         // thumbnailFlags 생성: 첫 번째 이미지는 썸네일(true), 나머지는 false
         const thumbnailFlags =
-          formData.imageFiles && formData.imageFiles.length > 0
-            ? formData.imageFiles.map((_, index) => index === 0)
+          formData.newImageFiles && formData.newImageFiles.length > 0
+            ? formData.newImageFiles.map(
+                (_: File, index: number) => index === 0
+              )
             : undefined;
 
         const newNoticeId = await createNotice(
           noticePostDtoString,
-          formData.imageFiles,
+          formData.newImageFiles,
           thumbnailFlags
         ); // thumbnailFlags 추가
 
-
-        const response = await createNotice2(apiPayload, formData.newImageFiles, thumbnailFlagsForCreate);
-        console.log("RRRRRRRRResponse", response)
-        // Location 헤더에서 ID 추출 (예시, 실제 API 응답에 따라 다를 수 있음)
-        const locationHeaderValue = response.headers && (response.headers.location || response.headers['Location']);
-        console.log("LLLLLLLocationHeaderValue", locationHeaderValue);
-        const newNoticeId = locationHeaderValue ? locationHeaderValue.split('/').pop() : null;
-        console.log("NNNNNNNNNNNoticeId", newNoticeId);
-        
         if (newNoticeId) {
           alert("새 공지/이벤트가 등록되었습니다.");
           navigate(`/notices/${newNoticeId}`); // 추출한 ID로 네비게이션
@@ -231,27 +184,19 @@ export default function NoticeNewPage() {
         noticeType: mapFrontendTypeToBackend(formData.type), // mapFrontendTypeToBackend 함수의 반환 값 사용
         noticeStatus: mapFrontendStatusToBackend(formData.status), // mapFrontendStatusToBackend 함수의 반환 값 사용
         noticeImportance: formData.isImportant ? 1 : 0,
-        keepImageIds: formData.keptExistingImageIds, // 유지할 기존 이미지 ID 목록
+        // keepImageIds는 NoticeForm에서 관리되지 않으므로, 필요시 추가 구현
+        // 예: keepImageIds: initialFormData.imageUrls?.filter(url => !formData.removedImageUrls.includes(url)).map(url => /* URL에서 ID 추출 로직 */)
       };
 
-      // formData.allImageThumbnailFlags는 ImageUpload에서 관리되어 NoticeForm을 통해 전달됨
-      // 이 플래그는 (유지되는 기존 이미지 + 새로 추가된 이미지)의 순서에 해당해야 함
-      const thumbnailFlagsForUpdate = formData.allImageThumbnailFlags?.map((flag) =>
-        flag ?? false 
-      );
-
-      console.log("🔄 업데이트 데이터 (noticePatchDto):", apiPayload);
-      console.log("🖼️ 새로 추가된 이미지 파일:", formData.newImageFiles);
-      console.log("💾 유지 요청된 기존 이미지 ID:", formData.keptExistingImageIds);
-      console.log("🚩 전체 이미지 썸네일 플래그:", thumbnailFlagsForUpdate);
+      const noticePatchDtoString = JSON.stringify(apiPayload);
 
       // 수정 시에도 thumbnailFlags 등이 필요하면 추가
       console.log("Updating notice (noticePutDto):", noticeId, apiPayload);
 
       // thumbnailFlags 생성: 첫 번째 이미지는 썸네일(true), 나머지는 false
       const thumbnailFlags =
-        formData.imageFiles && formData.imageFiles.length > 0
-          ? formData.imageFiles.map((_, index) => index === 0)
+        formData.newImageFiles && formData.newImageFiles.length > 0
+          ? formData.newImageFiles.map((_: File, index: number) => index === 0)
           : undefined;
 
       try {
@@ -259,11 +204,10 @@ export default function NoticeNewPage() {
         await updateNotice(
           itemId,
           noticePatchDtoString,
-          formData.imageFiles,
+          formData.newImageFiles,
           thumbnailFlags
         ); // thumbnailFlags 추가
         alert("공지/이벤트가 수정되었습니다.");
-
         navigate(`/notices/${itemId}`);
       } catch (error) {
         console.error("Error updating notice:", error);
