@@ -24,6 +24,9 @@ import ChatRoomDetailPage from "./pages/chat/ChatRoomDetailPage";
 
 // 로그인 상태를 가져오는 로직 (예시, 실제 사용하는 상태 관리 라이브러리에 맞게 수정)
 import { useAuthStore } from "./stores/useUserStore";
+import GuestQnaList from "./pages/qna/GuestQnaList";
+import GuestQnaDetailPage from "./pages/qna/GuestQnaDetail";
+
 
 export default function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -63,11 +66,12 @@ export default function App() {
       <Route path="/chatrooms" element={<ChatRoomManagementPage />} />
       <Route path="/themes" element={<ThemeManagementPage />} />
       <Route path="/events" element={<EventManagementPage />} />
-      <Route path="/suspendedqnalist" element={<SuspendedQnaListPage />} />
+      <Route path="/guestqnalist" element={<GuestQnaList />} />
+      <Route path="/guestqna/:questionId" element={<GuestQnaDetailPage />} />
       <Route
         path="/suspended-qna/:questionId"
-        element={<SuspendedQnaDetailPage />}
-      />
+        element={<SuspendedQnaDetailPage />} 
+        />
       <Route path="/chatrooms/:chatRoomId" element={<ChatRoomDetailPage />} />
     </Routes>
   );

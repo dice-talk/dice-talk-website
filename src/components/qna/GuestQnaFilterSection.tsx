@@ -2,12 +2,12 @@ import Button from "../ui/Button";
 import { DropdownFilter } from "../ui/DropdownFilter";
 import { SearchInputFilter } from "../ui/SearchInputFilter";
 
-type QnaStatus = "전체" | "QUESTION_REGISTERED" | "QUESTION_ANSWERED";
+type GuestQnaStatus = "전체" | "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED";
 
-const qnaStatusOptions: { value: QnaStatus; label: string }[] = [
+const guestQnaStatusOptions: { value: GuestQnaStatus; label: string }[] = [
   { value: "전체", label: "전체 상태" },
-  { value: "QUESTION_REGISTERED", label: "답변 미등록" },
-  { value: "QUESTION_ANSWERED", label: "답변 완료" },
+  { value: "QUESTION_GUEST", label: "답변 미등록" },
+  { value: "QUESTION_GUEST_ANSWERED", label: "답변 완료" },
 ];
 
 const searchTypeOptions = [
@@ -17,9 +17,9 @@ const searchTypeOptions = [
   { value: "작성자+제목", label: "작성자+제목" },
 ];
 
-interface QnaFilterSectionProps {
-  statusFilter: QnaStatus;
-  onStatusFilterChange: (value: QnaStatus) => void;
+interface GuestQnaFilterSectionProps {
+  statusFilter: GuestQnaStatus;
+  onStatusFilterChange: (value: GuestQnaStatus) => void;
   searchType: string;
   onSearchTypeChange: (value: string) => void;
   searchKeyword: string;
@@ -28,7 +28,7 @@ interface QnaFilterSectionProps {
   onSearch: () => void;
 }
 
-export function QnaFilterSection({
+export function GuestQnaFilterSection({
   statusFilter,
   onStatusFilterChange,
   searchType,
@@ -37,19 +37,17 @@ export function QnaFilterSection({
   onSearchKeywordChange,
   onResetFilters,
   onSearch,
-}: QnaFilterSectionProps) {
+}: GuestQnaFilterSectionProps) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
       {/* 1행: 상태 선택 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 mb-6">
-        {" "}
-        {/* mb-4에서 mb-6으로 변경하여 간격 조정 */}
-        <DropdownFilter<QnaStatus>
+        <DropdownFilter<GuestQnaStatus>
           label="상태"
           id="status-select"
           value={statusFilter}
           onValueChange={onStatusFilterChange}
-          options={qnaStatusOptions}
+          options={guestQnaStatusOptions}
           placeholder="상태 선택"
         />
       </div>
@@ -74,8 +72,6 @@ export function QnaFilterSection({
           />
         </div>
         <div className="flex justify-end gap-3 lg:col-span-2 mt-4 md:mt-auto">
-          {" "}
-          {/* md:mt-auto 추가 */}
           <Button
             variant="outline"
             className="px-6 w-full sm:w-auto"

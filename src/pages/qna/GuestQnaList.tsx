@@ -4,18 +4,18 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
 import { NewBadge } from "../../components/ui/NewBadge";
 import { QuestionStatusBadge } from "../../components/ui/QuestionStatusBadge";
-import { QnaFilterSection } from "../../components/qna/QnaFilterSection";
+import { GuestQnaFilterSection } from "../../components/qna/GuestQnaFilterSection";
 import { ReusableTable } from "../../components/common/ReusableTable";
 import { Pagination } from "../../components/common/Pagination";
 import type {
   ColumnDefinition,
   TableItem,
 } from "../../components/common/reusableTableTypes";
-import { getQuestions } from "../../api/questionApi";
+import { getGuestQuestions } from "../../api/questionApi";
 import type { QuestionResponse } from "../../types/questionTypes";
 import type { PageInfo } from "../../types/common";
 
-type QnaStatus = "전체" | "QUESTION_REGISTERED" | "QUESTION_ANSWERED";
+type GuestQnaStatus = "전체" | "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED";
 
 // ReusableTable을 위한 QnaItem 확장 (TableItem의 id와 매핑)
 interface QnaTableItem extends QuestionResponse, TableItem {
@@ -28,11 +28,15 @@ const qnaSortOptions = [
 ];
 
 // 한글 상태값을 API 코드값으로 변환
-const getStatusParam = (status: string) => {
-  return status === "전체" ? undefined : status;
+const getStatusParam = (
+  status: string
+): "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED" | undefined => {
+  return status === "전체"
+    ? undefined
+    : (status as "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED");
 };
 
-export default function QnaList() {
+export default function GuestQnaList() {
   const [qnas, setQnas] = useState<QuestionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageInfo, setPageInfo] = useState<PageInfo>({
@@ -43,14 +47,14 @@ export default function QnaList() {
   });
 
   // UI 입력을 위한 필터 상태
-  const [statusFilter, setStatusFilter] = useState<QnaStatus>("전체");
+  const [statusFilter, setStatusFilter] = useState<GuestQnaStatus>("전체");
   const [searchType, setSearchType] = useState("제목"); // 기본 검색 유형
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortValue, setSortValue] = useState("desc");
 
   // 실제 필터링에 사용될 필터 상태
   const [appliedFilters, setAppliedFilters] = useState({
-    status: "전체" as QnaStatus,
+    status: "전체" as GuestQnaStatus,
     searchType: "제목",
     searchKeyword: "",
   });
@@ -65,7 +69,7 @@ export default function QnaList() {
         const params: {
           page: number;
           size: number;
-          status?: string;
+          status?: "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED";
           sort: "desc" | "asc";
           keyword?: string;
           searchType?: "TITLE" | "AUTHOR" | "TITLE_AUTHOR" | "CONTENT";
@@ -81,14 +85,14 @@ export default function QnaList() {
           params.keyword = appliedFilters.searchKeyword;
           params.searchType = getSearchTypeValue(appliedFilters.searchType);
         }
-        console.log("QnA 목록 요청 URL:", `/questions/admin`, params);
-        const response = await getQuestions(params);
+        console.log("비회원 문의 목록 요청 URL:", `/questions/guest`, params);
+        const response = await getGuestQuestions(params);
         if (response.data) {
           setQnas(response.data.data);
           setPageInfo(response.data.pageInfo);
         }
       } catch (error) {
-        console.error("QnA 목록을 불러오는데 실패했습니다:", error);
+        console.error("비회원 문의 목록을 불러오는데 실패했습니다:", error);
         // TODO: 사용자에게 에러 메시지 표시
       } finally {
         setLoading(false);
@@ -143,7 +147,7 @@ export default function QnaList() {
 
   //상세조회 페이지 이동
   const handleRowClick = (item: QnaTableItem) => {
-    navigate(`/qna/${item.questionId}`);
+    navigate(`/guestqna/${item.questionId}`);
   };
 
   const columns: ColumnDefinition<QnaTableItem>[] = [
@@ -216,10 +220,12 @@ export default function QnaList() {
         )}
         <Header />
         <main className="flex-1 bg-slate-50 p-6 md:p-8 rounded-tl-xl overflow-y-auto">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8">QnA 관리</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-8">
+            비회원 문의 관리
+          </h2>
 
           {/* 필터 섹션 컴포넌트 사용 */}
-          <QnaFilterSection
+          <GuestQnaFilterSection
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
             searchType={searchType}
@@ -238,7 +244,7 @@ export default function QnaList() {
             sortValue={sortValue}
             onSortChange={setSortValue}
             sortOptions={qnaSortOptions}
-            emptyStateMessage="검색 결과에 해당하는 Q&A가 없습니다."
+            emptyStateMessage="검색 결과에 해당하는 비회원 문의가 없습니다."
             onRowClick={handleRowClick}
           />
 
