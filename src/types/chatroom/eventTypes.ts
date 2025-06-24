@@ -1,5 +1,5 @@
 /**
- * 이벤트 상태 (백엔드와 동일)
+ * 이벤트 상태 
  * - EVENT_OPEN: 활성화
  * - EVENT_CLOSE: 비활성화
  */
@@ -24,8 +24,9 @@ export interface EventPatchDto {
 }
 
 // UI에서 사용할 이벤트 아이템 타입 (EventResponseDto를 기반으로 확장 가능)
-export type EventItem = EventResponseDto & {
-  // UI에 필요한 추가적인 필드가 있다면 여기에 정의할 수 있습니다.
-  // 예를 들어, themeName을 별도로 관리하고 싶다면 추가할 수 있습니다.
-  // themeName?: string; 
-};
+export type EventItem = EventResponseDto;
+//  & {
+//   // UI에 필요한 추가적인 필드가 있다면 여기에 정의할 수 있습니다.
+//   // 예를 들어, themeName을 별도로 관리하고 싶다면 추가할 수 있습니다.
+//   // themeName?: string; 
+// };

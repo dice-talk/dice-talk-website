@@ -3,8 +3,17 @@ import type {
   ReportPostDto,
   ReportResponse,
   ReportReasonResponse,
+  ReportStatus,
 } from "../types/reportTypes";
 import type { PageInfo } from "../types/common";
+
+export interface GetReportsParams {
+  page: number;
+  size: number;
+  status?: ReportStatus;
+  searchTerm?: string;
+  sort?: string;
+}
 
 // 신고 등록
 export const postReport = (data: ReportPostDto) =>
@@ -15,12 +24,10 @@ export const getReport = (reportId: number) =>
   axiosInstance.get<{ data: ReportResponse }>(`/reports/${reportId}`);
 
 // 전체 신고 목록 조회 (페이지네이션)
-export const getReports = (page: number, size: number) =>
+export const getReports = (params: GetReportsParams) =>
   axiosInstance.get<{ data: ReportResponse[]; pageInfo: PageInfo }>(
     "/reports",
-    {
-      params: { page, size },
-    }
+    {  params  }
   );
 
 // 신고 처리 완료 (관리자)

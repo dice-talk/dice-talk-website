@@ -1,19 +1,14 @@
 // src/api/noticeApi.ts
 import { axiosInstance } from "./axiosInstance"; // axiosInstance 경로 확인 필요
 import type {
+  NoticePostDto,
+  NoticePatchDto,
   NoticeResponseDto,
   NoticeTypeBack,
   NoticeStatusBack,
 } from "../types/noticeTypes"; // 타입 경로 확인 필요
 import type { MultiResponse } from "../types/common"; // 공통 타입 경로 확인 필요
 
-/**
- * 공지/이벤트 생성 (POST /notices)
- * @param noticePostDtoString JSON 문자열 형태의 NoticePostDtoP
- * @param imageFiles 이미지 파일 목록 (optional)
- * @param thumbnailFlags 썸네일 플래그 목록 (optional)
- * @returns 생성된 공지/이벤트의 ID (Location 헤더에서 추출)
- */
 export const createNotice = async (
   noticePostDtoString: string,
   imageFiles?: File[],
@@ -53,14 +48,7 @@ export const createNotice = async (
   return null;
 };
 
-/**
- * 공지/이벤트 수정 (PATCH /notices/{noticeId})
- * @param noticeId 수정할 공지/이벤트 ID
- * @param noticePatchDtoString JSON 문자열 형태의 NoticePatchDtoP
- * @param imageFiles 이미지 파일 목록 (optional)
- * @param thumbnailFlags 썸네일 플래그 목록 (optional)
- * @returns 수정된 공지/이벤트 정보
- */
+
 export const updateNotice = async (
   noticeId: number,
   noticePatchDtoString: string,
@@ -97,6 +85,7 @@ export const updateNotice = async (
   );
   return response.data.data; // SingleResponseDto의 data 필드 접근
 };
+
 
 /**
  * 공지/이벤트 상세 조회 (GET /notices/{noticeId})
@@ -140,3 +129,4 @@ export const getNotices = async (params: {
 export const deleteNotice = async (noticeId: number): Promise<void> => {
   await axiosInstance.delete(`/notices/${noticeId}`);
 };
+

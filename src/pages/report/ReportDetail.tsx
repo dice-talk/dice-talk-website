@@ -5,11 +5,11 @@ import Header from "../../components/Header";
 import Button from "../../components/ui/Button";
 import type { ReportResponse, ReportStatus } from "../../types/reportTypes";
 import {
-  formatDateTime,
   getReportStatusLabel,
   getReportStatusBadgeStyleSwitch,
 } from "../../lib/ReportUtils";
 import { getReport, completeReport, rejectReport } from "../../api/reportApi";
+import { formatDateTime } from "../../lib/DataUtils";
 
 export default function ReportDetailPage() {
   const { reportId } = useParams<{ reportId: string }>();

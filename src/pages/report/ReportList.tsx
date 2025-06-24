@@ -11,14 +11,15 @@ import type {
   ReportStatus,
   ReportReason,
 } from "../../types/reportTypes";
-import type { ChatResponse } from "../../types/chatTypes";
+import type { ChatResponseDto } from "../../types/chatroom/chatTypes";
 import type {
   ColumnDefinition,
   TableItem,
 } from "../../components/common/reusableTableTypes";
-import { formatDate, getReportReasonLabel } from "../../lib/ReportUtils";
-import { getReports } from "../../api/reportApi";
+import { getReportReasonLabel } from "../../lib/ReportUtils";
+import { getReports, type GetReportsParams } from "../../api/reportApi";
 import StatusBadge from "../../components/ui/StatusBadge";
+import { formatDate } from "../../lib/DataUtils";
 
 interface ReportTableItem extends TableItem {
   reportId: number;
@@ -27,7 +28,7 @@ interface ReportTableItem extends TableItem {
   reporterEmail: string;
   reportedMemberId: number;
   reportedEmail: string;
-  reportedChats: ChatResponse[];
+  reportedChats: ChatResponseDto[];
   reportStatus: ReportStatus;
   createdAt: string;
   modifiedAt: string;
@@ -73,9 +74,18 @@ export default function ReportListPage() {
   }, [fetchReports]);
 
   // const fetchReports = async () => {
+
   //   try {
   //     setLoading(true);
-  //     const response = await getReports(currentPage, itemsPerPage);
+  //     // API 호출 시 appliedFilters와 sortValue 사용
+  //     const params = {
+  //       page: currentPage,
+  //       size: itemsPerPage,
+  //       status: appliedFilters.status !== "전체" ? appliedFilters.status as ReportStatus : undefined,
+  //       searchTerm: appliedFilters.term || undefined,
+  //       sort: sortValue, // API가 정렬 파라미터를 받는다고 가정
+  //     };
+  //     const response = await getReports(params); // 수정된 getReports API 호출 방식에 맞게 파라미터 전달
   //     setReports(response.data.data);
   //     setTotalCount(response.data.pageInfo.totalElements);
   //   } catch (error) {
@@ -83,11 +93,35 @@ export default function ReportListPage() {
   //   } finally {
   //     setLoading(false);
   //   }
-  // };
+  // }, [currentPage, itemsPerPage, appliedFilters, sortValue]); // appliedFilters와 sortValue를 의존성에 추가
 
-  // useEffect(() => {
-  //   fetchReports();
-  // }, [currentPage, itemsPerPage]);
+const fetchReports = useCallback(async () => {
+  try {
+    setLoading(true);
+
+  const cleanParams: GetReportsParams = {
+    page: currentPage,
+    size: itemsPerPage,
+    ...(appliedFilters.status !== "전체" ? { status: appliedFilters.status as ReportStatus } : {}),
+    ...(appliedFilters.term ? { searchTerm: appliedFilters.term } : {}),
+    ...(sortValue ? { sort: sortValue } : {}),
+  };
+  console.log("🔍 필터 파라미터", cleanParams);
+
+    const response = await getReports(cleanParams);
+    setReports(response.data.data);
+    setTotalCount(response.data.pageInfo.totalElements);
+  } catch (error) {
+    console.error("신고 목록을 불러오는데 실패했습니다:", error);
+  } finally {
+    setLoading(false);
+  }
+}, [currentPage, itemsPerPage, appliedFilters, sortValue]);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
 
   const handleResetFilters = () => {
     setStatusFilter("전체");
@@ -105,47 +139,25 @@ export default function ReportListPage() {
       status: statusFilter,
       term: searchTerm,
     });
-    setCurrentPage(1);
+    // currentPage가 이미 1이면 useEffect가 실행되지 않으므로, 직접 fetchReports 호출
+    if (currentPage === 1) {
+      fetchReports();
+    } else {
+      setCurrentPage(1); // currentPage가 변경되면 useEffect가 fetchReports를 호출
+    }
   };
 
   const filteredAndSortedReports = useMemo(() => {
-    let filtered = [...reports];
-
-    if (appliedFilters.status !== "전체") {
-      filtered = filtered.filter(
-        (report) => report.reportStatus === appliedFilters.status
-      );
-    }
-    if (appliedFilters.term) {
-      const lowerSearchTerm = appliedFilters.term.toLowerCase();
-      filtered = filtered.filter(
-        (report) =>
-          report.reporterEmail.toLowerCase().includes(lowerSearchTerm) ||
-          report.reporterId.toString().includes(lowerSearchTerm) ||
-          report.reportedEmail.toLowerCase().includes(lowerSearchTerm) ||
-          report.reportedMemberId.toString().includes(lowerSearchTerm)
-      );
-    }
-
-    if (sortValue === "createdAt_desc") {
-      filtered.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-    } else if (sortValue === "createdAt_asc") {
-      filtered.sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-    }
-
-    return filtered.map((r) => ({
+    // API에서 이미 필터링 및 정렬된 데이터를 가져오므로, 여기서는 매핑만 수행
+    // 또는 클라이언트 사이드 정렬만 남겨둘 수 있습니다.
+    // API가 정렬까지 처리한다면, 이 useMemo는 단순히 매핑만 하거나 필요 없을 수 있습니다.
+    return reports.map((r) => ({
       ...r,
       id: r.reportId,
       reporterInfo: `${r.reporterEmail} (ID: ${r.reporterId})`,
       reportedInfo: `${r.reportedEmail} (ID: ${r.reportedMemberId})`,
     }));
-  }, [reports, appliedFilters, sortValue]);
+  }, [reports]); // appliedFilters와 sortValue 의존성 제거 (API가 처리)
 
   const handlePageChange = (page: number) => setCurrentPage(page);
   const handleRowClick = (item: ReportTableItem) =>
@@ -156,7 +168,7 @@ export default function ReportListPage() {
       key: "reportId",
       header: "신고 ID",
       accessor: "reportId",
-      headerClassName: "w-[10%]",
+      headerClassName: "w-[8%]",
     },
     {
       key: "reportReason",

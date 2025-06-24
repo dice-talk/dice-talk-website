@@ -1,83 +1,25 @@
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react'; // Keep these imports if they are used elsewhere in the file, otherwise remove
 // import axiosInstance from '../api/axiosInstance';
 import WeeklyLineChart from './WeeklyLineChart';
-
-interface DailyCount {
-  date: string;
-  count: number;
-}
-
-interface DashboardWeekly {
-  weekStartDate: string;
-  weekEndDate: string;
-  weeklyNewMemberCount: DailyCount[];
-  weeklyActiveChatRoomCount: DailyCount[];
-  weeklyReportCount?: DailyCount[];
-  weeklyPaymentCount?: DailyCount[];
-}
+import type { DashboardWeekly, DailyCount } from '../types/dashboardTypes'; // Import types from new file
 
 type SummaryType = '가입자 수' | '채팅방 수' | '신고 수' | '결제 수';
 
-const dummyData: DashboardWeekly = {
-  weekStartDate: '2025-05-22',
-  weekEndDate: '2025-05-28',
-  weeklyNewMemberCount: [
-    { date: '2025-05-22', count: 3 },
-    { date: '2025-05-23', count: 1 },
-    { date: '2025-05-24', count: 5 },
-    { date: '2025-05-25', count: 10 },
-    { date: '2025-05-26', count: 11 },
-    { date: '2025-05-27', count: 8 },
-    { date: '2025-05-28', count: 12 }
-  ],
-  weeklyActiveChatRoomCount: [
-    { date: '2025-05-22', count: 11 },
-    { date: '2025-05-23', count: 8 },
-    { date: '2025-05-24', count: 10 },
-    { date: '2025-05-25', count: 9 },
-    { date: '2025-05-26', count: 6 },
-    { date: '2025-05-27', count: 7 },
-    { date: '2025-05-28', count: 12 }
-  ],
-  weeklyReportCount: [
-    { date: '2025-05-22', count: 1 },
-    { date: '2025-05-23', count: 3 },
-    { date: '2025-05-24', count: 2 },
-    { date: '2025-05-25', count: 1 },
-    { date: '2025-05-26', count: 4 },
-    { date: '2025-05-27', count: 1 },
-    { date: '2025-05-28', count: 1 }
-  ],
-  weeklyPaymentCount: [
-    { date: '2025-05-22', count: 4 },
-    { date: '2025-05-23', count: 1 },
-    { date: '2025-05-24', count: 2 },
-    { date: '2025-05-25', count: 2 },
-    { date: '2025-05-26', count: 2 },
-    { date: '2025-05-27', count: 4 },
-    { date: '2025-05-28', count: 6 }
-  ]
-};
+interface DashboardChartTabsProps {
+  selectedType: SummaryType;
+  weeklyData: DashboardWeekly | null; // Now received as a prop
+  loading: boolean; // Now received as a prop
+  error: string | null; // Now received as a prop
+}
 
-export default function DashboardChartTabs({ selectedType }: { selectedType: SummaryType }) {
-  const [weeklyData, setWeeklyData] = useState<DashboardWeekly | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const weekly = dummyData;
-        setWeeklyData(weekly);
-      } catch (err) {
-        console.error('대시보드 주간 데이터 요청 실패:', err);
-        setError('데이터를 불러오는 중 문제가 발생했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+export default function DashboardChartTabs({
+  selectedType,
+  weeklyData,
+  loading,
+  error,
+}: DashboardChartTabsProps) {
+  // No internal state for weeklyData, loading, error, or useEffect for fetching.
+  // These are now props from the parent Home component.
 
   const colorMap: Record<SummaryType, string> = {
     '가입자 수': '#3B82F6',
@@ -85,16 +27,23 @@ export default function DashboardChartTabs({ selectedType }: { selectedType: Sum
     '신고 수': '#F59E0B',
     '결제 수': '#10B981'
   };
-
-  const dataMap: Record<SummaryType, DailyCount[]> = {
-    '가입자 수': weeklyData?.weeklyNewMemberCount ?? [],
-    '채팅방 수': weeklyData?.weeklyActiveChatRoomCount ?? [],
-    '신고 수': weeklyData?.weeklyReportCount ?? [],
-    '결제 수': weeklyData?.weeklyPaymentCount ?? []
+  // Helper to add isFuture flag based on weekEndDate
+  const processDailyCounts = (counts: DailyCount[]): DailyCount[] => {
+    if (!weeklyData || counts.length === 0) return [];
+    const endDate = new Date(weeklyData.weekEndDate);
+    return counts.map(item => ({
+      ...item,
+      isFuture: new Date(item.date) > endDate,
+    }));
   };
-
+  const processedDataMap: Record<SummaryType, DailyCount[]> = {
+    '가입자 수': processDailyCounts(weeklyData?.weeklyNewMemberCount || []),
+    '채팅방 수': processDailyCounts(weeklyData?.weeklyActiveChatRoomCount || []),
+    '신고 수': processDailyCounts(weeklyData?.weeklyReportCount || []),
+    '결제 수': processDailyCounts(weeklyData?.weeklyPaymentCount || [])
+  };
   const titlePrefix = '최근 7일';
-  const dateRange = `${dummyData.weekStartDate.slice(5)} ~ ${dummyData.weekEndDate.slice(5)}`;
+  const dateRange = weeklyData ? `${weeklyData.weekStartDate.slice(5)} ~ ${weeklyData.weekEndDate.slice(5)}` : '';
 
   return (
     <div className="mt-4">
@@ -105,7 +54,7 @@ export default function DashboardChartTabs({ selectedType }: { selectedType: Sum
       ) : (
         <WeeklyLineChart
           title={`${titlePrefix} ${selectedType} (${dateRange})`}
-          data={dataMap[selectedType]}
+          data={processedDataMap[selectedType]}
           color={colorMap[selectedType]}
         />
       )}

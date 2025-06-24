@@ -7,7 +7,7 @@ import { ThemeEditModal } from '../../components/chat/ThemeEditModal';
 // Import types from themeTypes.ts
 import type { ThemeResponseDto, ThemePatchDto, ThemeStatus } from '../../types/chatroom/themeTypes';
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-import { getThemesForAdmin, updateTheme } from '../../api/themeApi';
+import { getThemes, updateTheme } from '../../api/themeApi';
 import type { MultiResponse, PageInfo } from '../../types/common';
 import { Pagination } from '../../components/common/Pagination';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -33,12 +33,13 @@ export default function ThemeManagementPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response: MultiResponse<ThemeResponseDto> = await getThemesForAdmin({
+      const response: MultiResponse<ThemeResponseDto> = await getThemes({
         page: currentPage,
         size: itemsPerPage,
         status: filterStatus,
       });
       setThemes(response.data);
+      console.log('ThemeManagementPage - API Response pageInfo:', response.pageInfo); // 로그 메시지 명확화
       setPageInfo(response.pageInfo);
     } catch (err) {
       console.error("테마 목록을 불러오는데 실패했습니다:", err);
@@ -54,6 +55,11 @@ export default function ThemeManagementPage() {
   useEffect(() => {
     fetchThemes();
   }, [fetchThemes]);
+
+  useEffect(() => {
+    console.log('ThemeManagementPage - PageInfo state updated:', pageInfo); 
+    // console.log('Calculated totalItemsCount:', totalItemsCount); // totalItemsCount는 렌더링 시 계산되므로 여기서 매번 확인할 필요는 없음
+  }, [pageInfo]); // pageInfo가 변경될 때마다 실행
 
   const handleOpenEditModal = (theme: ThemeResponseDto) => {
     setSelectedTheme(theme);
@@ -72,11 +78,6 @@ export default function ThemeManagementPage() {
     themeStatus?: ThemeStatus;
   }) => {
     if (!selectedTheme) return;
-
-    // ThemePatchDto에 맞게 데이터 구성 (id는 경로로 전달되므로 제외)
-    // updatedFields.image는 string | File | null 타입일 수 있으나,
-    // ThemePatchDto의 image는 string | null | undefined 타입입니다.
-    // API 함수(updateTheme)의 실제 구현이 File 객체를 처리한다고 가정하고 타입 단언을 사용합니다.
     const dataToPassToApi = {
       themeId: selectedTheme.themeId,
       ...updatedFields,

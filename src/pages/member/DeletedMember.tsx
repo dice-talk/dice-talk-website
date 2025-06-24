@@ -72,8 +72,9 @@ export default function DeletedMemberManagement() {
   };
 
   useEffect(() => {
+    // 초기 로드 시 또는 정렬 값 변경 시에만 데이터 조회
     fetchDeletedMembers();
-  }, [sortValue]);
+  }, [sortValue]); 
 
   const handleResetFilters = () => {
     setGenderFilter("전체");
@@ -96,6 +97,7 @@ export default function DeletedMemberManagement() {
 
   const handleSortChange = (newSortValue: string) => {
     setSortValue(newSortValue);
+    // fetchDeletedMembers(); // 정렬 변경 시 데이터 다시 로드 (API가 정렬 파라미터를 지원하고, fetchDeletedMembers가 sortValue를 사용해야 함)
   };
 
   const filteredAndSortedMembers = useMemo(() => {

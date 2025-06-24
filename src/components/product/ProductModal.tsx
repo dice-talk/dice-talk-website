@@ -4,7 +4,7 @@ import {
  type ProductResponseDto,
  type ProductPostDto,
  type ProductPatchDto,
-} from '../../types/productTypes';
+} from '../../types/payment/productTypes';
 import { ProductForm } from './ProductForm'; // ProductForm 경로 수정 (동일 디렉토리 가정)
 import Modal from '../ui/Modal'; // 새로 만든 Modal 컴포넌트 import
 import { createProduct, updateProduct } from '../../api/productApi';

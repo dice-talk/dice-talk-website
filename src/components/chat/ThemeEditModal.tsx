@@ -18,7 +18,7 @@ interface ThemeEditModalProps {
     // rules?: string | null; // rules 필드가 있다면 추가
   }) => void;
 }
-
+ 
 export const ThemeEditModal: React.FC<ThemeEditModalProps> = ({ isOpen, onClose, theme, onSave }) => {
   // theme.name은 수정 불가하므로 별도 상태 X
   const [description, setDescription] = useState('');

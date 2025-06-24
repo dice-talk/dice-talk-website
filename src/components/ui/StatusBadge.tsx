@@ -14,7 +14,7 @@ import type { MemberStatus } from "../../types/memberTypes";
 import type { NoticeStatus } from "../../types/noticeTypes"; // 실제 Notice 상태 타입으로 가정
 import type { ThemeStatus } from "../../types/chatroom/themeTypes";
 import type { EventStatus } from "../../types/chatroom/eventTypes"; // 실제 Event 상태 타입으로 가정 (eventUtils의 mapBackendStatusToFrontendLabel이 받는 타입)
-import type { PaymentStatus } from "../../types/paymentTypes";
+import type { PaymentStatus } from "../../types/payment/paymentTypes";
 import type { RoomStatus } from "../../types/chatroom/chatRoomTypes"; // 실제 ChatRoom 상태 타입으로 가정
 
 type StatusBadgeProps =

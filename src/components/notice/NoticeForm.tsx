@@ -8,8 +8,10 @@ import { ImageUpload } from '../ui/ImageUpload'; // NoticeStatus import 제거
 import { NoticeStatus } from '../../types/noticeTypes'; // NoticeStatusFrontend import
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/Select'; // 커스텀 Select 컴포넌트 임포트
 import Button from '../ui/Button'; // Button 컴포넌트 임포트
-import { Popover, PopoverTrigger, PopoverContent } from '../ui/Popover'; // Popover 컴포넌트 임포트 (가정)
- 
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/Popover'; 
+import type { ExistingImage } from '../ui/ImageUpload'; // ExistingImage 타입 가져오기
+
+// import { ImageUpload } from './ImageUpload';
 // NoticeItem 인터페이스는 앱 전역에서 사용되므로, src/types/noticeTypes.ts 와 같은
 // 공유 파일로 이동하여 관리하는 것이 좋습니다. 여기서는 설명을 위해 간단히 정의합니다.
 interface NoticeItemForForm {
@@ -22,22 +24,27 @@ interface NoticeItemForForm {
   imageUrls?: string[];
   startDate?: string;
   endDate?: string;
+  thumbnailFlags?: boolean[]; // 각 이미지 파일에 대한 썸네일 여부
 }
 
+// NoticeNewPage에서 정의한 ExtendedNoticeFormData와 유사한 구조를 정의합니다.
+// 실제로는 NoticeNewPage의 ExtendedNoticeFormData 타입을 직접 import하거나 공유하는 것이 좋습니다.
 export interface NoticeFormData {
   title: string;
   content: string;
   isImportant: boolean;
   status: NoticeStatus; // NoticeStatusFrontend 사용
   type: '공지사항' | '이벤트';
-  imageFiles: File[];
-  removedImageUrls: string[];
   startDate?: string;
   endDate?: string;
+  // ImageUpload 관련 필드 추가
+  newImageFiles: File[];
+  keptExistingImageIds: number[];
+  allImageThumbnailFlags: boolean[];
 }
 
 interface NoticeFormProps {
-  initialData?: Partial<NoticeItemForForm>;
+  initialData?: Partial<NoticeItemForForm & { existingImages?: ExistingImage[] }>; // existingImages 추가
   onSave: (data: NoticeFormData) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
@@ -71,28 +78,46 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
   const [isImportant, setIsImportant] = useState(false);
   const [status, setStatus] = useState<NoticeStatus>(NoticeStatus.ONGOING); // NoticeStatusFrontend 사용
   const [type, setType] = useState<'공지사항' | '이벤트'>('공지사항');
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [removedImageUrls, setRemovedImageUrls] = useState<string[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [currentImageUrls, setCurrentImageUrls] = useState<string[]>([]);
+
+  // ImageUpload 관련 상태
+  const [newlyAddedFiles, setNewlyAddedFiles] = useState<File[]>([]);
+  const [removedExistingOriginalUrls, setRemovedExistingOriginalUrls] = useState<string[]>([]); // ImageUpload에서 제거된 '기존' 이미지의 URL
+  const [currentAllThumbnailFlags, setCurrentAllThumbnailFlags] = useState<boolean[]>([]);
+  const [initialExistingImages, setInitialExistingImages] = useState<ExistingImage[]>([]);
 
   useEffect(() => {
     setTitle(initialData.title || '');
     setContent(initialData.content || '');
     setIsImportant(initialData.isImportant || false);
-    setStatus(initialData.status || NoticeStatus.ONGOING); // NoticeStatusFrontend 사용
+    setStatus(initialData.status || NoticeStatus.SCHEDULED); // NoticeNewPage의 초기값과 일치 또는 적절한 기본값
     setType(initialData.type || '공지사항');
     setStartDate(initialData.startDate || '');
     setEndDate(initialData.endDate || '');
-    setCurrentImageUrls(initialData.imageUrls || []);
-    setImageFiles([]);
-    setRemovedImageUrls([]);
+
+    const existingImagesFromProps = initialData.existingImages || [];
+    setInitialExistingImages(existingImagesFromProps);
+
+    // ImageUpload 상태 초기화
+    setNewlyAddedFiles([]);
+    setRemovedExistingOriginalUrls([]);
+    // 초기 썸네일 플래그는 existingImagesFromProps에서 가져오거나, 없다면 모두 false로 설정
+    // ImageUpload 컴포넌트가 초기 썸네일 상태를 existingImageUrls prop을 통해 직접 관리하므로,
+    // 여기서는 onImagesChange를 통해 받는 최종 썸네일 상태를 저장합니다.
+    // 초기 렌더링 시에는 initialData.existingImages의 isThumbnail 값을 사용합니다.
+    setCurrentAllThumbnailFlags(existingImagesFromProps.map(img => img.isThumbnail));
+
   }, [initialData]);
 
-  const handleImageChange = (newFiles: File[], newRemovedUrls: string[]) => {
-    setImageFiles(newFiles);
-    setRemovedImageUrls(newRemovedUrls);
+  const handleImageChange = (
+    newFiles: File[], 
+    removedUrls: string[], // ImageUpload에서 제거된 이미지 URL (기존 이미지 URL 또는 Blob URL)
+    allThumbFlags: boolean[] // ImageUpload에 현재 표시된 모든 이미지의 썸네일 플래그
+  ) => {
+    setNewlyAddedFiles(newFiles);
+    setRemovedExistingOriginalUrls(removedUrls.filter(url => initialExistingImages.some(img => img.url === url))); // 제거된 URL 중 '기존' 이미지의 URL만 필터링
+    setCurrentAllThumbnailFlags(allThumbFlags);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -104,20 +129,26 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
 
     const today = format(new Date(), "yyyy-MM-dd");
 
+    // keptExistingImageIds 계산: 초기 기존 이미지 중, ImageUpload에서 제거되지 않은 이미지들의 ID
+    const keptExistingImageIds = initialExistingImages
+      .filter(img => img.id !== undefined && !removedExistingOriginalUrls.includes(img.url))
+      .map(img => img.id!);
+
     const formData: NoticeFormData = {
       title,
       content,
       isImportant,
       status,
       type,
-      imageFiles,
-      removedImageUrls,
       startDate: type === '공지사항' ? today : (startDate || undefined),
       endDate: type === '공지사항' ? today : (endDate || undefined),
+      // ImageUpload 관련 데이터
+      newImageFiles: newlyAddedFiles,
+      keptExistingImageIds: keptExistingImageIds,
+      allImageThumbnailFlags: currentAllThumbnailFlags,
     };
     onSave(formData);
   };
-
   return (
     <form id={`notice-form-${mode}`} onSubmit={handleSubmit} className="space-y-6">
       <div>
@@ -226,7 +257,13 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
         <textarea id="noticeContent" value={content} onChange={(e) => setContent(e.target.value)} rows={10} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" disabled={isSubmitting} />
       </div>
       
-      <ImageUpload onImagesChange={handleImageChange} existingImageUrls={currentImageUrls} label="이미지 첨부 (선택 사항)" maxFiles={5} disabled={isSubmitting} />
+      <ImageUpload 
+        onImagesChange={handleImageChange} 
+        existingImageUrls={initialExistingImages} // initialData에서 직접 ExistingImage[]를 전달
+        label="이미지 첨부 (선택 사항)" 
+        maxFiles={5} 
+        disabled={isSubmitting}
+      />
     </form>
   );
 };

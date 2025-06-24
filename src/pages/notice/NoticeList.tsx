@@ -8,9 +8,7 @@ import { Pagination } from '../../components/common/Pagination';
 import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge'; // StatusBadge 임포트
 import {
-  formatDate,
   mapFrontendStatusToBackendForFilter,
-  mapFrontendStatusToBackend, // mapFrontendStatusToBackend 임포트 추가
   mapBackendTypeToFrontendList, // 이전 단계에서 이동된 함수
   mapBackendStatusToFrontendList // 이전 단계에서 이동된 함수
 } from '../../lib/NoticeUtils';
@@ -18,6 +16,7 @@ import type { ColumnDefinition } from '../../components/common/reusableTableType
 import { getNotices } from '../../api/noticeApi'
 import { type NoticeResponseDto, type NoticeImageDto, type NoticeTypeBack,  NoticeStatus, type NoticeItemView } from '../../types/noticeTypes'; 
 import type { PageInfo } from '../../types/common';
+import { formatDate } from '../../lib/DataUtils';
 
 // 프론트엔드 표시용 NoticeItemView를 테이블 아이템으로 사용
 type NoticeTableItem = NoticeItemView;
@@ -175,7 +174,7 @@ export default function NoticeListPage() {
       key: 'status',
       header: '상태',
       headerClassName: 'w-[15%]',
-      cellRenderer: (item: NoticeTableItem) => <StatusBadge status={mapFrontendStatusToBackend(item.status)} type="notice" />,
+      cellRenderer: (item: NoticeTableItem) => <StatusBadge status={item.status} type="notice" />,
     },
     { 
       key: 'createdAt', 

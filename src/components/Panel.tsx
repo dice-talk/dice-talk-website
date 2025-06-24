@@ -2,7 +2,7 @@ interface PanelProps {
   title: string;
   items: string[];
   className?: string;
-}
+} 
 
 export function Panel({ title, items, className = ''} : PanelProps) {
   return (
