@@ -296,9 +296,11 @@ export default function QnaDetailPage() {
                     onImagesChange={handleAnswerImageChange}
                     existingImageUrls={
                       isEditingAnswer
-                        ? qnaItem.answer?.answerImages?.map(
-                            (img) => img.imageUrl
-                          ) || []
+                        ? qnaItem.answer?.answerImages?.map((img) => ({
+                            url: img.imageUrl,
+                            isThumbnail: false,
+                            id: img.answerImageId,
+                          })) || []
                         : []
                     }
                     maxFiles={5}
