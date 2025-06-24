@@ -11,8 +11,8 @@ export interface MenuItem {
 
 export const menuItems: MenuItem[] = [
   {
-    name: "대시보드",
-    path: "/",
+    name: '대시보드',
+    path: '/home',
   },
   {
     name: "회원 관리",
