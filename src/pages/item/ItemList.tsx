@@ -3,11 +3,11 @@ import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import { ReusableTable } from '../../components/common/ReusableTable';
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-import { type ItemResponseDto, type Item } from '../../types/itemTypes';
+import { type ItemResponseDto, type Item } from '../../types/payment/itemTypes';
 import type { MultiResponse, PageInfo } from '../../types/common';
 import Button from '../../components/ui/Button';
 import { ItemModal } from '../../components/item/ItemModal';
-import { formatDate } from '../../lib/ReportUtils'; // formatDate 유틸리티 경로 확인
+import { formatDate } from '../../lib/DataUtils'; // formatDate 유틸리티 경로 확인
 import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
 import { getItemsAdmin, deleteItem }from '../../api/itemApi';
 
@@ -124,13 +124,23 @@ export default function ItemListPage() {
   const columns: ColumnDefinition<ItemTableItem>[] = [
     { key: 'no', header: 'No', cellRenderer: (_item, index) => index + 1, headerClassName: 'w-[5%]' },
     {
-      key: 'itemImage', header: '이미지', headerClassName: 'w-[10%]',
+      key: 'itemImage', header: '이미지', headerClassName: 'w-[8%]',
       cellRenderer: (item) => item.itemImage ? <img src={item.itemImage} alt={item.itemName} className="h-12 w-12 object-cover rounded" /> : 'N/A'
     },
-    { key: 'itemName', header: '아이템명', accessor: 'itemName', headerClassName: 'w-[20%]' },
-    { key: 'description', header: '설명', accessor: 'description', headerClassName: 'w-[30%]', cellRenderer: (item) => <span className="truncate" title={item.description}>{item.description}</span> }, // itemDescription -> description
+    { key: 'itemName', header: '아이템명', accessor: 'itemName', headerClassName: 'w-[15%]' },
+    { 
+      key: 'description', 
+      header: '설명', 
+      accessor: 'description', 
+      headerClassName: 'w-[25%]', 
+      cellRenderer: (item) => (
+        <span title={item.description}>
+          {item.description.length > 25 ? `${item.description.substring(0, 25)}...` : item.description}
+        </span>
+      ) 
+    }, // itemDescription -> description
     { key: 'dicePrice', header: '다이스 소모량', accessor: (item) => `${item.dicePrice.toLocaleString()}개`, headerClassName: 'w-[10%]' }, // diceCost -> dicePrice
-    { key: 'createdAt', header: '등록일', accessor: (item) => formatDate(item.createdAt), headerClassName: 'w-[10%]' },
+    { key: 'createdAt', header: '등록일', accessor: (item) => formatDate(item.createdAt), headerClassName: 'w-[12%]' },
     {
       key: 'actions', header: '관리', headerClassName: 'w-[15%]',
       cellRenderer: (item) => (

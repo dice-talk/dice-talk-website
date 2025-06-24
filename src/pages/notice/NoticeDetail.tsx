@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import Button from '../../components/ui/Button';
-import { formatDate } from '../../components/notice/noticeUtils'
+import { formatDate } from '../../lib/DataUtils';
 import { isAxiosError } from 'axios'; // isAxiosError 임포트
 import { getNoticeDetail, deleteNotice } from '../../api/noticeApi'; // updateNotice -> getNoticeDetail
 import {

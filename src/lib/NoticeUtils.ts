@@ -1,5 +1,5 @@
 // src/lib/NoticeUtils.ts
-import { format, parseISO, isValid } from 'date-fns';
+// import { format, parseISO, isValid } from 'date-fns';
 import { 
   NoticeStatus, 
   type NoticeStatusBack, 
@@ -49,20 +49,20 @@ export const getNoticeStyle = (status: NoticeStatusType): string => {
   }
 };
 
-export const formatDate = (dateString?: string): string => {
-  if (!dateString) return 'N/A';
-  try {
-    const date = parseISO(dateString);
-    if (!isValid(date)) {
-      console.warn("Invalid date string provided to formatDate:", dateString);
-      return 'Invalid Date';
-    }
-    return format(date, 'yyyy.MM.dd');
-  } catch (error) {
-    console.error("Error formatting date:", dateString, error);
-    return 'Invalid Date';
-  }
-};
+// export const formatDate = (dateString?: string): string => {
+//   if (!dateString) return 'N/A';
+//   try {
+//     const date = parseISO(dateString);
+//     if (!isValid(date)) {
+//       console.warn("Invalid date string provided to formatDate:", dateString);
+//       return 'Invalid Date';
+//     }
+//     return format(date, 'yyyy.MM.dd');
+//   } catch (error) {
+//     console.error("Error formatting date:", dateString, error);
+//     return 'Invalid Date';
+//   }
+// };
 
 export const formatDateToLocalDateTimeString = (dateString?: string): string | undefined => {
   if (!dateString) return undefined;

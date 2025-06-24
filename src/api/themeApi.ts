@@ -3,22 +3,27 @@ import { axiosInstance } from "./axiosInstance"; // axiosInstance 경로 확인
 import type { ThemePatchDto, ThemeResponseDto, ThemeStatus } from '../types/chatroom/themeTypes';
 import type { MultiResponse } from "../types/common";
 
+const THEME_BASE_URL = "/themes";
 
-// 모든 테마 목록 조회
-export const getThemesForAdmin = async (params?: {
-  page?: number;
-  size?: number;
-  status?: ThemeStatus;
-}): Promise<MultiResponse<ThemeResponseDto>> => {
-  const response = await axiosInstance.get<MultiResponse<ThemeResponseDto>>("/themes", { params });
+export interface GetThemesParams {
+ page?: number; // 페이지 번호 (선택적)
+  size?: number; // 페이지 크기 (선택적)
+  status?: ThemeStatus | ''; // 테마 상태 (선택적, ''는 전체를 의미할 수 있음)
+  // 추가적인 필터 파라미터가 있다면 여기에 정의 (예: name?: string;)
+}
+
+export const getThemes = async (params:GetThemesParams): Promise<MultiResponse<ThemeResponseDto>> => {
+  const response = await axiosInstance.get<MultiResponse<ThemeResponseDto>>(`${THEME_BASE_URL}/admin`, { params });
   return response.data;
 };
+
+
 
 
 // 특정 ID의 테마 정보 조회
 export const getThemeById = async (themeId: number): Promise<ThemeResponseDto> => {
 
-  const response = await axiosInstance.get<ThemeResponseDto>(`/themes/${themeId}`);
+  const response = await axiosInstance.get<ThemeResponseDto>(`${THEME_BASE_URL}/${themeId}`);
   return response.data; // SingleResponseDto의 data 필드에서 실제 테마 데이터 추출
 };
 
@@ -42,7 +47,7 @@ const { themeId, ...otherPatchData } = themeData;
      // formData.append("image", imageFile); // 만약 imageFile을 별도 파라미터로 받는다면
   }
 
-  const response = await axiosInstance.patch<ThemeResponseDto>(`/themes/${themeId}`, formData, {
+  const response = await axiosInstance.patch<ThemeResponseDto>(`${THEME_BASE_URL}/${themeId}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -52,5 +57,5 @@ const { themeId, ...otherPatchData } = themeData;
 
 // 특정 ID의 테마를 삭제합니다.
 export const deleteTheme = async (themeId: number): Promise<void> => {
-  await axiosInstance.delete(`/themes/${themeId}`);
+  await axiosInstance.delete(`${THEME_BASE_URL}/${themeId}`);
 };

@@ -15,9 +15,6 @@ interface PaymentHistoryFilterSectionProps {
   // 상태 필터
   statusFilter: string; // '전체' 또는 PaymentStatus
   onStatusFilterChange: (status: string) => void;
-  // 결제수단 필터
-  methodFilter: string; // '전체' 또는 PaymentMethod
-  onMethodFilterChange: (method: string) => void;
   // 검색 필터
   userSearchTerm: string; // 사용자 ID 또는 이메일
   onUserSearchTermChange: (term: string) => void;
@@ -26,8 +23,8 @@ interface PaymentHistoryFilterSectionProps {
   // 액션 버튼
   onApplyFilters: () => void;
   onResetFilters: () => void;
-}
-
+}  
+ 
 const paymentStatusOptions: { value: string, label: string }[] = [
   { value: '전체', label: '전체 상태' },
   { value: '결제 완료', label: '결제 완료' },
@@ -37,23 +34,24 @@ const paymentStatusOptions: { value: string, label: string }[] = [
   { value: '결제 대기중', label: '결제 대기중' },
 ];
 
-const paymentMethodOptions: { value: string, label: string }[] = [
-  { value: '전체', label: '전체 결제수단' },
-  { value: '신용카드', label: '신용카드' },
-  { value: '카카오페이', label: '카카오페이' },
-  { value: '네이버페이', label: '네이버페이' },
-  { value: '계좌이체', label: '계좌이체' },
-  { value: '휴대폰결제', label: '휴대폰결제' },
-  { value: '기타', label: '기타' },
-];
+// const paymentMethodOptions: { value: string, label: string }[] = [
+//   { value: '전체', label: '전체 결제수단' },
+//   { value: '신용카드', label: '신용카드' },
+//   { value: '카카오페이', label: '카카오페이' },
+//   { value: '네이버페이', label: '네이버페이' },
+//   { value: '계좌이체', label: '계좌이체' },
+//   { value: '휴대폰결제', label: '휴대폰결제' },
+//   { value: '기타', label: '기타' },
+// ];
 
 export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionProps> = ({
   startDate, onStartDateChange, endDate, onEndDateChange,
   statusFilter, onStatusFilterChange,
-  methodFilter, onMethodFilterChange,
+  // methodFilter, onMethodFilterChange, // 제거됨
   userSearchTerm, onUserSearchTermChange,
   productSearchTerm, onProductSearchTermChange,
-  onResetFilters,
+  onApplyFilters, 
+  onResetFilters
 }) => {
   return (
     <div className="mb-6 p-4 bg-white rounded-lg shadow border border-gray-200/75 space-y-4">
@@ -74,13 +72,16 @@ export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionPr
           onValueChange={onStatusFilterChange}
           options={paymentStatusOptions}
         />
-        <DropdownFilter
-          label="결제 수단"
-          id="methodFilter"
-          value={methodFilter}
-          onValueChange={onMethodFilterChange}
-          options={paymentMethodOptions}
-        />
+        {/* methodFilter와 onMethodFilterChange가 제공될 때만 렌더링 (제거됨) */}
+        {/* {methodFilter !== undefined && onMethodFilterChange && (
+          <DropdownFilter
+            label="결제 수단"
+            id="methodFilter"
+            value={methodFilter}
+            onValueChange={onMethodFilterChange}
+            options={paymentMethodOptions}
+          />
+        )} */}
       </div>
 
       {/* 2행: 검색 필터 및 버튼 */}
@@ -100,13 +101,15 @@ export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionPr
           onChange={onProductSearchTermChange}
         />
         <div className="md:col-span-2 flex justify-end items-end space-x-2 pt-4 sm:pt-0">
-          {/* <Button
-            variant="default"
-            onClick={onApplyFilters}
-            className="w-full sm:w-auto"
-          >
-            조회
-          </Button> */}
+          {onApplyFilters && ( 
+            <Button
+              variant="default"
+              onClick={onApplyFilters}
+              className="w-full sm:w-auto"
+            >
+              조회
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={onResetFilters}

@@ -2,10 +2,10 @@
 interface SummaryCardProps {
   title: string;
   value: string;
-  selected?: boolean;
+  selected?: boolean; 
   onClick?: () => void;
   className?: string; // ⬅️ 이 줄을 추가
-}
+} 
 
 export function SummaryCard({ title, value, selected, onClick, className ='',
  }: SummaryCardProps) { 

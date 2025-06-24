@@ -3,7 +3,9 @@
 import { type ChatResponseDto } from './chatTypes';
 import { type EventResponseDto } from './eventTypes';
 import { type ChatPartResponseDto } from './chatPart';
-import { type MultiResponse } from '../common';
+// import { type MultiResponse } from '../common';
+import type { SpringPage } from "../common"; // SpringPage 임포트
+
 
 // ChatRoom.java의 RoomType enum
 export const RoomType = {
@@ -36,7 +38,7 @@ export interface ChatRoomSingleResponseDto {
   roomStatus: RoomStatus; // 채팅방 상태
   themeId: number | null 
   themeName: string; // 테마 이름
-  chats: MultiResponse<ChatResponseDto>; // ChatDto.Response 타입으로 변경 필요
+  chats: SpringPage<ChatResponseDto>;
   chatParts: ChatPartResponseDto[];
   roomEvents: EventResponseDto[]; // RoomEventDto.Response 타입으로 변경 필요
   createdAt: string; // LocalDateTime은 string으로 처리 (ISO 8601 형식)

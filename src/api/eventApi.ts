@@ -20,7 +20,7 @@ export const createEvent = async (postDto: EventPostDto): Promise<string | null>
   return null;
 };
 
-/**
+/** 
  * 이벤트 수정
  * @param eventId 수정할 이벤트 ID
  * @param patchDto 이벤트 수정 정보

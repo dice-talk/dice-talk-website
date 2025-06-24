@@ -1,5 +1,5 @@
 // import { PageInfo } from "../types/common";
-import type { ChatResponse } from "./chatTypes";
+import type { ChatResponseDto } from "./chatroom/chatTypes";
 
 export type ReportStatus = string;
 
@@ -23,7 +23,7 @@ export interface ReportResponse {
   reporterEmail: string;
   reportedMemberId: number;
   reportedEmail: string;
-  reportedChats: ChatResponse[];
+  reportedChats: ChatResponseDto[];
   chatRoomId: number;
   reportStatus: ReportStatus;
   createdAt: string;

@@ -1,18 +1,13 @@
 import axiosInstance from './axiosInstance';
+import type { MainDashboardResponse } from '../types/dashboardTypes';
 
-interface DailyCount {
-  date: string; // ISO 문자열, 예: '2025-05-25'
-  count: number;
-  isFuture: boolean;
-}
+const DASHBOARD_BASE_URL = "/admin";
 
-interface DashboardWeekly {
-  weeklyNewMemberCount: DailyCount[];
-  weeklyActiveChatRoomCount: DailyCount[];
-  // 추후 신고 수, 결제 수 등 추가 가능
-}
-
-export const adminSignup = async (data: DashboardWeekly) => {
-  const response = await axiosInstance.post('/admin/dashboard', data);
+/**
+ * 대시보드 메인 데이터를 조회합니다.
+ * @returns MainDashboardResponse 타입의 대시보드 데이터
+ */
+export const getDashboardData = async (): Promise<MainDashboardResponse> => {
+  const response = await axiosInstance.get<MainDashboardResponse>(`${DASHBOARD_BASE_URL}/dashboard`);
   return response.data;
 };
