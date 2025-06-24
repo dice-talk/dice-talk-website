@@ -1,10 +1,10 @@
 // src/components/report/ReportFilterSection.tsx
-import React from 'react';
-import { ReportStatus } from '../../types/reportTypes';
-import { getReportStatusLabel } from '../../lib/ReportUtils';
-import Button from '../ui/Button';
-import { DropdownFilter } from '../ui/DropdownFilter';
-import { SearchInputFilter } from '../ui/SearchInputFilter';
+import React from "react";
+import type { ReportStatus } from "../../types/reportTypes";
+import { getReportStatusLabel } from "../../lib/ReportUtils";
+import Button from "../ui/Button";
+import { DropdownFilter } from "../ui/DropdownFilter";
+import { SearchInputFilter } from "../ui/SearchInputFilter";
 
 interface ReportFilterSectionProps {
   statusFilter: string;
@@ -12,7 +12,15 @@ interface ReportFilterSectionProps {
   searchTerm: string;
   onSearchTermChange: (term: string) => void;
   onResetFilters: () => void;
+  onSearch: () => void;
 }
+
+const REPORT_STATUSES: ReportStatus[] = [
+  "REPORT_RECEIVED",
+  "REPORT_REJECTED",
+  "REPORT_COMPLETED",
+  "REPORT_DELETED",
+];
 
 export const ReportFilterSection: React.FC<ReportFilterSectionProps> = ({
   statusFilter,
@@ -20,10 +28,11 @@ export const ReportFilterSection: React.FC<ReportFilterSectionProps> = ({
   searchTerm,
   onSearchTermChange,
   onResetFilters,
+  onSearch,
 }) => {
   const reportStatusOptions = [
-    { value: '전체', label: '전체 상태' },
-    ...Object.values(ReportStatus).map(status => ({
+    { value: "전체", label: "전체 상태" },
+    ...REPORT_STATUSES.map((status) => ({
       value: status,
       label: getReportStatusLabel(status),
     })),
@@ -53,17 +62,22 @@ export const ReportFilterSection: React.FC<ReportFilterSectionProps> = ({
             value={searchTerm}
             onChange={onSearchTermChange}
           />
-
         </div>
 
         {/* 필터 초기화 버튼 */}
-        <div className="md:col-start-3 lg:col-start-4 flex justify-end">
+        <div className="md:col-start-3 lg:col-start-4 flex justify-end gap-3">
           <Button
             variant="outline"
             onClick={onResetFilters}
             className="w-full md:w-auto"
           >
-            필터 초기화
+            초기화
+          </Button>
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 w-full md:w-auto"
+            onClick={onSearch}
+          >
+            조회
           </Button>
         </div>
       </div>

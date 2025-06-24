@@ -1,30 +1,36 @@
-export const ReportStatus = {
-  REPORT_RECEIVED: 'REPORT_RECEIVED', // 접수됨
-  UNDER_REVIEW: 'UNDER_REVIEW',       // 검토 중
-  ACTION_TAKEN: 'ACTION_TAKEN',       // 조치 완료 (예: 경고 발송)
-  DISMISSED: 'DISMISSED',             // 기각됨
-} as const;
+// import { PageInfo } from "../types/common";
+import type { ChatResponseDto } from "./chatroom/chatTypes";
 
-export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
+export type ReportStatus = string;
 
-export interface ReportedChat {
-  chatId: number;
-  message: string;
-  memberId: number;
-  nickname: string;
-  chatRoomId: number;
-  createdAt: string;
+export type ReportReason = string;
+
+export interface ReportPostDto {
+  reportReason: ReportReason;
+  reporterId: number;
+  chatReports?: ChatReportPost[];
+  reportedMemberIds: number[];
 }
 
-export interface ReportItem {
+export interface ChatReportPost {
+  chatId: number;
+}
+
+export interface ReportResponse {
   reportId: number;
-  reason: string;
+  reportReason: string;
   reporterId: number;
   reporterEmail: string;
   reportedMemberId: number;
   reportedEmail: string;
-  reportedChats: ReportedChat[]; // 여러 채팅 내용이 첨부될 수 있음을 가정
+  reportedChats: ChatResponseDto[];
+  chatRoomId: number;
   reportStatus: ReportStatus;
   createdAt: string;
   modifiedAt: string;
+}
+
+export interface ReportReasonResponse {
+  code: ReportReason;
+  description: string;
 }

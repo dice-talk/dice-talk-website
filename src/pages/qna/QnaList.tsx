@@ -1,159 +1,219 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../../components/sidebar/Sidebar';
-import Header from '../../components/Header';
-import { NewBadge } from '../../components/ui/NewBadge';
-import { QnaFilterSection } from '../../components/qna/QnaFilterSection';
-import { ReusableTable } from '../../components/common/ReusableTable';
-import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
-import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-// QnaDetail.tsx에서 QnaItem, QuestionStatusType, mockQnas, formatDate를 가져옴
-import { type QnaItem, type QuestionStatusType, mockQnas as importedMockQnas, formatDate } from './QnaDetail';
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../../components/sidebar/Sidebar";
+import Header from "../../components/Header";
+import { NewBadge } from "../../components/ui/NewBadge";
+import { QuestionStatusBadge } from "../../components/ui/QuestionStatusBadge";
+import { QnaFilterSection } from "../../components/qna/QnaFilterSection";
+import { ReusableTable } from "../../components/common/ReusableTable";
+import { Pagination } from "../../components/common/Pagination";
+import type {
+  ColumnDefinition,
+  TableItem,
+} from "../../components/common/reusableTableTypes";
+import { getQuestions } from "../../api/questionApi";
+import type { QuestionResponse } from "../../types/questionTypes";
+import type { PageInfo } from "../../types/common";
+
+type QnaStatus = "전체" | "QUESTION_REGISTERED" | "QUESTION_ANSWERED";
 
 // ReusableTable을 위한 QnaItem 확장 (TableItem의 id와 매핑)
-interface QnaTableItem extends QnaItem, TableItem {
+interface QnaTableItem extends QuestionResponse, TableItem {
   id: number; // questionId를 id로 사용
-};
+}
 
 const qnaSortOptions = [
-  { value: 'questionId_desc', label: '등록 최신순' },
-  { value: 'questionId_asc', label: '등록 오래된순' },
+  { value: "desc", label: "등록 최신순" },
+  { value: "asc", label: "등록 오래된순" },
 ];
 
-// // 테스트를 위해 "어제" 날짜를 생성합니다.
-// const yesterday = new Date();
-// yesterday.setDate(yesterday.getDate() - 1);
-// mockQnas를 importedMockQnas로 사용
-
-const AnswerStatusDisplay = ({ status }: { status: QuestionStatusType }) => {
-  if (status === 'QUESTION_ANSWERED') {
-    return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-700">답변 완료</span>;
-  }
-  // QUESTION_REGISTERED, UPDATE는 답변 미등록으로 처리
-  return <span className="text-gray-500">-</span>;
+// 한글 상태값을 API 코드값으로 변환
+const getStatusParam = (status: string) => {
+  return status === "전체" ? undefined : status;
 };
 
 export default function QnaList() {
-  const qnas: QnaItem[] = useMemo(() => importedMockQnas, []); // importedMockQnas 사용 및 useMemo
-  const [statusFilter, setStatusFilter] = useState('전체');
-  const [searchType, setSearchType] = useState('제목'); // 기본 검색 유형
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [sortValue, setSortValue] = useState('questionId_desc'); // ReusableTable의 sortValue와 연결
-  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태 추가
-  const itemsPerPage = 10; // 페이지당 보여줄 아이템 수
+  const [qnas, setQnas] = useState<QuestionResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pageInfo, setPageInfo] = useState<PageInfo>({
+    page: 1,
+    totalPages: 1,
+    totalElements: 0,
+    size: 10,
+  });
+
+  // UI 입력을 위한 필터 상태
+  const [statusFilter, setStatusFilter] = useState<QnaStatus>("전체");
+  const [searchType, setSearchType] = useState("제목"); // 기본 검색 유형
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [sortValue, setSortValue] = useState("desc");
+
+  // 실제 필터링에 사용될 필터 상태
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: "전체" as QnaStatus,
+    searchType: "제목",
+    searchKeyword: "",
+  });
+
   const navigate = useNavigate();
 
-  const handleResetFilters = () => {
-    setStatusFilter('전체');
-    setSearchType('제목');
-    setSearchKeyword('');
+  useEffect(() => {
+    const fetchQnas = async () => {
+      setLoading(true);
+      try {
+        const statusParam = getStatusParam(appliedFilters.status);
+        const params: {
+          page: number;
+          size: number;
+          status?: string;
+          sort: "desc" | "asc";
+          keyword?: string;
+          searchType?: "TITLE" | "AUTHOR" | "TITLE_AUTHOR" | "CONTENT";
+        } = {
+          page: pageInfo.page,
+          size: pageInfo.size,
+          sort: sortValue as "desc" | "asc",
+        };
+        if (statusParam) {
+          params.status = statusParam;
+        }
+        if (appliedFilters.searchKeyword) {
+          params.keyword = appliedFilters.searchKeyword;
+          params.searchType = getSearchTypeValue(appliedFilters.searchType);
+        }
+        console.log("QnA 목록 요청 URL:", `/questions/admin`, params);
+        const response = await getQuestions(params);
+        if (response.data) {
+          setQnas(response.data.data);
+          setPageInfo(response.data.pageInfo);
+        }
+      } catch (error) {
+        console.error("QnA 목록을 불러오는데 실패했습니다:", error);
+        // TODO: 사용자에게 에러 메시지 표시
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQnas();
+  }, [pageInfo.page, pageInfo.size, appliedFilters, sortValue]);
+
+  const getSearchTypeValue = (
+    searchType: string
+  ): "TITLE" | "AUTHOR" | "TITLE_AUTHOR" | "CONTENT" | undefined => {
+    switch (searchType) {
+      case "제목":
+        return "TITLE";
+      case "작성자":
+        return "AUTHOR";
+      case "작성자+제목":
+        return "TITLE_AUTHOR";
+      case "내용":
+        return "CONTENT";
+      default:
+        return undefined;
+    }
   };
 
- 
-  const filteredAndSortedQnas = useMemo(() => {
-    let filtered = [...qnas];
+  const handleResetFilters = () => {
+    // UI 필터 상태 초기화
+    setStatusFilter("전체");
+    setSearchType("제목");
+    setSearchKeyword("");
+    // 적용된 필터 상태도 초기화
+    setAppliedFilters({
+      status: "전체",
+      searchType: "제목",
+      searchKeyword: "",
+    });
+    setPageInfo((prev) => ({ ...prev, page: 1 })); // 초기화 시 첫 페이지로 이동
+  };
 
-    // 상태 필터링
-    if (statusFilter !== '전체') {
-      filtered = filtered.filter(qna => {
-        if (statusFilter === '답변 완료') {
-          return qna.questionStatus === 'QUESTION_ANSWERED';
-        }
-        if (statusFilter === '답변 미등록') {
-          return qna.questionStatus === 'QUESTION_REGISTERED' || qna.questionStatus === 'QUESTION_UPDATED';
-        }
-        return true; // '전체'의 경우 모든 항목 포함 (실질적으로 위에서 처리됨)
-      });
-    }
-
-    // 통합 검색 필터링
-    if (searchKeyword) {
-      const keyword = searchKeyword.toLowerCase();
-      filtered = filtered.filter(qna => {
-        if (searchType === '작성자') {
-          return qna.authorEmail.toLowerCase().includes(keyword);
-        } else if (searchType === '제목') {
-          return qna.title.toLowerCase().includes(keyword);
-        } else if (searchType === '내용') {
-          return qna.content.toLowerCase().includes(keyword);
-        } else if (searchType === '제목+내용') {
-          return qna.title.toLowerCase().includes(keyword) || qna.content.toLowerCase().includes(keyword);
-        }
-        return true;
-      });
-    }
-
-    // 정렬 로직은 ReusableTable에 의해 관리되므로, 여기서는 필터링된 데이터를 TableItem 형식으로 변환
-    if (sortValue === 'questionId_desc') {
-      filtered.sort((a, b) => b.questionId - a.questionId);
-    } else if (sortValue === 'questionId_asc') {
-      filtered.sort((a, b) => a.questionId - b.questionId);
-    }
-    // ReusableTable에 맞게 id 필드 추가
-    return filtered.map(qna => ({ ...qna, id: qna.questionId } as QnaTableItem)); // 명시적 타입 캐스팅 추가
-  }, [qnas, statusFilter, searchType, searchKeyword, sortValue]);
-
-  // 페이지네이션을 위한 데이터 계산
-  const paginatedQnas = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredAndSortedQnas.slice(startIndex, endIndex);
-  }, [filteredAndSortedQnas, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(filteredAndSortedQnas.length / itemsPerPage);
+  const handleSearch = () => {
+    setAppliedFilters({
+      status: statusFilter,
+      searchType: searchType,
+      searchKeyword: searchKeyword,
+    });
+    setPageInfo((prev) => ({ ...prev, page: 1 })); // 검색 시 첫 페이지로 이동
+  };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    setPageInfo((prev) => ({ ...prev, page }));
   };
 
-  //상세조회 페이지 이동 
+  //상세조회 페이지 이동
   const handleRowClick = (item: QnaTableItem) => {
     navigate(`/qna/${item.questionId}`);
   };
 
   const columns: ColumnDefinition<QnaTableItem>[] = [
     {
-      key: 'no',
-      header: 'No',
-      cellRenderer: (_item, index) => (currentPage - 1) * itemsPerPage + index + 1, // 페이지네이션 고려한 순번
-      headerClassName: 'w-1/12', // 약 8.33%
-      cellClassName: 'text-gray-700',
+      key: "no",
+      header: "No",
+      cellRenderer: (item) => item.questionId, // questionId 그대로 출력
+      headerClassName: "w-1/12", // 약 8.33%
+      cellClassName: "text-gray-700",
     },
     {
-      key: 'title',
-      header: '제목',
+      key: "title",
+      header: "제목",
       cellRenderer: (item) => {
-        const displayTitle = item.title.length > 30 ? `${item.title.substring(0, 30)}...` : item.title;
+        const displayTitle =
+          item.title.length > 30
+            ? `${item.title.substring(0, 30)}...`
+            : item.title;
         return (
-            <div className="w-full flex items-center justify-start text-left" title={item.title}>
-              <NewBadge createdAt={item.createdAt} />
-              <span className="ml-1 min-w-0">{displayTitle}</span>
-            </div>
+          <div
+            className="w-full flex items-center justify-start text-left"
+            title={item.title}
+          >
+            <NewBadge createdAt={item.createdAt} />
+            <span className="ml-1 min-w-0">{displayTitle}</span>
+          </div>
         );
       },
-      headerClassName: 'w-5/12 text-left', // 약 41.67%
-      cellClassName: 'text-left',
+      headerClassName: "w-5/12 text-left", // 약 41.67%
+      cellClassName: "text-left",
     },
     {
-      key: 'authorEmail',
-      header: '작성자(이메일)',
-      accessor: 'authorEmail',
-      headerClassName: 'w-2/12', // 약 16.67% (기존 3/12에서 조정)
-      cellClassName: 'text-gray-700',
+      key: "email",
+      header: "작성자(이메일)",
+      accessor: "email",
+      headerClassName: "w-2/12", // 약 16.67% (기존 3/12에서 조정)
+      cellClassName: "text-gray-700",
     },
     {
-      key: 'questionStatus',
-      header: '답변 등록',
-      cellRenderer: (item) => <AnswerStatusDisplay status={item.questionStatus} />,
-      headerClassName: 'w-2/12', // 약 16.67%
+      key: "questionStatus",
+      header: "답변 등록",
+      cellRenderer: (item) => (
+        <QuestionStatusBadge status={item.questionStatus} />
+      ),
+      headerClassName: "w-2/12", // 약 16.67%
     },
-    { key: 'createdAt', header: '등록일', accessor: (item) => formatDate(item.createdAt), headerClassName: 'w-2/12', cellClassName: 'text-gray-700' }, // 약 16.67%
+    {
+      key: "createdAt",
+      header: "등록일",
+      accessor: (item) => new Date(item.createdAt).toLocaleDateString(),
+      headerClassName: "w-2/12",
+      cellClassName: "text-gray-700",
+    },
   ];
+
+  // ReusableTable에 맞게 id 필드 추가
+  const tableData = useMemo(
+    () => qnas.map((qna) => ({ ...qna, id: qna.questionId } as QnaTableItem)),
+    [qnas]
+  );
 
   return (
     <div className="min-h-screen flex bg-gradient-to-r from-blue-300 to-purple-300">
       <Sidebar />
       <div className="flex-1 flex flex-col">
+        {loading && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <p className="text-white text-xl">데이터를 불러오는 중...</p>
+          </div>
+        )}
         <Header />
         <main className="flex-1 bg-slate-50 p-6 md:p-8 rounded-tl-xl overflow-y-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-8">QnA 관리</h2>
@@ -167,28 +227,29 @@ export default function QnaList() {
             searchKeyword={searchKeyword}
             onSearchKeywordChange={setSearchKeyword}
             onResetFilters={handleResetFilters}
+            onSearch={handleSearch}
           />
 
           {/* ReusableTable 사용 */}
           <ReusableTable
             columns={columns}
-            data={paginatedQnas} // 페이지네이션된 데이터 사용
-            totalCount={filteredAndSortedQnas.length} // 필터링된 결과의 개수를 totalCount로 사용
+            data={tableData}
+            totalCount={pageInfo.totalElements}
             sortValue={sortValue}
             onSortChange={setSortValue}
             sortOptions={qnaSortOptions}
             emptyStateMessage="검색 결과에 해당하는 Q&A가 없습니다."
             onRowClick={handleRowClick}
           />
+
           {/* 페이지네이션 컴포넌트 추가 */}
-          {totalPages > 0 && (
+          {pageInfo.totalPages > 0 && (
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
+              currentPage={pageInfo.page}
+              totalPages={pageInfo.totalPages}
               onPageChange={handlePageChange}
             />
           )}
-
         </main>
       </div>
     </div>

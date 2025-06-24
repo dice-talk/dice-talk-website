@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { adminSignup } from '../../api/auth';
 import axios, { AxiosError } from 'axios';
+import type { AdminSignupRequest } from '../../types/authTypes'; // AdminSignupRequest 타입 임포트
 import { Input } from '../ui/Input'; // Input 컴포넌트 임포트
 import Button from '../ui/Button'; // Button 컴포넌트 임포트
 
@@ -18,21 +19,19 @@ export default function SignupForm({ onSignupSuccess }: SignupFormProps) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState(''); // 비밀번호 확인 필드 추가
-  const [phone] = useState('');
 
   const handleSignup = async () => {
+    if (password !== confirmPassword) {
+      alert('비밀번호가 일치하지 않습니다.');
+      return;
+    }
     try {
-      await adminSignup({
+      const signupData: AdminSignupRequest = {
         email,
         name, 
         password,
-        // TODO: 비밀번호 확인 로직 추가
-        // TODO: 실제 API에 필요한 모든 필드 (birth, gender, region 등) 추가 또는 제거
-        phone, 
-        birth: '2000-01-01',
-        gender: null,
-        region: '서울시 강남구' 
-    });
+      };
+      await adminSignup(signupData);
 
       alert('회원가입 성공!');
       onSignupSuccess(); // 성공 시 부모 컴포넌트의 콜백 호출
@@ -47,7 +46,7 @@ export default function SignupForm({ onSignupSuccess }: SignupFormProps) {
 };
 
    // TODO: 비밀번호 확인 로직 추가
-   const isPasswordMatch = password === confirmPassword;
+   const isPasswordMatch = password === confirmPassword || confirmPassword === '';
 
    return (
     // 페이지 레이아웃 제거, 폼 요소만 남김
@@ -93,8 +92,6 @@ export default function SignupForm({ onSignupSuccess }: SignupFormProps) {
         />
         {!isPasswordMatch && confirmPassword && <p className="mt-1 text-xs text-red-600">비밀번호가 일치하지 않습니다.</p>}
       </div>
-      {/* TODO: 전화번호 필드 추가 */}
-      {/* TODO: 실제 API에 필요한 추가 필드 (생년월일, 성별, 지역 등) 추가 */}
       <Button
         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
         onClick={handleSignup}

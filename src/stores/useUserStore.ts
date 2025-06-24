@@ -3,15 +3,16 @@ import { persist } from 'zustand/middleware';
 
 interface UserState {
   username: string;
-  token: string;
+  token: string | null;
   setUser: (username: string, token: string) => void;
   reset: () => void;
 }
 
 interface AuthState {
   isLoggedIn: boolean;
-  login: () => void;
-  logout: () => void;
+  isAuthenticated: boolean; // isAuthenticated 속성 추가
+  login: () => void; // 실제 구현에서는 토큰 등을 받아 isAuthenticated를 true로 설정
+  logout: () => void; // 실제 구현에서는 토큰을 제거하고 isAuthenticated를 false로 설정
 }
 
 //회원가입, 로그인 후 상태 저장 및 페이지 새로고침에도 유지
@@ -19,9 +20,9 @@ export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       username: '',
-      token: '',
+      token: null, //초기값 설정 
       setUser: (username, token) => set({ username, token }),
-      reset: () => set({ username: '', token: '' }),
+      reset: () => set({ username: '', token: null }),
     }),
     {
       name: 'user-storage', // localStorage 키 이름
@@ -31,7 +32,9 @@ export const useUserStore = create<UserState>()(
 
 export const useAuthStore = create<AuthState>((set) => ({
   isLoggedIn: false,
-  login: () => set({ isLoggedIn: true }),
-  logout: () => set({ isLoggedIn: false }),
+  isAuthenticated: false, // 초기값은 false 또는 토큰 유무에 따라 설정
+  login: () => set({ isAuthenticated: true }),
+  logout: () => set({ isAuthenticated: false }),
 }));
+
 

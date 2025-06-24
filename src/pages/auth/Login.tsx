@@ -1,42 +1,87 @@
 // src/pages/Login.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../../api/auth';
-import { useAuthStore } from '../../stores/useUserStore';
-import Button from '../../components/ui/Button'; // Button 컴포넌트 임포트
-import { Input } from '../../components/ui/Input'; // Input 컴포넌트 임포트
-import SignupForm from '../../components/auth/SignupForm'; // SignupForm 컴포넌트 임포트 (새로 생성될 파일)
-
+import { login, adminSignup } from '../../api/auth';
+import { useAuthStore, useUserStore } from '../../stores/useUserStore';
+import Button from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import axios, { AxiosError } from 'axios';
 
 const Login = () => {
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login'); // 'login' 또는 'signup'
-  const [loginId, setLoginId] = useState(''); // 아이디 또는 이메일
-  const [loginPassword, setLoginPassword] = useState(''); // 비밀번호
-  const { login: setLoginStatus } = useAuthStore(); // 스토어에서 로그인 상태 변경 함수 가져오기
-  const navigate = useNavigate(); //페이지 이동 
+  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [loginId, setLoginId] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
+  // 회원가입 입력 상태
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupName, setSignupName] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupPasswordConfirm, setSignupPasswordConfirm] = useState('');
+  const [passwordMatch, setPasswordMatch] = useState<boolean | null>(null);
+
+
+  const authLoginAction = useAuthStore((state) => state.login);
+  const userSetUserAction = useUserStore((state) => state.setUser);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      await login({ username: loginId, password: loginPassword }); // loginId와 loginPassword 사용
-      setLoginStatus(); //로그인 상태 true 변경
-      // setLoginStatus(); // 로그인 상태 true 변경
-      alert('로그인 성공!');
-      navigate('/home'); //로그인 성공 시 /home 으로 이동
+      const token = await login({ username: loginId, password: loginPassword });
+      if (token) {
+        localStorage.setItem("accessToken", token);
+        userSetUserAction(loginId, token);
+        authLoginAction();
+        alert('로그인 성공!');
+        navigate('/home');
+      } else {
+        alert('로그인 실패: 서버로부터 토큰을 받지 못했습니다.');
+      }
     } catch (error) {
       console.error(error);
       alert('로그인 실패');
     }
-    // TODO: 실제 로그인 로직 구현
-    // console.log('로그인 시도:', { loginId, loginPassword });
-    // 로그인 성공 시 메인 페이지 등으로 이동
-    // navigate('/');
   };
+const handleSignup = async () => {
+  if (signupPassword !== signupPasswordConfirm || !passwordMatch) {
+    alert('비밀번호가 일치하지 않습니다.');
+    return;
+  }
+
+  try {
+    await adminSignup({
+      email: signupEmail,
+      name: signupName,
+      password: signupPassword,
+      birth: '2000-01-01',
+      gender: null,
+      region: '서울시 강남구',
+    });
+
+    alert('회원가입 성공! 로그인 페이지로 이동합니다.');
+    setActiveTab('login');
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && err.response) {
+      const axiosErr = err as AxiosError<{ message: string }>;
+      alert(`회원가입 실패: ${axiosErr.response?.data?.message || axiosErr.response?.statusText}`);
+    } else {
+      alert('회원가입 실패: 알 수 없는 오류');
+    }
+  }
+};
+
+  useEffect(() => {
+    if (signupPasswordConfirm === '') {
+      setPasswordMatch(null);
+    } else {
+      setPasswordMatch(signupPassword === signupPasswordConfirm);
+    }
+  }, [signupPassword, signupPasswordConfirm]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-300 to-purple-300 p-4"> {/* 배경 및 중앙 정렬 */}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-300 to-purple-300 p-4">
       <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
         {/* 탭 네비게이션 */}
-        <div className="flex border-b border-gray-200 mb-6"> {/* 하단 경계선 추가 */}
+        <div className="flex border-b border-gray-200 mb-6">
           <button
             className={`flex-1 py-3 text-center font-semibold transition-colors ${activeTab === 'login' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab('login')}
@@ -51,9 +96,9 @@ const Login = () => {
           </button>
         </div>
 
-        {/* 탭 내용 */}
+        {/* 로그인 폼 */}
         {activeTab === 'login' ? (
-          <div className="space-y-6"> {/* 폼 요소 간 간격 */}
+          <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 text-center">로그인</h2>
             <div>
               <label htmlFor="loginId" className="block text-sm font-medium text-gray-700 mb-1">아이디 또는 이메일</label>
@@ -64,21 +109,42 @@ const Login = () => {
               <Input type="password" id="loginPassword" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="비밀번호 입력" />
             </div>
             <Button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white">로그인</Button>
-
-            {/* 추가 링크/버튼 */}
-            <div className="flex justify-center gap-4 text-sm mt-4"> {/* 중앙 정렬 및 간격 조정 */}
-              <button onClick={() => console.log('ID 찾기')} className="text-blue-600 hover:underline">ID 찾기</button> {/* ID 찾기 추가 */}
-              <button onClick={() => console.log('비밀번호 찾기')} className="text-blue-600 hover:underline">비밀번호 찾기</button>
-            </div>
           </div>
         ) : (
-          <div className="space-y-6"> {/* 폼 요소 간 간격 */}
+          // 회원가입 폼
+          <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 text-center">회원가입</h2>
-            {/* SignupForm 컴포넌트 사용 */}
-            <SignupForm onSignupSuccess={() => setActiveTab('login')} /> {/* 회원가입 성공 시 로그인 탭으로 전환 */}
+            <div>
+              <label htmlFor="signupEmail" className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+              <Input type="email" id="signupEmail" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} placeholder="이메일 입력" />
+            </div>
+            <div>
+              <label htmlFor="signupName" className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+              <Input id="signupName" value={signupName} onChange={(e) => setSignupName(e.target.value)} placeholder="이름 입력" />
+            </div>
+            <div>
+              <label htmlFor="signupPassword" className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+              <Input type="password" id="signupPassword" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="비밀번호 입력" />
+            </div>
+            <div>
+              <label htmlFor="signupPasswordConfirm" className="block text-sm font-medium text-gray-700 mb-1">비밀번호 확인</label>
+              <Input type="password" id="signupPasswordConfirm" value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} placeholder="비밀번호 다시 입력" />
+              {passwordMatch === true && signupPasswordConfirm !== '' && (
+                <p className="mt-1 text-xs text-green-600">비밀번호가 일치합니다.</p>
+              )}
+              {passwordMatch === false && signupPasswordConfirm !== '' && (
+                <p className="mt-1 text-xs text-red-600">비밀번호가 일치하지 않습니다.</p>
+              )}
+            </div>
+            <Button 
+              onClick={handleSignup} 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+              disabled={passwordMatch === false && signupPasswordConfirm !== ''} // 비밀번호 불일치 시 버튼 비활성화
+            >
+              회원가입
+            </Button>          
           </div>
         )}
-
       </div>
     </div>
   );

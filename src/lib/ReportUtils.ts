@@ -1,44 +1,49 @@
 // src/utils/reportUtils.ts
-import { ReportStatus } from '../types/reportTypes';
-
-export const formatDate = (dateString: string | undefined): string => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-};
-
-export const formatDateTime = (dateString: string | undefined): string => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+import type { ReportStatus, ReportReason } from "../types/reportTypes";
 
 export const getReportStatusLabel = (status: ReportStatus): string => {
-  const labels: Record<ReportStatus, string> = {
-    [ReportStatus.REPORT_RECEIVED]: '접수됨',
-    [ReportStatus.UNDER_REVIEW]: '검토 중',
-    [ReportStatus.ACTION_TAKEN]: '조치 완료',
-    [ReportStatus.DISMISSED]: '기각됨',
-  };
-  return labels[status] || status;
+  switch (status) {
+    case "REPORT_RECEIVED":
+      return "신고 접수";
+    case "REPORT_REJECTED":
+      return "신고 반려";
+    case "REPORT_COMPLETED":
+      return "처리 완료";
+    case "REPORT_DELETED":
+      return "삭제됨"; // 혹은 다른 적절한 레이블
+    default:
+      return status;
+  }
 };
 
-export const getReportStatusBadgeStyle = (status: ReportStatus): string => {
-  const styles: Record<ReportStatus, string> = {
-    [ReportStatus.REPORT_RECEIVED]: 'bg-blue-100 text-blue-700',
-    [ReportStatus.UNDER_REVIEW]: 'bg-yellow-100 text-yellow-700',
-    [ReportStatus.ACTION_TAKEN]: 'bg-green-100 text-green-700',
-    [ReportStatus.DISMISSED]: 'bg-gray-100 text-gray-700',
+export const getReportStatusBadgeStyleSwitch = (
+  status: ReportStatus | string // string도 허용
+): string => {
+  switch (status) {
+    case "REPORT_RECEIVED":
+    case "신고 접수":
+      return "bg-blue-500 text-white font-semibold shadow-sm";
+    case "REPORT_REJECTED":
+    case "신고 반려":
+      return "bg-orange-500 text-white font-semibold shadow-sm";
+    case "REPORT_COMPLETED":
+    case "처리 완료":
+      return "bg-green-500 text-white font-semibold shadow-sm";
+    case "REPORT_DELETED":
+    case "신고 삭제":
+      return "bg-red-500 text-white font-semibold shadow-sm";
+    default:
+      return "bg-gray-500 text-white font-semibold shadow-sm";
+  }
+};
+
+export const getReportReasonLabel = (reason: ReportReason): string => {
+  const labels: Record<ReportReason, string> = {
+    SPAM: "스팸",
+    HARASSMENT: "성희롱",
+    SCAM: "사기",
+    ABUSE: "욕설/비방",
+    PRIVACY_VIOLATION: "개인정보 침해",
   };
-  return styles[status] || 'bg-gray-100 text-gray-700';
+  return labels[reason] || reason;
 };

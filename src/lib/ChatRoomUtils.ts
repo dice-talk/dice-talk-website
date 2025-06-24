@@ -1,71 +1,81 @@
-import { ChatRoomConcept, ChatRoomStatus, ChatRoomType, type ChatRoomParticipant } from '../types/chatRoomTypes';
+import {
+    RoomStatus as ChatRoomStatusEnum,
+    type RoomType as ChatRoomTypeEnum,
+    type ChatRoomParticipant, // ChatRoomManagementPage에서 사용하던 타입
+} from '../types/chatroom/chatRoomTypes';
 
-export const getChatRoomConceptLabel = (concept: ChatRoomConcept | null): string => {
-  if (!concept) return '해당 없음'; // 1:1 채팅방 또는 컨셉 없는 방
-  switch (concept) {
-    case ChatRoomConcept.DICE_FRIENDS: return '다이스 프렌즈';
-    case ChatRoomConcept.HEART_SIGNAL: return '하트시그널';
-    default: return concept || '알 수 없음';
+// export const THEME_ID_TO_CONCEPT_DETAILS = {
+//   1: { key: 'DICE_FRIENDS', label: '다이스 프렌즈' },
+//   2: { key: 'HEART_SIGNAL', label: '하트시그널' },
+//   // 필요에 따라 다른 테마 ID와 컨셉 정보를 추가합니다.
+// } as const;
+
+// export type ConceptThemeId = keyof typeof THEME_ID_TO_CONCEPT_DETAILS;
+export const THEME_NAME_TO_LABEL_DETAILS = {
+  "다이스 프렌즈": { label: "다이스 프렌즈" }, // value와 label이 같을 수도 있고, 다를 수도 있습니다.
+  "하트시그널": { label: "하트시그널" },
+};
+ export type ConceptThemeId = keyof typeof THEME_NAME_TO_LABEL_DETAILS;
+
+/**
+ * themeId를 기반으로 채팅방 컨셉 레이블을 반환합니다.
+ * @param themeId - 채팅방의 테마 ID
+ * @returns 컨셉 레이블 문자열
+ */
+// export function getChatRoomThemeLabel(themeId: number | null | undefined): string {
+//   if (themeId === null || themeId === undefined) {
+//     return '일반'; // 예: 1:1 채팅방 또는 특정 컨셉이 없는 방
+//   }
+//   const details = THEME_NAME_TO_LABEL_DETAILS[theas ConceptThemeName];
+//   return details ? details.label : `테마 ID: ${themeId}`;
+// }
+
+export const getChatRoomTypeLabel = (type: ChatRoomTypeEnum): string => {
+ switch (type) {
+    case 'GROUP': return '그룹채팅';
+    case 'COUPLE': return '1:1 채팅';
+    default:
+      {
+      const exhaustiveCheck: never = type;
+      return `알 수 없는 타입: ${exhaustiveCheck}`;
+      }
   }
 };
 
-export const getChatRoomTypeLabel = (roomType: ChatRoomType): string => {
-  switch (roomType) {
-    case ChatRoomType.GROUP: return '단체 채팅방';
-    case ChatRoomType.COUPLE: return '1:1 채팅방';
-    default: return roomType || '알 수 없음';
-  }
-}
 
-export const getChatRoomStatusLabel = (status: ChatRoomStatus): string => {
+export const getChatRoomStatusLabel = (status: ChatRoomStatusEnum): string => {
+
   switch (status) {
-    case ChatRoomStatus.WAITING_FOR_MEMBERS: return '인원 모집 중';
-    case ChatRoomStatus.ACTIVE: return '진행 중';
-    case ChatRoomStatus.CLOSING_SOON: return '종료 임박';
-    case ChatRoomStatus.ENDED: return '종료됨';
-    case ChatRoomStatus.FORCE_CLOSED_BY_ADMIN: return '강제 종료됨';
-    default: return status || '알 수 없음';
+    case 'ROOM_ACTIVE': return '활성화';
+    case 'ROOM_DEACTIVE': return '비활성화';
+    default:
+      {
+      const exhaustiveCheck: never = status;
+      return `알 수 없는 상태: ${exhaustiveCheck}`;
+      }
   }
 };
 
-export const getChatRoomStatusBadgeStyle = (status: ChatRoomStatus): string => {
+export const getChatRoomStatusBadgeStyle = (status: ChatRoomStatusEnum): string => {
   switch (status) {
-    case ChatRoomStatus.WAITING_FOR_MEMBERS: return 'bg-yellow-100 text-yellow-700 border border-yellow-300';
-    case ChatRoomStatus.ACTIVE: return 'bg-green-100 text-green-700 border border-green-300';
-    case ChatRoomStatus.CLOSING_SOON: return 'bg-orange-100 text-orange-700 border border-orange-300';
-    case ChatRoomStatus.ENDED: return 'bg-gray-100 text-gray-700 border border-gray-300';
-    case ChatRoomStatus.FORCE_CLOSED_BY_ADMIN: return 'bg-red-100 text-red-700 border border-red-300';
-    default: return 'bg-gray-100 text-gray-500 border border-gray-300';
+    case 'ROOM_ACTIVE': return 'bg-green-100 text-green-800';
+    case 'ROOM_DEACTIVE': return 'bg-red-100 text-red-800';
+    default:
+      return `bg-gray-100 text-gray-600`;
   }
 };
 
-export const formatDateTime = (isoString?: string): string => {
-  if (!isoString) return '-';
-  try {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) return 'Invalid Date';
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return 'Invalid Date';
-  }
-};
 
-export const calculateTimeRemaining = (endsAt?: string, status?: ChatRoomStatus): string => {
-  if (!endsAt || status === ChatRoomStatus.ENDED || status === ChatRoomStatus.FORCE_CLOSED_BY_ADMIN) {
-    return getChatRoomStatusLabel(status || ChatRoomStatus.ENDED);
+export const calculateTimeRemaining = (endsAt?: string, status?: ChatRoomStatusEnum): string => {
+  if (!endsAt || status === ChatRoomStatusEnum.ROOM_DEACTIVE) { // ROOM_DEACTIVE를 종료 상태로 간주
+    return getChatRoomStatusLabel(status || ChatRoomStatusEnum.ROOM_DEACTIVE);
   }
   
   const now = new Date();
   const endDate = new Date(endsAt);
   const diffMs = endDate.getTime() - now.getTime();
 
-  if (diffMs <= 0) return getChatRoomStatusLabel(ChatRoomStatus.ENDED);
+  if (diffMs <= 0) return getChatRoomStatusLabel(ChatRoomStatusEnum.ROOM_DEACTIVE);
 
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -79,18 +89,17 @@ export const calculateTimeRemaining = (endsAt?: string, status?: ChatRoomStatus)
   return remainingStr;
 };
 
-export const getParticipantDisplay = (participants: ChatRoomParticipant[] /*, concept: ChatRoomConcept | null, roomType: ChatRoomType, maxParticipants: number */): string => {
+// ChatRoomFilterSection에서 사용할 컨셉 필터 옵션
+export const chatRoomThemeFilterOptionsForDropdown = [
+  { value: 'ALL', label: '전체 테마' },
+  ...Object.entries(THEME_NAME_TO_LABEL_DETAILS).map(([themeName, details]) => ({
+    value: themeName,
+    label: details.label,
+  })),
+  // 필요하다면 '컨셉 없음'에 대한 필터 옵션 추가
+  // { value: 'NONE', label: '일반 (컨셉 없음)' },
+];
+export const getParticipantDisplay = (participants: ChatRoomParticipant[]): string => {
   const currentCount = participants.length;
   return currentCount.toString();
-  // if (roomType === ChatRoomType.GROUP && concept === ChatRoomConcept.HEART_SIGNAL) {
-  //   const maleCount = participants.filter(p => p.gender === 'MALE').length;
-  //   const femaleCount = participants.filter(p => p.gender === 'FEMALE').length;
-  //   // Assuming Heart Signal aims for 3 males, 3 females
-  //   return `남 ${maleCount}/${maxParticipants/2}, 여 ${femaleCount}/${maxParticipants/2} (총 ${currentCount}/${maxParticipants})`;
-  // }
-  // if (roomType === ChatRoomType.COUPLE) {
-  //   // 1:1 채팅방의 경우 성별 표시가 필요하다면 여기서 추가 가능
-  //   return `${currentCount}/${maxParticipants} (1:1)`;
-  // }
-  // return `${currentCount}/${maxParticipants}`;
 };

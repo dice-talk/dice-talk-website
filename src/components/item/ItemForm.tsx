@@ -1,13 +1,19 @@
 // src/components/item/ItemForm.tsx
-import React, { useState, useEffect } from 'react';
-import { type Item } from '../../types/itemTypes';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  type ItemResponseDto,
+  type ItemPostDto,
+  type ItemPatchDto,
+} from '../../types/payment/itemTypes';
 import Button from '../ui/Button';
 import { Input } from '../ui/Input';
-import defaultItemImage from '../../assets/product.png'; // 상품 이미지 재활용 또는 새 아이템 기본 이미지
 
 interface ItemFormProps {
-  initialData?: Item | null;
-  onSubmit: (itemData: Omit<Item, 'itemId' | 'createdAt' | 'modifiedAt'> | Item) => void;
+  initialData?: ItemResponseDto | null;
+  onSubmit: (
+    dto: ItemPostDto | ItemPatchDto,
+    imageFile?: File | null
+  ) => void;
   onCancel: () => void;
   isEditMode: boolean;
 }
@@ -19,42 +25,116 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   isEditMode,
 }) => {
   const [itemName, setItemName] = useState('');
-  const [itemDescription, setItemDescription] = useState('');
-  const [itemImage, setItemImage] = useState(defaultItemImage);
-  const [diceCost, setDiceCost] = useState<number | ''>('');
+  const [description, setDescription] = useState(''); // itemDescription -> description (DTO 필드명)
+  const [diceCost, setDiceCost] = useState<string>(''); // 숫자를 문자열로 변경
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialData) {
       setItemName(initialData.itemName);
-      setItemDescription(initialData.itemDescription || '');
-      setItemImage(initialData.itemImage || defaultItemImage);
-      setDiceCost(initialData.diceCost);
+      setDescription(initialData.description || ''); // description 사용
+      setDiceCost(initialData.dicePrice.toString()); // dicePrice 사용, 숫자를 문자열로 변환
+      setImagePreview(initialData.itemImage || null);
+      setImageFile(null); // 수정 모드 시작 시 파일 입력 리셋
+      if (fileInputRef.current) fileInputRef.current.value = ''; // 파일 입력 필드 초기화
     } else {
       // Reset form for new item
       setItemName('');
-      setItemDescription('');
-      setItemImage(defaultItemImage);
+      setDescription('');
       setDiceCost('');
+      setImageFile(null);
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = ''; // 파일 입력 필드 초기화
     }
   }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (diceCost === '' || Number(diceCost) < 0) {
-      alert('올바른 다이스 소모량을 입력해주세요.');
+      alert('다이스 소모량을 0 이상으로 입력해주세요.');
       return;
     }
-    const itemData = {
-      itemName,
-      itemDescription,
-      itemImage, // 실제로는 이미지 업로드 로직 필요 또는 URL 입력
-      diceCost: Number(diceCost),
-    };
+
+    const numericDiceCost = Number(diceCost);
+
+    if (isNaN(numericDiceCost)) {
+      alert('유효한 다이스 소모량 형식이 아닙니다.');
+      return;
+    }
+
+    if (numericDiceCost < 0) {
+       alert('다이스 소모량은 0 이상이어야 합니다.');
+       return;
+    }
 
     if (isEditMode && initialData) {
-      onSubmit({ ...initialData, ...itemData });
+      const trimmedItemName = itemName.trim();
+      const trimmedDescription = description.trim();
+
+      if (trimmedItemName === '') {
+        alert('아이템명은 비워둘 수 없습니다.');
+        return;
+      }
+      // 백엔드 @NotSpace는 null, 빈 문자열, 공백 문자열을 허용하지 않습니다.
+      if (trimmedDescription === '') {
+        alert('아이템 설명은 비워둘 수 없습니다.');
+        return;
+      }
+
+      const patchDto: ItemPatchDto = {
+        itemName: trimmedItemName, // 이미 trim 처리됨
+        description: trimmedDescription.replace(/\n/g, ' '), // 개행 문자를 공백으로 대체
+        dicePrice: numericDiceCost, // dicePrice 사용
+      };
+
+      // 실제 변경이 있었는지 확인 (선택 사항: 변경 없으면 API 호출 안 함)
+      const hasChanges =
+        itemName !== initialData.itemName ||
+        description !== initialData.description ||
+        numericDiceCost !== initialData.dicePrice || // 이미 numericDiceCost로 비교 중
+        !!imageFile;
+
+      if (hasChanges) {
+        onSubmit(patchDto, imageFile);
+      } else {
+        alert("변경된 내용이 없습니다.");
+        return;
+      }
     } else {
-      onSubmit(itemData);
+      // 새 아이템 등록 시에도 itemName과 description 유효성 검사 추가
+      const trimmedItemName = itemName.trim();
+      const trimmedDescription = description.trim();
+
+      if (trimmedItemName === '') {
+        alert('아이템명은 비워둘 수 없습니다.');
+        return;
+      }
+      if (trimmedDescription === '') {
+        alert('아이템 설명은 비워둘 수 없습니다.');
+        return;
+      }
+
+      const postDto: ItemPostDto = {
+        itemName: trimmedItemName,
+        description: trimmedDescription,
+        dicePrice: numericDiceCost,
+      };
+      onSubmit(postDto, imageFile); // imageFile도 함께 전달
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      // 파일 선택 취소 시
+      setImageFile(null);
+      // 수정 모드이고 기존 이미지가 있었다면 기존 이미지 미리보기를 유지할 수 있음
+      setImagePreview(initialData?.itemImage || null);
     }
   };
 
@@ -65,17 +145,29 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         <Input id="itemName" type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} required />
       </div>
       <div>
-        <label htmlFor="itemDescription" className="block text-sm font-medium text-gray-700">아이템 설명 (선택)</label>
-        <Input id="itemDescription" type="text" value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} />
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">아이템 설명</label>
+        <Input id="description" type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
       </div>
       <div>
-        <label htmlFor="itemImage" className="block text-sm font-medium text-gray-700">아이템 이미지 URL</label>
-        <Input id="itemImage" type="url" value={itemImage} onChange={(e) => setItemImage(e.target.value)} placeholder="https://example.com/image.png" />
-        {itemImage && <img src={itemImage} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded" />}
+        <label htmlFor="itemImageFile" className="block text-sm font-medium text-gray-700">아이템 이미지</label>
+        <Input
+          id="itemImageFile"
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleImageChange}
+          className="block w-full text-sm text-slate-500
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-full file:border-0
+            file:text-sm file:font-semibold
+            file:bg-violet-50 file:text-violet-700
+            hover:file:bg-violet-100"
+        />
+        {imagePreview && <img src={imagePreview} alt={itemName || "아이템 이미지 미리보기"} className="mt-2 h-20 w-20 object-cover rounded" />}
       </div>
       <div>
         <label htmlFor="diceCost" className="block text-sm font-medium text-gray-700">다이스 소모량</label>
-        <Input id="diceCost" type="number" value={diceCost} onChange={(e) => setDiceCost(Number(e.target.value))} required min="0" />
+        <Input id="diceCost" type="number" value={diceCost} onChange={(e) => setDiceCost(e.target.value)} required min="0" />
       </div>
       <div className="flex justify-end space-x-3 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
