@@ -46,41 +46,41 @@ export default function Home() {
   };
 
   // Prepare data for Panel components
-  const qnaPanelItems = dashboardData?.dashboardQuestions?.[0] ? [
-    `최근 7일간 등록된 질문: ${formatNumber(dashboardData.dashboardQuestions[0].weeklyQuestionCount)}건`,
-    `미답변 질문 수: ${formatNumber(dashboardData.dashboardQuestions[0].noAnswerQuestionCount)}건`
+  const qnaPanelItems = dashboardData?.dashboardQuestions?.[0] ? [ // QnA 현황
+    <>최근 7일간 등록된 질문: <strong>{formatNumber(dashboardData.dashboardQuestions[0].weeklyQuestionCount)}건</strong></>,
+    <>미답변 질문 수: <strong>{formatNumber(dashboardData.dashboardQuestions[0].noAnswerQuestionCount)}건</strong></>
   ] : ['데이터를 불러오는 중입니다...'];
 
-  const noticePanelItems = dashboardData?.recentNotices?.[0] ? [
-    `최근 등록: ${dashboardData.recentNotices[0].recentNoticeTitle || '없음'}`,
-    `진행 중인 이벤트 수: ${formatNumber(dashboardData.recentNotices[0].activeEventCount)}건`
+  const noticePanelItems = dashboardData?.recentNotices?.[0] ? [ // 최근 공지 및 이벤트
+    <>최근 등록: <strong>{dashboardData.recentNotices[0].recentNoticeTitle || '없음'}</strong></>,
+    <>진행 중인 이벤트 수: <strong>{formatNumber(dashboardData.recentNotices[0].activeEventCount)}건</strong></>
   ] : ['데이터를 불러오는 중입니다...'];
 
-  const paymentPanelItems = dashboardData?.dashboardPayments?.[0] ? [
-    `오늘 다이스 충전 금액: ${formatNumber(dashboardData.dashboardPayments[0].todayTotalAmount)}원`,
-    `이번 달 다이스 충전: ${formatNumber(dashboardData.dashboardPayments[0].monthlyTotalAmount)}원`,
-    `아이템 사용 건수: ${formatNumber(dashboardData.dashboardPayments[0].todayItemUsageCount)}건`
+  const paymentPanelItems = dashboardData?.dashboardPayments?.[0] ? [ // 결제 현황 요약
+    <>오늘 다이스 충전 금액: <strong>{formatNumber(dashboardData.dashboardPayments[0].todayTotalAmount)}원</strong></>,
+    <>이번 달 다이스 충전: <strong>{formatNumber(dashboardData.dashboardPayments[0].monthlyTotalAmount)}원</strong></>,
+    <>아이템 사용 건수: <strong>{formatNumber(dashboardData.dashboardPayments[0].todayItemUsageCount)}건</strong></>
   ] : ['데이터를 불러오는 중입니다...'];
 
-  const topPayersPanelItems = dashboardData?.dashboardPayments?.[0]
+  const topPayersPanelItems = dashboardData?.dashboardPayments?.[0] // 최다 결제 회원 TOP3
     ? (dashboardData.dashboardPayments[0].topPayers?.length > 0
       ? dashboardData.dashboardPayments[0].topPayers.slice(0, 3).map(
-          (payer) => `${payer.email}, ${formatNumber(payer.totalAmount)}원`
+          (payer) => <>{payer.email}, <strong>{formatNumber(payer.totalAmount)}원</strong></>
         )
       : ['최다 결제 회원 정보가 없습니다.'])
     : ['데이터를 불러오는 중입니다...'];
 
   // NEW: Chat Room Panel Items
   const chatRoomPanelItems = dashboardData?.dashboardChatRooms?.[0] ? [
-    `활성화 중인 전체 채팅방: ${formatNumber(dashboardData.dashboardChatRooms[0].activeChatRoom)}개`,
-    `활성화 중인 단체 채팅방: ${formatNumber(dashboardData.dashboardChatRooms[0].activeGroupChatRoom)}개`,
-    `활성화 중인 1대1 채팅방: ${formatNumber(dashboardData.dashboardChatRooms[0].activeCoupleChatRoom)}개`,
+    <>활성화 중인 전체 채팅방: <strong>{formatNumber(dashboardData.dashboardChatRooms[0].activeChatRoom)}개</strong></>,
+    <>활성화 중인 단체 채팅방: <strong>{formatNumber(dashboardData.dashboardChatRooms[0].activeGroupChatRoom)}개</strong></>,
+    <>활성화 중인 1대1 채팅방: <strong>{formatNumber(dashboardData.dashboardChatRooms[0].activeCoupleChatRoom)}개</strong></>,
   ] : ['데이터를 불러오는 중입니다...'];
 
   const recentActivityLogItems = [
-    ...(dashboardData?.todayMemberNames?.map(name => `새로운 회원 '${name}'이 가입했습니다.`) || []),
-    ...(dashboardData?.dashboardQuestions?.map(q => `새로운 QnA '${q.title}'이 등록되었습니다.`) || []),
-    ...(dashboardData?.recentNotices?.map(n => `공지사항 '${n.recentNoticeTitle}'이 작성되었습니다.`) || []),
+    ...(dashboardData?.todayMemberNames?.map(name => <>새로운 회원 '<strong>{name}</strong>'이 가입했습니다.</>) || []),
+    ...(dashboardData?.dashboardQuestions?.map(q => <>새로운 QnA '<strong>{q.title}</strong>'이 등록되었습니다.</>) || []),
+    ...(dashboardData?.recentNotices?.map(n => <>공지사항 '<strong>{n.recentNoticeTitle}</strong>'이 작성되었습니다.</>) || []),
   ].slice(0, 5); // Limit to a reasonable number of logs
 
   return (
