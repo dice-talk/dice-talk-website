@@ -47,6 +47,13 @@ export default function Sidebar() {
         currentPath.startsWith("/qna/") || currentPath.startsWith("/qnalist/")
       );
     }
+    // For "전체 채팅방 조회" (path: '/chatrooms')
+    if (subItemPath === "/chatrooms") {
+      // Check if detail page is under /chatrooms/ (but not /chatrooms itself)
+      return (
+        currentPath.startsWith("/chatrooms/") && currentPath !== "/chatrooms"
+      );
+    }
 
     // No general prefix match for now to avoid unintended activations.
     // If other parent-child relationships need this, they should be added specifically.
