@@ -143,7 +143,8 @@ export default function BannedMemberDetail() {
                   member.reports.map((report) => (
                     <div
                       key={report.reportId}
-                      className="bg-gray-50 p-4 rounded-lg"
+                      className="bg-gray-50 p-4 rounded-lg cursor-pointer hover:bg-blue-50 transition"
+                      onClick={() => navigate(`/reports/${report.reportId}`)}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>

@@ -20,21 +20,21 @@ export const formatDate = (dateString: string) => {
   });
 };
 
-export default function QnaDetailPage() {
+export default function GuestQnaDetailPage() {
   const { questionId } = useParams<{ questionId: string }>();
   const navigate = useNavigate();
   const [answer, setAnswer] = useState("");
   const [qnaItem, setQnaItem] = useState<QuestionResponse | null>(null);
-  const [answerImageFiles, setAnswerImageFiles] = useState<File[]>([]); // 여러 File 객체
-  const [isEditingAnswer, setIsEditingAnswer] = useState(false); // 답변 작성/수정 모드 상태
-  const [isAnswerFormOpen, setIsAnswerFormOpen] = useState(false); // 답변 폼 노출 여부
+  const [answerImageFiles, setAnswerImageFiles] = useState<File[]>([]);
+  const [isEditingAnswer, setIsEditingAnswer] = useState(false);
+  const [isAnswerFormOpen, setIsAnswerFormOpen] = useState(false);
   const [removedImageUrls, setRemovedImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
     if (questionId) {
       getQuestion(Number(questionId))
         .then((res) => {
-          console.log("질문 상세 응답:", res.data.data);
+          console.log("비회원 문의 상세 응답:", res.data.data);
           setQnaItem(res.data.data);
           if (res.data.data.answer?.content) {
             setAnswer(res.data.data.answer.content);
@@ -43,12 +43,11 @@ export default function QnaDetailPage() {
           }
         })
         .catch(() => {
-          // setError("QnA 항목을 불러오지 못했습니다.");
+          alert("비회원 문의를 불러오지 못했습니다.");
         });
     }
   }, [questionId]);
 
-  // 답변 저장(등록/수정)
   const handleSave = async () => {
     if (!qnaItem) return;
     if (answer.trim() === "") {
@@ -58,7 +57,6 @@ export default function QnaDetailPage() {
     const isEdit = isEditingAnswer && qnaItem.answer;
     let answerDto: AnswerPostRequest | AnswerPatchRequest;
     if (isEdit) {
-      // 기존 답변 이미지 id 배열
       const keepImageIds =
         qnaItem.answer?.answerImages
           .filter((img) => !removedImageUrls.includes(img.imageUrl))
@@ -94,7 +92,6 @@ export default function QnaDetailPage() {
       setRemovedImageUrls([]);
       setIsEditingAnswer(false);
       setIsAnswerFormOpen(false);
-      // 저장 후 상세 재조회
       const res = await getQuestion(qnaItem.questionId);
       setQnaItem(res.data.data);
       if (res.data.data.answer?.content) {
@@ -107,7 +104,6 @@ export default function QnaDetailPage() {
     }
   };
 
-  // 답변 작성 폼 열기
   const handleOpenAnswerForm = () => {
     setIsAnswerFormOpen(true);
     setIsEditingAnswer(false);
@@ -115,7 +111,6 @@ export default function QnaDetailPage() {
     setAnswerImageFiles([]);
   };
 
-  // 답변 수정 폼 열기
   const handleEditAnswer = () => {
     setIsEditingAnswer(true);
     setIsAnswerFormOpen(true);
@@ -125,7 +120,6 @@ export default function QnaDetailPage() {
     }
   };
 
-  // 답변 작성/수정 취소
   const handleCancelEdit = () => {
     setIsEditingAnswer(false);
     setIsAnswerFormOpen(false);
@@ -134,7 +128,6 @@ export default function QnaDetailPage() {
     }
   };
 
-  // 답변 삭제
   const handleDeleteAnswer = () => {
     if (window.confirm("답변을 정말 삭제하시겠습니까?")) {
       if (qnaItem) {
@@ -155,7 +148,6 @@ export default function QnaDetailPage() {
     setRemovedImageUrls(removedUrls);
   };
 
-  // 목록으로 버튼
   const handleListButton = () => {
     navigate(-1);
   };
@@ -163,7 +155,7 @@ export default function QnaDetailPage() {
   if (!qnaItem) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-slate-50">
-        <p>QnA 항목을 불러오는 중이거나 찾을 수 없습니다...</p>
+        <p>비회원 문의를 불러오는 중이거나 찾을 수 없습니다...</p>
       </div>
     );
   }
@@ -174,7 +166,7 @@ export default function QnaDetailPage() {
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 bg-slate-50 p-6 md:p-8 rounded-tl-xl overflow-y-auto space-y-8">
-          {/* 질문 섹션 */}
+          {/* 문의 섹션 */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">
@@ -185,7 +177,7 @@ export default function QnaDetailPage() {
               </span>
             </div>
             <div className="text-sm text-gray-500 mt-1 mb-4">
-              <span>작성자: {qnaItem.email}</span>
+              <span>이메일: {qnaItem.email}</span>
             </div>
             <div className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
               {qnaItem.content}
@@ -211,7 +203,6 @@ export default function QnaDetailPage() {
 
           {/* 답변 섹션 */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            {/* 답변이 있고, 폼이 열려있지 않을 때(보기 모드) */}
             {qnaItem.answer && !isAnswerFormOpen && (
               <div>
                 <div className="flex justify-between items-center mb-3">
@@ -264,7 +255,6 @@ export default function QnaDetailPage() {
                 </div>
               </div>
             )}
-            {/* 답변이 없고, 폼이 열려있지 않을 때 */}
             {!qnaItem.answer && !isAnswerFormOpen && (
               <div className="flex flex-col items-center justify-center py-8">
                 <p className="text-gray-600 mb-4">
@@ -279,7 +269,6 @@ export default function QnaDetailPage() {
                 </Button>
               </div>
             )}
-            {/* 답변 작성/수정 폼 */}
             {isAnswerFormOpen && (
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">

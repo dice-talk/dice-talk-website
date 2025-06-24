@@ -1,29 +1,51 @@
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './Select'; // Select 컴포넌트 경로 확인
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "./Select"; // Select 컴포넌트 경로 확인
 
-interface DropdownOption {
-  value: string;
+interface DropdownOption<T extends string> {
+  value: T;
   label: string;
 }
 
-interface DropdownFilterProps {
+interface DropdownFilterProps<T extends string> {
   label: string;
-  value: string;
-  onValueChange: (value: string) => void;
-  options: DropdownOption[];
+  value: T;
+  onValueChange: (value: T) => void;
+  options: DropdownOption<T>[];
   placeholder?: string;
   id?: string;
 }
 
-export function DropdownFilter({ label, value, onValueChange, options, placeholder, id }: DropdownFilterProps) {
+export function DropdownFilter<T extends string>({
+  label,
+  value,
+  onValueChange,
+  options,
+  placeholder,
+  id,
+}: DropdownFilterProps<T>) {
   return (
     <div className="flex flex-col">
-      <label htmlFor={id || label.toLowerCase()} className="mb-1 text-sm font-medium text-gray-700">{label}</label>
+      <label
+        htmlFor={id || label.toLowerCase()}
+        className="mb-1 text-sm font-medium text-gray-700"
+      >
+        {label}
+      </label>
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger id={id || label.toLowerCase()}>
           <SelectValue placeholder={placeholder || `${label} 선택`} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((opt) => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
