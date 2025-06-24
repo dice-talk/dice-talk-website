@@ -1,8 +1,6 @@
 // src/api/noticeApi.ts
 import { axiosInstance } from "./axiosInstance"; // axiosInstance 경로 확인 필요
 import type {
-  NoticePostDto,
-  NoticePatchDto,
   NoticeResponseDto,
   NoticeTypeBack,
   NoticeStatusBack,
@@ -48,7 +46,6 @@ export const createNotice = async (
   return null;
 };
 
-
 export const updateNotice = async (
   noticeId: number,
   noticePatchDtoString: string,
@@ -85,7 +82,6 @@ export const updateNotice = async (
   );
   return response.data.data; // SingleResponseDto의 data 필드 접근
 };
-
 
 /**
  * 공지/이벤트 상세 조회 (GET /notices/{noticeId})
@@ -129,4 +125,3 @@ export const getNotices = async (params: {
 export const deleteNotice = async (noticeId: number): Promise<void> => {
   await axiosInstance.delete(`/notices/${noticeId}`);
 };
-
