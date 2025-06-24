@@ -3,7 +3,7 @@ import {
  type ProductResponseDto,
  type ProductPostDto,
  type ProductPatchDto,
-} from '../../types/productTypes';
+} from '../../types/payment/productTypes';
 import Button from '../ui/Button';
 import { Input } from '../ui/Input'; // Input 컴포넌트가 있다고 가정
 

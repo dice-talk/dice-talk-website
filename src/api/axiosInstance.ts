@@ -9,6 +9,7 @@ export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    // "Content-Type": "multipart/form-data"
   },
 });
 

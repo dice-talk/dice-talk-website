@@ -78,8 +78,9 @@ export default function MemberManagement() {
   ); // useCallback 의존성 배열에 fetchMembers가 사용하는 상태값 추가
 
   useEffect(() => {
+    // 초기 로드 시 데이터 조회
     fetchMembers();
-  }, [fetchMembers]); // useEffect 의존성 배열에 fetchMembers 추가
+  }, []); // 초기 로드 시에만 실행
 
   const handleResetFilters = () => {
     setStatusFilter("전체");
@@ -102,6 +103,7 @@ export default function MemberManagement() {
 
   const handleSortChange = (newSortValue: string) => {
     setSortValue(newSortValue);
+    fetchMembers(); 
   };
 
   const filteredAndSortedMembers = useMemo(() => {
@@ -113,7 +115,7 @@ export default function MemberManagement() {
       key: "no",
       header: "No",
       cellRenderer: (item) => item.memberId,
-      headerClassName: "w-[5%]",
+      headerClassName: "w-[8%]",
     },
     {
       key: "name",
@@ -125,7 +127,7 @@ export default function MemberManagement() {
       key: "email",
       header: "이메일",
       accessor: "email",
-      headerClassName: "w-[30%]",
+      headerClassName: "w-[20%]",
     },
     {
       key: "birth",

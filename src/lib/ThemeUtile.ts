@@ -18,7 +18,7 @@ export const getThemeStyle = (status: ThemeStatusType): string => {
     default: return 'bg-gray-100 text-gray-700 border border-gray-300';
   }
 };
-
+ 
 export const themeSortOptions = [
   { value: 'id_desc', label: '최신 등록순' },
   { value: 'id_asc', label: '오래된 등록순' },

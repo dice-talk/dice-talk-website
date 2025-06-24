@@ -4,11 +4,11 @@ import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import { ReusableTable } from '../../components/common/ReusableTable';
 import type { ColumnDefinition } from '../../components/common/reusableTableTypes';
-import { type ProductResponseDto, type ProductItem } from '../../types/productTypes';
+import { type ProductResponseDto, type ProductItem } from '../../types/payment/productTypes';
 import type { MultiResponse, PageInfo } from '../../types/common';
 import Button from '../../components/ui/Button';
 import { ProductModal } from '../../components/product/ProductModal';
-import { formatDate } from '../../lib/ReportUtils'; // 경로 확인 필요
+import { formatDate } from '../../lib/DataUtils'; // 경로 확인 필요
 import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
 import { getProducts, deleteProduct } from '../../api/productApi';
 
@@ -83,6 +83,7 @@ export default function ProductListPage() {
   };
 
   const handleDeleteProduct = async (productId: number) => {
+      console.log("handleDeleteProduct called with productId:", productId); // 이 부분 추가
     if (window.confirm("정말로 이 상품을 삭제하시겠습니까?")) {
 
       try {

@@ -5,29 +5,23 @@ import Header from '../../components/Header';
 import { ReusableTable } from '../../components/common/ReusableTable';
 import Button from '../../components/ui/Button';
 import { EventEditModal } from '../../components/chat/EventEditModal';
-import type { EventItem, EventResponseDto, EventPatchDto } from '../../types/chatroom/eventTypes'; // EventIdValues, EventId 제거, EventResponseDto, EventPatchDto, EventStatus 추가
+import type { EventItem, EventResponseDto, EventPatchDto } from '../../types/chatroom/eventTypes'; 
 import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-import { getEvents, updateEvent, createEvent } from '../../api/eventApi'; // API 함수 임포트
-import type { MultiResponse, PageInfo } from '../../types/common'; // PageInfo 임포트
-import { Pagination } from '../../components/common/Pagination'; // Pagination 임포트
+import { getEvents, updateEvent, createEvent } from '../../api/eventApi'; 
+import type { MultiResponse, PageInfo } from '../../types/common'; 
+import { Pagination } from '../../components/common/Pagination'; 
 import StatusBadge from '../../components/ui/StatusBadge';
 
 
 // EventResponseDto를 EventItem (UI용)으로 변환하는 함수
 const transformEventResponseToItem = (dto: EventResponseDto): EventItem => {
-  // EventItem은 EventResponseDto와 현재 동일하므로 직접 반환
-  // 만약 EventItem에 추가적인 UI 전용 필드가 있다면 여기서 매핑
   return {
     ...dto,
-    // 예: themeName: dto.theme?.name || 'N/A' (theme 객체가 응답에 포함된다면)
   };
 };
 
-// TableItem likely has an 'id' property (e.g., string | number).
-// EventItem has 'id: EventId'.
-// To resolve the conflict, Omit 'id' from EventItem and explicitly define it.
 interface EventTableItem extends EventItem, TableItem {
-  id: number; // EventResponseDto의 eventId를 사용
+  id: number; 
 }
 
 export default function EventManagementPage() {
@@ -40,10 +34,7 @@ export default function EventManagementPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [pageInfo, setPageInfo] = useState<PageInfo | null>(null);
-  // TODO: 필터 상태 추가 (필요시)
-  // const [filterThemeId, setFilterThemeId] = useState<number | undefined>();
-  // const [filterStatus, setFilterStatus] = useState<EventStatus | undefined>();
-
+ 
   const fetchEvents = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -129,9 +120,7 @@ export default function EventManagementPage() {
     { value: 'id_asc', label: 'ID (오래된순)' },
     { value: 'name_asc', label: '이벤트명 (오름차순)' },
     { value: 'name_desc', label: '이벤트명 (내림차순)' },
-    // { value: 'activationTimeHours_asc', label: '활성화 시간 (빠른순)' }, // 백엔드 필드명과 맞추거나 제거
-    // { value: 'activationTimeHours_desc', label: '활성화 시간 (느린순)' },// 백엔드 필드명과 맞추거나 제거
-    { value: 'status_open_first', label: '상태 (활성 먼저)' },
+     { value: 'status_open_first', label: '상태 (활성 먼저)' },
   ];
 
   const tableData = useMemo((): EventTableItem[] => {
@@ -141,8 +130,6 @@ export default function EventManagementPage() {
       if (sortValue === 'id_asc') return a.eventId - b.eventId;
       if (sortValue === 'name_asc') return a.eventName.localeCompare(b.eventName);
       if (sortValue === 'name_desc') return b.eventName.localeCompare(a.eventName);
-      // if (sortValue === 'activationTimeHours_asc') return a.activationTimeHours - b.activationTimeHours; // 제거 또는 수정
-      // if (sortValue === 'activationTimeHours_desc') return b.activationTimeHours - a.activationTimeHours; // 제거 또는 수정
       if (sortValue === 'status_open_first') {
         return (a.eventStatus === 'EVENT_OPEN' ? -1 : 1) - (b.eventStatus === 'EVENT_OPEN' ? -1 : 1);
       }
@@ -166,34 +153,21 @@ export default function EventManagementPage() {
     {
       key: 'name',
       header: '이벤트명',
-      headerClassName: 'w-[25%]', // 너비 조정
+      headerClassName: 'w-[25%]', 
       accessor: 'eventName',
     },
     {
       key: 'themeId',
       header: '연결된 테마 번호',
       accessor: 'themeId',
-      headerClassName: 'w-[15%] text-center', // 너비 조정
+      headerClassName: 'w-[15%] text-center', 
       cellClassName: 'text-center',
     },
-    // { // description, activationTimeHours 등은 상세 조회나 수정 모달에서 확인하도록 변경
-    //   key: 'description',
-    //   header: '설명',
-    //   accessor: 'description',
-    //   headerClassName: 'w-[35%]',
-    //   cellRenderer: (item) => {
-    //     const maxLength = 30;
-    //     const displayText = item.description.length > maxLength 
-    //       ? `${item.description.substring(0, maxLength)}...` 
-    //       : item.description;
-    //     return <span className="block" title={item.description}>{displayText}</span>;
-    //   }
-    // },
     {
       key: 'eventStatus',
       header: '상태',
       accessor: 'eventStatus',
-      headerClassName: 'w-[15%] text-center', // 너비 조정
+      headerClassName: 'w-[15%] text-center', 
       cellClassName: 'text-center',
       cellRenderer: (item: EventTableItem) => <StatusBadge status={item.eventStatus} type="event" />,
 
@@ -225,8 +199,6 @@ export default function EventManagementPage() {
               setIsEditModalOpen(true);
             }}>새 이벤트 추가</Button> */}
           </div>
-          
-          {/* TODO: 필터 섹션 추가 (필요시) */}
 
           {isLoading ? (
             <div className="flex justify-center items-center py-10">

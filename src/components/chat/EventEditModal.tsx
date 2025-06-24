@@ -39,12 +39,13 @@ export const EventEditModal: React.FC<EventEditModalProps> = ({ isOpen, onClose,
   }, [eventItem, isOpen]); // isOpen 추가하여 모달 열릴 때마다 상태 재설정
 
   const handleSave = () => {
-    const parsedThemeId = Number(themeId);
+    // themeId가 빈 문자열이면 유효성 검사에서 걸리도록 하거나, 특정 기본값(예: 0 또는 null)으로 처리
+    const parsedThemeId = themeId === '' ? NaN : Number(themeId); // 빈 문자열이면 NaN으로 만들어 유효성 검사
     if (!name.trim()) {
       alert("이벤트명은 필수입니다.");
       return;
     }
-    if (isNaN(parsedThemeId) || parsedThemeId <= 0) {
+    if (themeId === '' || isNaN(parsedThemeId) || parsedThemeId <= 0) { // themeId가 빈 문자열인 경우도 유효성 검사
       alert("유효한 테마 ID를 입력해주세요.");
       return;
     }
@@ -59,7 +60,7 @@ export const EventEditModal: React.FC<EventEditModalProps> = ({ isOpen, onClose,
     onSave(updatedFields, eventItem?.eventId); // 수정 시에는 eventId 전달
   };
 
-  if (!isOpen || !eventItem) return null;
+  if (!isOpen) return null; // eventItem이 null이어도 모달은 열릴 수 있도록 수정 (생성 모드)
   const modalTitle = eventItem ? `'${eventItem.eventName}' 이벤트 수정` : '새 이벤트 등록';
 
   return (
@@ -76,7 +77,14 @@ export const EventEditModal: React.FC<EventEditModalProps> = ({ isOpen, onClose,
           <label htmlFor="themeId" className="block text-sm font-medium text-gray-700 mb-1">
             테마 ID
           </label>
-          <Input id="themeId" type="number" value={themeId} onChange={(e) => setThemeId(Number(e.target.value))} placeholder="연결할 테마의 ID를 입력하세요" />
+          <Input 
+            id="themeId" 
+            type="text" // type을 "text"로 변경하여 입력값 직접 제어
+            value={themeId.toString()} 
+            readOnly 
+            disabled 
+            className="bg-gray-100 cursor-not-allowed" // 수정 불가 시각적 피드백
+            placeholder="테마 ID (수정 불가)" />
         </div>
         
         <div className="mt-2">

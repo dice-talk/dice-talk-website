@@ -4,7 +4,7 @@ import {
   type ItemResponseDto,
   type ItemPostDto,
   type ItemPatchDto,
-} from '../../types/itemTypes';
+} from '../../types/payment/itemTypes';
 import Button from '../ui/Button';
 import { Input } from '../ui/Input';
 

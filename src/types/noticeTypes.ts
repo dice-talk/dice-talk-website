@@ -54,7 +54,6 @@ export interface NoticeImagePostDto {
 export interface NoticeImagePatchDto {
   noticeImageId: number;
   noticeId?: number; // 일반적으로 수정 시에는 noticeId가 필요 없을 수 있음 (noticeImageId로 식별)
-                     // 하지만 백엔드 DTO에는 포함되어 있으므로 유지
   imageUrl: string;
   isThumbnail: boolean;
 }
@@ -122,4 +121,6 @@ export interface NoticeItemView {
   imageUrls?: string[];
   startDate?: string; // API 응답의 startDate를 그대로 사용하거나, 포맷팅된 문자열
   endDate?: string;   // API 응답의 endDate를 그대로 사용하거나, 포맷팅된 문자열
+  thumbnailFlags?: boolean[]; // 각 이미지 파일에 대한 썸네일 여부
+
 }

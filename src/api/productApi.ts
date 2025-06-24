@@ -1,6 +1,6 @@
 // src/api/productApi.ts
 import { axiosInstance } from "./axiosInstance";
-import type { ProductResponseDto } from "../types/productTypes";
+import type { ProductResponseDto } from "../types/payment/productTypes";
 import type { MultiResponse } from "../types/common";
 
 /**
