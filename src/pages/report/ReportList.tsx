@@ -1,5 +1,5 @@
 // src/pages/report/ReportListPage.tsx
-import { useState, useMemo, useEffect, useCallback} from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
@@ -71,7 +71,6 @@ export default function ReportListPage() {
   useEffect(() => {
     fetchReports();
   }, [fetchReports]);
-
 
   // const fetchReports = async () => {
   //   try {
@@ -179,7 +178,9 @@ export default function ReportListPage() {
     {
       key: "reportStatus",
       header: "상태",
-      cellRenderer: (item) => <StatusBadge status={item.reportStatus} type="report" />
+      cellRenderer: (item) => (
+        <StatusBadge status={item.reportStatus} type="report" />
+      ),
     },
     {
       key: "createdAt",

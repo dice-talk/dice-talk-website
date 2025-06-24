@@ -11,13 +11,13 @@ import type { MultiResponse } from "../types/common"; // 공통 타입 경로 �
  * 공지/이벤트 생성 (POST /notices)
  * @param noticePostDtoString JSON 문자열 형태의 NoticePostDtoP
  * @param imageFiles 이미지 파일 목록 (optional)
- * @param thumbnailFlagsStr 썸네일 플래그 문자열 목록 (optional)
+ * @param thumbnailFlags 썸네일 플래그 목록 (optional)
  * @returns 생성된 공지/이벤트의 ID (Location 헤더에서 추출)
  */
 export const createNotice = async (
   noticePostDtoString: string,
   imageFiles?: File[],
-  thumbnailFlagsStr?: string[]
+  thumbnailFlags?: boolean[]
 ): Promise<string | null> => {
   const formData = new FormData();
   formData.append("noticePostDto", noticePostDtoString);
@@ -25,21 +25,29 @@ export const createNotice = async (
   if (imageFiles) {
     imageFiles.forEach((file) => formData.append("images", file));
   }
-  if (thumbnailFlagsStr) {
-    thumbnailFlagsStr.forEach((flag) => formData.append("thumbnailFlags", flag));
+
+  // thumbnailFlags를 URL 쿼리 파라미터로 전송
+  const params = new URLSearchParams();
+  if (thumbnailFlags && thumbnailFlags.length > 0) {
+    thumbnailFlags.forEach((flag) =>
+      params.append("thumbnailFlags", flag.toString())
+    );
   }
 
-  const response = await axiosInstance.post<void>("/notices", formData, {
+  const url = params.toString() ? `/notices?${params.toString()}` : "/notices";
+
+  const response = await axiosInstance.post<void>(url, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
 
-  const locationHeader = response.headers.location || response.headers['Location']; // Axios는 헤더 키를 소문자로 정규화하지만, 대문자도 확인
+  const locationHeader =
+    response.headers.location || response.headers["Location"]; // Axios는 헤더 키를 소문자로 정규화하지만, 대문자도 확인
   console.log("[API] Location Header from server:", locationHeader); // 실제 헤더 값 로깅
   if (locationHeader) {
-    const parts = locationHeader.split('/');
-    return parts[parts.length -1];
+    const parts = locationHeader.split("/");
+    return parts[parts.length - 1];
   }
   console.error("Location header is missing in createNotice response."); // 이 메시지가 현재 발생 중
   return null;
@@ -65,12 +73,21 @@ export const updateNotice = async (
   if (imageFiles) {
     imageFiles.forEach((file) => formData.append("images", file));
   }
-  if (thumbnailFlags) {
-    thumbnailFlags.forEach((flag) => formData.append("thumbnailFlags", flag.toString()));
+
+  // thumbnailFlags를 URL 쿼리 파라미터로 전송
+  const params = new URLSearchParams();
+  if (thumbnailFlags && thumbnailFlags.length > 0) {
+    thumbnailFlags.forEach((flag) =>
+      params.append("thumbnailFlags", flag.toString())
+    );
   }
 
+  const url = params.toString()
+    ? `/notices/${noticeId}?${params.toString()}`
+    : `/notices/${noticeId}`;
+
   const response = await axiosInstance.patch<{ data: NoticeResponseDto }>( // 백엔드가 SingleResponseDto로 감싸서 반환
-    `/notices/${noticeId}`,
+    url,
     formData,
     {
       headers: {
@@ -86,8 +103,12 @@ export const updateNotice = async (
  * @param noticeId 조회할 공지/이벤트 ID
  * @returns 공지/이벤트 상세 정보
  */
-export const getNoticeDetail = async (noticeId: number): Promise<NoticeResponseDto> => {
-  const response = await axiosInstance.get<{ data: NoticeResponseDto }>(`/notices/${noticeId}`); // SingleResponseDto
+export const getNoticeDetail = async (
+  noticeId: number
+): Promise<NoticeResponseDto> => {
+  const response = await axiosInstance.get<{ data: NoticeResponseDto }>(
+    `/notices/${noticeId}`
+  ); // SingleResponseDto
   return response.data.data;
 };
 
@@ -103,9 +124,12 @@ export const getNotices = async (params: {
   page?: number;
   size?: number;
   sort?: string;
-  importance?: number
+  importance?: number;
 }): Promise<MultiResponse<NoticeResponseDto>> => {
-  const response = await axiosInstance.get<MultiResponse<NoticeResponseDto>>("/notices", { params });
+  const response = await axiosInstance.get<MultiResponse<NoticeResponseDto>>(
+    "/notices",
+    { params }
+  );
   return response.data;
 };
 
