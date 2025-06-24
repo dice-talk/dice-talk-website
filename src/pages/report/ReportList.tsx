@@ -1,5 +1,5 @@
 // src/pages/report/ReportListPage.tsx
-import { useState, useMemo, useEffect, useCallback} from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
@@ -56,7 +56,25 @@ export default function ReportListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // const fetchReports = useCallback(async () => {
+  const fetchReports = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getReports(currentPage, itemsPerPage);
+      setReports(response.data.data);
+      setTotalCount(response.data.pageInfo.totalElements);
+    } catch (error) {
+      console.error("신고 목록을 불러오는데 실패했습니다:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
+  // const fetchReports = async () => {
+
   //   try {
   //     setLoading(true);
   //     // API 호출 시 appliedFilters와 sortValue 사용
@@ -172,7 +190,9 @@ const fetchReports = useCallback(async () => {
     {
       key: "reportStatus",
       header: "상태",
-      cellRenderer: (item) => <StatusBadge status={item.reportStatus} type="report" />
+      cellRenderer: (item) => (
+        <StatusBadge status={item.reportStatus} type="report" />
+      ),
     },
     {
       key: "createdAt",
