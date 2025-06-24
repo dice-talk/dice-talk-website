@@ -1,7 +1,6 @@
 // src/utils/reportUtils.ts
 import type { ReportStatus, ReportReason } from "../types/reportTypes";
 
-
 export const getReportStatusLabel = (status: ReportStatus): string => {
   switch (status) {
     case "REPORT_RECEIVED":
@@ -18,19 +17,23 @@ export const getReportStatusLabel = (status: ReportStatus): string => {
 };
 
 export const getReportStatusBadgeStyleSwitch = (
-  status: ReportStatus
+  status: ReportStatus | string // string도 허용
 ): string => {
   switch (status) {
     case "REPORT_RECEIVED":
-      return "bg-blue-100 text-blue-700";
+    case "신고 접수":
+      return "bg-blue-500 text-white font-semibold shadow-sm";
     case "REPORT_REJECTED":
-      return "bg-gray-100 text-gray-700";
+    case "신고 반려":
+      return "bg-orange-500 text-white font-semibold shadow-sm";
     case "REPORT_COMPLETED":
-      return "bg-green-100 text-green-700";
+    case "처리 완료":
+      return "bg-green-500 text-white font-semibold shadow-sm";
     case "REPORT_DELETED":
-      return "bg-red-100 text-red-700";
+    case "신고 삭제":
+      return "bg-red-500 text-white font-semibold shadow-sm";
     default:
-      return "bg-gray-100 text-gray-700"; // 일치하는 case가 없으면 기본 회색 반환
+      return "bg-gray-500 text-white font-semibold shadow-sm";
   }
 };
 
