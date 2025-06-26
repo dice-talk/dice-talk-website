@@ -7,14 +7,14 @@ import { getThemeLabel, getThemeStyle } from "../../lib/ThemeUtile";
 import { getNoticeLabel, getNoticeStyle } from "../../lib/NoticeUtils";
 import { getMemberLabel, getMemberStyle } from "../../lib/memberUtils";
 import { mapBackendStatusToFrontendLabel as getEventLabel, getEventStatusBadgeStyle as getEventStyle } from "../../lib/EventUtils";
-import { getPaymentStatusLabel, getStatusBadgeStyle as getPaymentStyle } from "../../lib/PaymentUtils";
+// import { getPaymentStatusLabel, getStatusBadgeStyle as getPaymentStyle } from "../../lib/PaymentUtils";
 
 import type { ReportStatus } from "../../types/reportTypes";
 import type { MemberStatus } from "../../types/memberTypes";
 import type { NoticeStatus } from "../../types/noticeTypes"; // 실제 Notice 상태 타입으로 가정
 import type { ThemeStatus } from "../../types/chatroom/themeTypes";
 import type { EventStatus } from "../../types/chatroom/eventTypes"; // 실제 Event 상태 타입으로 가정 (eventUtils의 mapBackendStatusToFrontendLabel이 받는 타입)
-import type { PaymentStatus } from "../../types/payment/paymentTypes";
+// import type { PaymentStatus } from "../../types/payment/paymentTypes";
 import type { RoomStatus } from "../../types/chatroom/chatRoomTypes"; // 실제 ChatRoom 상태 타입으로 가정
 
 type StatusBadgeProps =
@@ -23,7 +23,7 @@ type StatusBadgeProps =
   | { type: "report"; status: ReportStatus }
   | { type: "theme"; status: ThemeStatus }
   | { type: "event"; status: EventStatus }
-  | { type: "payment"; status: PaymentStatus }
+  // | { type: "payment"; status: PaymentStatus }
   | { type: "chatRoom"; status: RoomStatus };
 
 const StatusBadge = (props: StatusBadgeProps) => {
@@ -52,10 +52,10 @@ const StatusBadge = (props: StatusBadgeProps) => {
       label = getEventLabel(status);
       badgeClassName = getEventStyle(status);
       break;
-    case "payment":
-      label = getPaymentStatusLabel(status);
-      badgeClassName = getPaymentStyle(status);
-      break;
+    // case "payment":
+    //   label = getPaymentStatusLabel(status);
+    //   badgeClassName = getPaymentStyle(status);
+    //   break;
     case "report":
       label = getReportStatusLabel(status);
       badgeClassName = getReportStatusBadgeStyleSwitch(status);

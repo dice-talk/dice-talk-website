@@ -4,6 +4,7 @@ import Button from '../ui/Button';
 import { DropdownFilter } from '../ui/DropdownFilter';
 import { SearchInputFilter } from '../ui/SearchInputFilter';
 import { Input } from '../ui/Input'; // 날짜 입력을 위해 Input 사용
+// import { PaymentStatus } from '../../types/payment/paymentTypes'; // PaymentStatus enum 임포트
 // import { PaymentStatus, PaymentMethod } from '../../types/paymentTypes';
 
 interface PaymentHistoryFilterSectionProps {
@@ -27,22 +28,13 @@ interface PaymentHistoryFilterSectionProps {
  
 const paymentStatusOptions: { value: string, label: string }[] = [
   { value: '전체', label: '전체 상태' },
-  { value: '결제 완료', label: '결제 완료' },
-  { value: '결제 실패', label: '결제 실패' },
-  { value: '환불 완료', label: '환불 완료' },
-  { value: '취소됨', label: '취소됨' },
-  { value: '결제 대기중', label: '결제 대기중' },
+  { value: 'COMPLETED', label: '결제 완료' },
+  { value: 'FAILED', label: '결제 실패' },
+  { value: 'REFUNDED', label: '환불 완료' },
+  { value: 'CANCELED', label: '결제 취소' },
+  { value: 'PENDING', label: '결제 대기' },
 ];
 
-// const paymentMethodOptions: { value: string, label: string }[] = [
-//   { value: '전체', label: '전체 결제수단' },
-//   { value: '신용카드', label: '신용카드' },
-//   { value: '카카오페이', label: '카카오페이' },
-//   { value: '네이버페이', label: '네이버페이' },
-//   { value: '계좌이체', label: '계좌이체' },
-//   { value: '휴대폰결제', label: '휴대폰결제' },
-//   { value: '기타', label: '기타' },
-// ];
 
 export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionProps> = ({
   startDate, onStartDateChange, endDate, onEndDateChange,
