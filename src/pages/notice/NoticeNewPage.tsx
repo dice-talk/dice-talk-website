@@ -14,6 +14,7 @@ import {
   mapFrontendTypeToBackend,
   mapBackendTypeToFrontend,
   mapBackendStatusToFrontend,
+  NoticeStatus,
 } from "../../lib/NoticeUtils";
 import { isAxiosError } from "axios";
 import {
@@ -28,7 +29,6 @@ import {
   type NoticeStatusBack,
   type NoticeItemView,
   type NoticeImageDto,
-  NoticeStatus,
 } from "../../types/noticeTypes"; // 타입 경로 수정
 
 export default function NoticeNewPage() {

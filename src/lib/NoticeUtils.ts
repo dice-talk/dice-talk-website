@@ -7,7 +7,7 @@ import {
   type NoticeItemView
 } from '../types/noticeTypes'; // 타입 경로 확인
 export type NoticeStatusType = 'ONGOING' | 'SCHEDULED' | 'CLOSED' | string;
-
+export { NoticeStatus }; 
 // Functions moved from NoticeList.tsx
 
 // 백엔드 NoticeType을 프론트엔드 NoticeItemView['type']으로 변환 (undefined 입력 가능)
@@ -42,27 +42,13 @@ export const getNoticeLabel = (status: NoticeStatusType): string => {
 
 export const getNoticeStyle = (status: NoticeStatusType): string => {
   switch (status) {
-    case 'ONGOING': return 'bg-green-100 text-green-700';
-    case 'SCHEDULED': return 'bg-blue-100 text-blue-700';
-    case 'CLOSED': return 'bg-gray-100 text-gray-700';
+    case NoticeStatus.ONGOING: return 'bg-green-100 text-green-700';
+    case NoticeStatus.SCHEDULED: return 'bg-blue-100 text-blue-700';
+    case NoticeStatus.CLOSED: return 'bg-gray-100 text-gray-700';
     default: return 'bg-gray-100 text-gray-700';
   }
 };
 
-// export const formatDate = (dateString?: string): string => {
-//   if (!dateString) return 'N/A';
-//   try {
-//     const date = parseISO(dateString);
-//     if (!isValid(date)) {
-//       console.warn("Invalid date string provided to formatDate:", dateString);
-//       return 'Invalid Date';
-//     }
-//     return format(date, 'yyyy.MM.dd');
-//   } catch (error) {
-//     console.error("Error formatting date:", dateString, error);
-//     return 'Invalid Date';
-//   }
-// };
 
 export const formatDateToLocalDateTimeString = (dateString?: string): string | undefined => {
   if (!dateString) return undefined;
@@ -100,4 +86,4 @@ export const mapFrontendTypeToBackend = (frontendType: NoticeItemView['type']): 
 
 export const mapBackendTypeToFrontend = (backendType: NoticeTypeBack): NoticeItemView['type'] => {
   return backendType === 'NOTICE' ? '공지사항' : '이벤트';
-};
+}; 

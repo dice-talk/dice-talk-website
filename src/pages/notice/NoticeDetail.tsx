@@ -8,13 +8,13 @@ import { formatDate } from '../../lib/DataUtils';
 import { isAxiosError } from 'axios'; // isAxiosError 임포트
 import { getNoticeDetail, deleteNotice } from '../../api/noticeApi'; // updateNotice -> getNoticeDetail
 import {
-  type NoticeResponseDto as NoticeResponseDto, // Alias for consistency if needed, or use NoticeResponseDto directly
+  type NoticeResponseDto,
   type NoticeImageDto,
   type NoticeTypeBack,
   type NoticeStatusBack,
-  NoticeStatus,
   type NoticeItemView // Import NoticeItemView
 } from '../../types/noticeTypes';
+import { NoticeStatus } from '../../lib/NoticeUtils'; // NoticeStatus import 경로 변경
 // NoticeList.tsx와 동일한 NoticeItem 타입 및 mockNotices 데이터를 사용한다고 가정합니다.
 // 실제 애플리케이션에서는 이들을 공유 모듈에서 가져오는 것이 좋습니다.
 
