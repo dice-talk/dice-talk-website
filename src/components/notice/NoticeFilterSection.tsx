@@ -1,7 +1,7 @@
 import Button from '../ui/Button';
 import { DropdownFilter } from '../ui/DropdownFilter';
 import { SearchInputFilter } from '../ui/SearchInputFilter';
-import { NoticeStatus } from './noticeUtils'; // NoticeStatus import
+import { NoticeStatus } from '../../lib/NoticeUtils'; // NoticeStatus import
 
 const noticeTypeOptions = [
   { value: '전체', label: '전체 유형' },

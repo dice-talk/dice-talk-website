@@ -20,8 +20,8 @@ export const getThemeStyle = (status: ThemeStatusType): string => {
 };
  
 export const themeSortOptions = [
-  { value: 'id_desc', label: '최신 등록순' },
-  { value: 'id_asc', label: '오래된 등록순' },
+  { value: 'id_desc', label: '등록일 (최신순)' },
+  { value: 'id_asc', label: '등록일 (오래된순)' },
   { value: 'name_asc', label: '테마명 (오름차순)' },
   { value: 'name_desc', label: '테마명 (내림차순)' },
   { value: 'status_on_first', label: '상태순 (진행중 우선)' },

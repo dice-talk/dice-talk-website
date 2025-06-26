@@ -21,10 +21,10 @@ interface SuspendedMemberTableItem extends SuspendedMember, TableItem {
 }
 
 const suspendedMemberSortOptions = [
-  { value: "suspensionStartDate_desc", label: "정지 시작일 (최신)" },
-  { value: "suspensionStartDate_asc", label: "정지 시작일 (오래된)" },
-  { value: "memberId_desc", label: "회원 ID (최신)" },
-  { value: "memberId_asc", label: "회원 ID (오래된)" },
+  { value: "suspensionStartDate_desc", label: "정지 시작일 (최신순)" },
+  { value: "suspensionStartDate_asc", label: "정지 시작일 (오래된순)" },
+  { value: "memberId_desc", label: "회원 ID (최신순)" },
+  { value: "memberId_asc", label: "회원 ID (오래된순)" },
 ];
 
 export default function SuspendedMemberManagement() {

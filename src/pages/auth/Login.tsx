@@ -6,6 +6,7 @@ import { useAuthStore, useUserStore } from '../../stores/useUserStore';
 import Button from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import axios, { AxiosError } from 'axios';
+import { Eye, EyeOff } from 'lucide-react'; // 아이콘 임포트
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
@@ -18,7 +19,11 @@ const Login = () => {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupPasswordConfirm, setSignupPasswordConfirm] = useState('');
   const [passwordMatch, setPasswordMatch] = useState<boolean | null>(null);
-
+  
+  // 비밀번호 보이기/숨기기 상태
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupPasswordConfirm, setShowSignupPasswordConfirm] = useState(false);
 
   const authLoginAction = useAuthStore((state) => state.login);
   const userSetUserAction = useUserStore((state) => state.setUser);
@@ -60,7 +65,9 @@ const handleSignup = async () => {
     alert('회원가입 성공! 로그인 페이지로 이동합니다.');
     setActiveTab('login');
   } catch (err: unknown) {
-    if (axios.isAxiosError(err) && err.response) {
+    if (axios.isAxiosError(err) && err.response?.status === 409) {
+      alert('이미 가입된 이메일 입니다');
+    } else if (axios.isAxiosError(err) && err.response) {
       const axiosErr = err as AxiosError<{ message: string }>;
       alert(`회원가입 실패: ${axiosErr.response?.data?.message || axiosErr.response?.statusText}`);
     } else {
@@ -106,7 +113,22 @@ const handleSignup = async () => {
             </div>
             <div>
               <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
-              <Input type="password" id="loginPassword" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="비밀번호 입력" />
+              <div className="relative">
+                <Input 
+                  type={showPassword ? "text" : "password"} 
+                  id="loginPassword" 
+                  value={loginPassword} 
+                  onChange={(e) => setLoginPassword(e.target.value)} 
+                  placeholder="비밀번호 입력"
+                  className="pr-10" // 아이콘을 위한 오른쪽 패딩
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none bg-transparent"
+                  aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                >{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+              </div>
             </div>
             <Button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white">로그인</Button>
           </div>
@@ -124,11 +146,41 @@ const handleSignup = async () => {
             </div>
             <div>
               <label htmlFor="signupPassword" className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
-              <Input type="password" id="signupPassword" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="비밀번호 입력" />
+              <div className="relative">
+                <Input 
+                  type={showSignupPassword ? "text" : "password"} 
+                  id="signupPassword" 
+                  value={signupPassword} 
+                  onChange={(e) => setSignupPassword(e.target.value)} 
+                  placeholder="비밀번호 입력"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSignupPassword(!showSignupPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none bg-transparent"
+                  aria-label={showSignupPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                >{showSignupPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+              </div>
             </div>
             <div>
               <label htmlFor="signupPasswordConfirm" className="block text-sm font-medium text-gray-700 mb-1">비밀번호 확인</label>
-              <Input type="password" id="signupPasswordConfirm" value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} placeholder="비밀번호 다시 입력" />
+              <div className="relative">
+                <Input 
+                  type={showSignupPasswordConfirm ? "text" : "password"} 
+                  id="signupPasswordConfirm" 
+                  value={signupPasswordConfirm} 
+                  onChange={(e) => setSignupPasswordConfirm(e.target.value)} 
+                  placeholder="비밀번호 다시 입력"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSignupPasswordConfirm(!showSignupPasswordConfirm)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none bg-transparent"
+                  aria-label={showSignupPasswordConfirm ? "비밀번호 숨기기" : "비밀번호 보기"}
+                >{showSignupPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+              </div>
               {passwordMatch === true && signupPasswordConfirm !== '' && (
                 <p className="mt-1 text-xs text-green-600">비밀번호가 일치합니다.</p>
               )}

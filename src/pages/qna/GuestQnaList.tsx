@@ -23,8 +23,8 @@ interface QnaTableItem extends QuestionResponse, TableItem {
 }
 
 const qnaSortOptions = [
-  { value: "desc", label: "등록 최신순" },
-  { value: "asc", label: "등록 오래된순" },
+  { value: "desc", label: "등록일 (최신순)" },
+  { value: "asc", label: "등록일 (오래된순)" },
 ];
 
 // 한글 상태값을 API 코드값으로 변환
