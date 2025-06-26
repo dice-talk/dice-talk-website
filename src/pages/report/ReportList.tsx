@@ -204,8 +204,8 @@ export default function ReportListPage() {
   ];
 
   const reportSortOptions = [
-    { value: "createdAt_desc", label: "최신 신고순" },
-    { value: "createdAt_asc", label: "오래된 신고순" },
+    { value: "createdAt_desc", label: "신고일 (최신순)" },
+    { value: "createdAt_asc", label: "신고일 (오래된순)" },
   ];
 
   return (

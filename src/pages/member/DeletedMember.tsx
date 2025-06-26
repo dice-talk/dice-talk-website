@@ -16,8 +16,8 @@ interface DeletedMemberTableItem extends DeletedMemberResponse, TableItem {
 }
 
 const deletedMemberSortOptions = [
-  { value: "탈퇴일 순 (최신)", label: "탈퇴일 순 (최신)" },
-  { value: "탈퇴일 순 (오래된)", label: "탈퇴일 순 (오래된)" },
+  { value: "탈퇴일 순 (최신)", label: "탈퇴일 (최신순)" },
+  { value: "탈퇴일 순 (오래된)", label: "탈퇴일 (오래된순)" },
 ];
 
 export default function DeletedMemberManagement() {

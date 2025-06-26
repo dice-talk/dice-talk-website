@@ -21,8 +21,8 @@ interface MemberTableItem extends MemberMyInfoResponse, TableItem {
 }
 
 const memberSortOptions = [
-  { value: "가입 순 (최신)", label: "가입 순 (최신)" },
-  { value: "가입 순 (오래된)", label: "가입 순 (오래된)" },
+  { value: "가입 순 (최신)", label: "가입일 (최신순)" },
+  { value: "가입 순 (오래된)", label: "가입일 (오래된순)" },
 ];
 
 export default function MemberManagement() {
