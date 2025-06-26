@@ -12,9 +12,10 @@ import {
   mapBackendTypeToFrontendList, // 이전 단계에서 이동된 함수
   mapBackendStatusToFrontendList // 이전 단계에서 이동된 함수
 } from '../../lib/NoticeUtils';
+import { NoticeStatus } from '../../lib/NoticeUtils'; // NoticeStatus import 경로 변경
 import type { ColumnDefinition } from '../../components/common/reusableTableTypes';
 import { getNotices } from '../../api/noticeApi'
-import { type NoticeResponseDto, type NoticeImageDto, type NoticeTypeBack,  NoticeStatus, type NoticeItemView } from '../../types/noticeTypes'; 
+import { type NoticeResponseDto, type NoticeImageDto, type NoticeTypeBack, type NoticeItemView } from '../../types/noticeTypes'; 
 import type { PageInfo } from '../../types/common';
 import { formatDate } from '../../lib/DataUtils';
 
@@ -22,8 +23,8 @@ import { formatDate } from '../../lib/DataUtils';
 type NoticeTableItem = NoticeItemView;
 
 const noticeSortOptions = [
-  { value: 'id_desc', label: '최신 등록순 (ID)' }, 
-  { value: 'id_asc', label: '오래된 등록순 (ID)' },
+  { value: 'id_desc', label: '등록일 (최신순)' }, 
+  { value: 'id_asc', label: '등록일 (오래된순)' },
   { value: 'importance_desc', label: '중요도순' },
 ];
 

@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { logout } from "../../api/auth";
-import { useUserStore } from "../../stores/useUserStore";
+import { logout as apiLogout } from "../../api/auth"; // API logout 함수와 이름 충돌 방지
+import { useUserStore, useAuthStore } from "../../stores/useUserStore"; // useAuthStore 임포트
 import profileImg from "../../assets/images/profile.png";
 import homeIcon from "../../assets/images/home_icon.png";
 import logoutIcon from "../../assets/images/logout_icon.png";
@@ -10,7 +10,8 @@ import { menuItems } from "./menuItems";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Sidebar() {
-  const { reset } = useUserStore();
+  const { reset: userReset } = useUserStore(); // useUserStore의 reset 액션
+  const authLogout = useAuthStore((state) => state.logout); // useAuthStore의 logout 액션
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   // 애니메이션 적용 여부를 제어하는 상태
@@ -62,12 +63,14 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await apiLogout(); // 백엔드 로그아웃 API 호출
     } catch (e) {
       console.warn("서버 로그아웃 실패:", e);
     } finally {
-      reset();
-      navigate("/login");
+      alert('로그아웃 되었습니다.'); // 알림창 추가
+      authLogout(); // 인증 상태를 false로 설정
+      userReset(); // 사용자 정보 초기화
+      navigate("/login"); // 로그인 페이지로 이동
     }
   };
 

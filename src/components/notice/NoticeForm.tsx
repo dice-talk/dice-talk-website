@@ -4,8 +4,8 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/dist/style.css'; // react-day-picker CSS import
-import { ImageUpload } from '../ui/ImageUpload'; // NoticeStatus import 제거
-import { NoticeStatus } from '../../types/noticeTypes'; // NoticeStatusFrontend import
+import { ImageUpload } from '../ui/ImageUpload';
+import { NoticeStatus } from '../../lib/NoticeUtils'; // NoticeStatus import 경로 변경
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/Select'; // 커스텀 Select 컴포넌트 임포트
 import Button from '../ui/Button'; // Button 컴포넌트 임포트
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/Popover'; 
@@ -14,7 +14,7 @@ import type { ExistingImage } from '../ui/ImageUpload'; // ExistingImage 타입 
 // import { ImageUpload } from './ImageUpload';
 // NoticeItem 인터페이스는 앱 전역에서 사용되므로, src/types/noticeTypes.ts 와 같은
 // 공유 파일로 이동하여 관리하는 것이 좋습니다. 여기서는 설명을 위해 간단히 정의합니다.
-interface NoticeItemForForm {
+interface NoticeItemForForm { 
   id?: number;
   type: '공지사항' | '이벤트';
   title: string;

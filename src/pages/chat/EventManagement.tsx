@@ -116,8 +116,8 @@ export default function EventManagementPage() {
   
   // 이벤트 정렬 옵션
   const eventSortOptions = [
-    { value: 'id_desc', label: 'ID (최신순)' },
-    { value: 'id_asc', label: 'ID (오래된순)' },
+    { value: 'id_desc', label: '등록일 (최신순)' },
+    { value: 'id_asc', label: '등록일 (오래된순)' },
     { value: 'name_asc', label: '이벤트명 (오름차순)' },
     { value: 'name_desc', label: '이벤트명 (내림차순)' },
      { value: 'status_open_first', label: '상태 (활성 먼저)' },
