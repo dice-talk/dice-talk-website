@@ -1,6 +1,10 @@
 import type { PageInfo } from "./common";
 
-export type MemberStatus = "MEMBER_ACTIVE" | "MEMBER_BANNED" | "MEMBER_DELETED";
+export type MemberStatus =
+  | "MEMBER_ACTIVE"
+  | "MEMBER_BANNED"
+  | "MEMBER_DELETED"
+  | "MEMBER_SLEEP";
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 
 export interface MemberPostRequest {
