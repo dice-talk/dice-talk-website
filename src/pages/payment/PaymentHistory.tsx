@@ -3,7 +3,7 @@
 // import Header from '../../components/Header';
 // import { ReusableTable } from '../../components/common/ReusableTable';
 // import type { ColumnDefinition, TableItem } from '../../components/common/reusableTableTypes';
-// import type { PaymentAdminResponseDto } from '../../types/payment/paymentTypes';
+// import type { PaymentAdminResponseDto, PaymentStatus } from '../../types/payment/paymentTypes';
 // import { getAdminPaymentHistory, type GetAdminPaymentsParams } from '../../api/paymentApi';
 // import { PaymentHistoryFilterSection } from '../../components/payment/PaymentHIstoryFilterSection';
 // import { formatDateTime } from '../../lib/DataUtils'; // Changed to formatDateTime
@@ -54,7 +54,7 @@
 //       size: itemsPerPage,
 //       email: appliedFilters.emailSearchTerm || undefined,
 //       productName: appliedFilters.productSearchTerm || undefined,
-//       status: appliedFilters.statusFilter === '전체' ? undefined : appliedFilters.statusFilter,
+//       status: appliedFilters.statusFilter === '전체' ? undefined : (appliedFilters.statusFilter as PaymentStatus),
 //       start: appliedFilters.startDate ? new Date(appliedFilters.startDate).toISOString() : undefined,
 //       end: appliedFilters.endDate ? new Date(new Date(appliedFilters.endDate).setHours(23,59,59,999)).toISOString() : undefined,
 //       sort: sortValue.replace('_', ','), // API expects 'requestedAt,desc'
