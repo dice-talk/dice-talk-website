@@ -4,8 +4,8 @@ import Button from '../ui/Button';
 import { DropdownFilter } from '../ui/DropdownFilter';
 import { SearchInputFilter } from '../ui/SearchInputFilter';
 import { Input } from '../ui/Input'; // 날짜 입력을 위해 Input 사용
-// import { PaymentStatus } from '../../types/payment/paymentTypes'; // PaymentStatus enum 임포트
-// import { PaymentStatus, PaymentMethod } from '../../types/paymentTypes';
+import { PaymentStatus } from '../../types/payment/paymentTypes';
+import { getPaymentStatusLabel } from '../../lib/PaymentUtils';
 
 interface PaymentHistoryFilterSectionProps {
   // 날짜 필터
@@ -26,13 +26,12 @@ interface PaymentHistoryFilterSectionProps {
   onResetFilters: () => void;
 }  
  
-const paymentStatusOptions: { value: string, label: string }[] = [
+const paymentStatusOptions = [
   { value: '전체', label: '전체 상태' },
-  { value: 'COMPLETED', label: '결제 완료' },
-  { value: 'FAILED', label: '결제 실패' },
-  { value: 'REFUNDED', label: '환불 완료' },
-  { value: 'CANCELED', label: '결제 취소' },
-  { value: 'PENDING', label: '결제 대기' },
+  ...Object.values(PaymentStatus).map((status) => ({
+    value: status,
+    label: getPaymentStatusLabel(status),
+  })),
 ];
 
 
@@ -64,16 +63,6 @@ export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionPr
           onValueChange={onStatusFilterChange}
           options={paymentStatusOptions}
         />
-        {/* methodFilter와 onMethodFilterChange가 제공될 때만 렌더링 (제거됨) */}
-        {/* {methodFilter !== undefined && onMethodFilterChange && (
-          <DropdownFilter
-            label="결제 수단"
-            id="methodFilter"
-            value={methodFilter}
-            onValueChange={onMethodFilterChange}
-            options={paymentMethodOptions}
-          />
-        )} */}
       </div>
 
       {/* 2행: 검색 필터 및 버튼 */}

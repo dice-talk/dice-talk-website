@@ -14,7 +14,7 @@ import SuspendedMemberManagement from "./pages/report/SuspendedMember";
 import BannedMemberDetail from "./pages/report/BannedMemberDetail";
 import ProductListPage from "./pages/product/ProductList";
 import ItemListPage from "./pages/item/ItemList";
-// import PaymentHistoryPage from "./pages/payment/PaymentHistory";
+import PaymentHistoryPage from "./pages/payment/PaymentHistoryPage";
 import ChatRoomManagementPage from "./pages/chat/ChatRoomManagementPage";
 import ThemeManagementPage from "./pages/chat/ThemeManagement";
 import EventManagementPage from "./pages/chat/EventManagement";
@@ -77,7 +77,7 @@ export default function App() {
       />
       <Route path="/products" element={<ProductListPage />} />
       <Route path="/items" element={<ItemListPage />} />
-      {/* <Route path="/payments" element={<PaymentHistoryPage />} /> */}
+      <Route path="/payments" element={<PaymentHistoryPage />} />
       <Route path="/chatrooms" element={<ChatRoomManagementPage />} />
       <Route path="/themes" element={<ThemeManagementPage />} />
       <Route path="/events" element={<EventManagementPage />} />
