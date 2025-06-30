@@ -1,5 +1,5 @@
 // src/pages/payment/PaymentHistoryPage.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import { ReusableTable } from '../../components/common/ReusableTable';
@@ -43,61 +43,40 @@ export default function PaymentHistoryPage() {
     sort: 'requestedAt_desc',
   });
 
-  const fetchAdminHistoryData = async (pageToFetch: number, filters = appliedFilters) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await getAdminPaymentHistory({
-        page: pageToFetch - 1,
-        size: itemsPerPage,
-        email: filters.email || undefined,
-        productName: filters.productName || undefined,
-        status: filters.status,
-        start: filters.startDate ? new Date(filters.startDate).toISOString() : undefined,
-        end: filters.endDate ? new Date(new Date(filters.endDate).setHours(23, 59, 59, 999)).toISOString() : undefined,
-        sort: filters.sort.replace('_', ','),
-      });
-      setHistoryItems(response.data);
-      setPageInfo(response.pageInfo);
-    } catch (err) {
-      console.error("결제 내역을 불러오는데 실패했습니다:", err);
-      setError("결제 내역을 불러오는데 실패했습니다. 다시 시도해주세요.");
-      setHistoryItems([]);
-      setPageInfo(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const fetchAdminHistoryData = useCallback(
+    async (pageToFetch: number, filters = appliedFilters) => {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('🔍 정렬 필터:', filters.sort);
+      try {
+        const response = await getAdminPaymentHistory({
+          page: pageToFetch - 1,
+          size: itemsPerPage,
+          email: filters.email || undefined,
+          productName: filters.productName || undefined,
+          status: filters.status,
+          start: filters.startDate ? new Date(filters.startDate).toISOString() : undefined,
+          end: filters.endDate ? new Date(new Date(filters.endDate).setHours(23, 59, 59, 999)).toISOString() : undefined,
+          sort: filters.sort.replace('_', ','),
+        });
+        setHistoryItems(response.data);
+        setPageInfo(response.pageInfo);
+      } catch (err) {
+        console.error('결제 내역을 불러오는데 실패했습니다:', err);
+        setError('결제 내역을 불러오는데 실패했습니다. 다시 시도해주세요.');
+        setHistoryItems([]);
+        setPageInfo(null);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [appliedFilters, itemsPerPage]
+  );
 
   useEffect(() => {
     fetchAdminHistoryData(currentPage);
-  }, [currentPage, appliedFilters]);
-
-  // useEffect(() => {
-  //   // 정렬 변경 시 즉시 적용
-  //   setAppliedFilters((prev) => ({ ...prev, sort: sortValue }));
-  // }, [sortValue]);
-
-  // useEffect(() => {
-  //   // 결제 상태 변경 시 즉시 적용
-  //   setAppliedFilters((prev) => ({
-  //     ...prev,
-  //     status: mapFrontendStatusToBackendKey(statusFilter) as PaymentStatus | undefined,
-  //   }));
-  //   setCurrentPage(1);
-  // }, [statusFilter]);
-
-  // const handleApplyFilters = () => {
-  //   setAppliedFilters({
-  //     startDate,
-  //     endDate,
-  //     status: mapFrontendStatusToBackendKey(statusFilter) as PaymentStatus | undefined,
-  //     email: emailSearchTerm,
-  //     productName: productSearchTerm,
-  //     sort: sortValue,
-  //   });
-  //   setCurrentPage(1);
-  // };
+  }, [currentPage, sortValue, fetchAdminHistoryData]);
 
 const handleApplyFilters = () => {
   setAppliedFilters({
@@ -135,7 +114,17 @@ const handleApplyFilters = () => {
 
   const handleSortChange = (newSort: string) => {
     setSortValue(newSort);
+  
+    const updatedFilters = {
+      ...appliedFilters,
+      sort: newSort,
+    };
+
+    setAppliedFilters(updatedFilters); 
+    fetchAdminHistoryData(currentPage, updatedFilters);
+
   };
+
 
   const columns: ColumnDefinition<PaymentHistoryTableItem>[] = [
     {

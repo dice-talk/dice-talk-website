@@ -47,20 +47,11 @@ export const mapFrontendStatusToBackendKey = (frontendStatus: string): string | 
   }
 };
 
-// export const paymentSortOptions = [
-//   { value: 'transactionDate_desc', label: '결제일시 (최신순)' },
-//   { value: 'transactionDate_asc', label: '결제일시 (오래된순)' },
-//   { value: 'amount_desc', label: '결제금액 (높은순)' },
-//   { value: 'amount_asc', label: '결제금액 (낮은순)' },
-// ];
- 
 export const paymentSortOptions = [
   { value: 'requestedAt_desc', label: '결제 요청일 (최신순)' },
   { value: 'requestedAt_asc', label: '결제 요청일 (오래된순)' },
-  { value: 'amount_desc', label: '결제금액 (높은순)' },
-  { value: 'amount_asc', label: '결제금액 (낮은순)' },
-  { value: 'paymentStatus_asc', label: '결제 상태 (가나다순)' },
-  { value: 'paymentStatus_desc', label: '결제 상태 (가나다역순)' },
   { value: 'completedAt_desc', label: '결제 완료일 (최신순)' },
   { value: 'completedAt_asc', label: '결제 완료일 (오래된순)' },
+  { value: 'amount_desc', label: '결제금액 (높은순)' },
+  { value: 'amount_asc', label: '결제금액 (낮은순)' },
 ];

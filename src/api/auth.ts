@@ -32,7 +32,7 @@ export const login = async (credentials: LoginRequest): Promise<string | null> =
  * @param data 회원가입 정보 (MemberPostRequest 타입)
  * @param data 회원가입 정보 (AdminSignupRequest 타입)
  * @returns 서버 응답
- */
+**/
 export const adminSignup = async (data: AdminSignupRequest) => {
   // 회원가입 성공 시에도 토큰이 반환된다면,
   // axiosInstance의 응답 인터셉터가 이를 처리할 수 있습니다.
