@@ -1,4 +1,4 @@
-import type { MemberStatus } from '../types/memberTypes'; // 실제 MemberStatus 타입을 가져옵니다.
+import type { MemberStatus } from '../types/memberTypes'; 
 
 export const getMemberLabel = (status: MemberStatus | string): string => {
   switch (status) {
@@ -8,7 +8,7 @@ export const getMemberLabel = (status: MemberStatus | string): string => {
       return "정지 회원";
     case 'MEMBER_DELETED':
       return "탈퇴 회원";
-    // case 'MEMBER_DORMANT': // 휴면 회원이 있다면 추가
+    // case 'MEMBER_SLEEPED': 
     //   return "휴면 회원";
     default:
       return status.toString(); // 알 수 없는 상태는 그대로 표시
@@ -27,7 +27,7 @@ export const mapFrontendStatusToBackend = (frontendStatus: string): MemberStatus
   if (frontendStatus === "활동 중") return "MEMBER_ACTIVE";
   if (frontendStatus === "정지 회원") return "MEMBER_BANNED";
   if (frontendStatus === "탈퇴 회원") return "MEMBER_DELETED";
-  // if (frontendStatus === "휴면 회원") return "MEMBER_DORMANT";
+  // if (frontendStatus === "휴면 회원") return "MEMBER_SLEEPED";
   if (frontendStatus === "전체") return undefined;
   console.warn(`Unhandled frontend status for backend mapping: ${frontendStatus}`);
   return undefined;

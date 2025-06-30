@@ -1,4 +1,3 @@
-// src/api/noticeApi.ts
 import { axiosInstance } from "./axiosInstance"; // axiosInstance 경로 확인 필요
 import type { 
   NoticeResponseDto,

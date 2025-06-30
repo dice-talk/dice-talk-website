@@ -1,4 +1,3 @@
-// src/components/member/SuspendedMemberFilterSection.tsx
 import React from 'react';
 import Button from '../ui/Button';
 import { DropdownFilter } from '../ui/DropdownFilter';
@@ -9,15 +8,14 @@ interface SuspendedMemberFilterSectionProps {
   onGenderFilterChange: (value: string) => void;
   ageGroupFilter: string;
   onAgeGroupFilterChange: (value: string) => void;
-  suspensionReasonFilter: string; // 'reasonFilter'에서 'suspensionReasonFilter'로 변경
-  onSuspensionReasonFilterChange: (value: string) => void; // 핸들러 이름 변경
+  suspensionReasonFilter: string;
+  onSuspensionReasonFilterChange: (value: string) => void; 
   nameSearch: string;
   onNameSearchChange: (value: string) => void;
   emailSearch: string;
   onEmailSearchChange: (value: string) => void;
   onResetFilters: () => void;
-  onSearch: () => void; // onApplyFilters -> onSearch로 변경
-  // 정지 기간 필터는 필요시 추가 (예: startDate, endDate)
+  onSearch: () => void; 
 }
 
 const genderOptions = [

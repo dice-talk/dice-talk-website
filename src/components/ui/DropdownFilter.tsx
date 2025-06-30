@@ -4,7 +4,7 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from "./Select"; // Select 컴포넌트 경로 확인
+} from "./Select";
 
 interface DropdownOption<T extends string> {
   value: T;

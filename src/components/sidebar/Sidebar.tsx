@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { logout as apiLogout } from "../../api/auth"; // API logout 함수와 이름 충돌 방지
-import { useUserStore, useAuthStore } from "../../stores/useUserStore"; // useAuthStore 임포트
+import { logout as apiLogout } from "../../api/auth"; 
+import { useUserStore, useAuthStore } from "../../stores/useUserStore"; 
 import profileImg from "../../assets/images/profile.png";
 import homeIcon from "../../assets/images/home_icon.png";
 import logoutIcon from "../../assets/images/logout_icon.png";
@@ -10,19 +10,18 @@ import { menuItems } from "./menuItems";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Sidebar() {
-  const { reset: userReset } = useUserStore(); // useUserStore의 reset 액션
-  const authLogout = useAuthStore((state) => state.logout); // useAuthStore의 logout 액션
+  const { reset: userReset } = useUserStore(); 
+  const authLogout = useAuthStore((state) => state.logout); 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   // 애니메이션 적용 여부를 제어하는 상태
-  const [shouldAnimateTransition, setShouldAnimateTransition] = useState(true); // true: 애니메이션 적용, false: 즉시 변경
+  const [shouldAnimateTransition, setShouldAnimateTransition] = useState(true); 
   const navigate = useNavigate();
   const location = useLocation();
   const mouseLeaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const MENU_ANIMATION_DURATION_SECONDS = 0.3; // 애니메이션 지속 시간 (초) - 이전 값으로 되돌리거나 적절히 조절
+  const MENU_ANIMATION_DURATION_SECONDS = 0.3; 
 
-  // Helper function to determine if a sub-item is active
   const isSubItemActive = (
     subItemPath: string,
     currentPath: string
@@ -32,8 +31,6 @@ export default function Sidebar() {
       return true;
     }
 
-    // 2. Specific handling for /notices and /qnalist
-    // For "공지사항&이벤트 조회" (path: '/notices')
     if (subItemPath === "/notices") {
       return (
         currentPath.startsWith("/notices/") &&
@@ -41,36 +38,32 @@ export default function Sidebar() {
         !currentPath.endsWith("/edit")
       );
     }
-    // For "QnA 조회" (path: '/qnalist')
+   
     if (subItemPath === "/qnalist") {
-      // Check if detail page is under /qna/ OR /qnalist/
+     
       return (
         currentPath.startsWith("/qna/") || currentPath.startsWith("/qnalist/")
       );
     }
-    // For "전체 채팅방 조회" (path: '/chatrooms')
     if (subItemPath === "/chatrooms") {
-      // Check if detail page is under /chatrooms/ (but not /chatrooms itself)
       return (
         currentPath.startsWith("/chatrooms/") && currentPath !== "/chatrooms"
       );
     }
-
-    // No general prefix match for now to avoid unintended activations.
-    // If other parent-child relationships need this, they should be added specifically.
+ 
     return false;
   };
 
   const handleLogout = async () => {
     try {
-      await apiLogout(); // 백엔드 로그아웃 API 호출
+      await apiLogout(); 
     } catch (e) {
       console.warn("서버 로그아웃 실패:", e);
     } finally {
-      alert('로그아웃 되었습니다.'); // 알림창 추가
-      authLogout(); // 인증 상태를 false로 설정
-      userReset(); // 사용자 정보 초기화
-      navigate("/login"); // 로그인 페이지로 이동
+      alert('로그아웃 되었습니다.'); 
+      authLogout(); 
+      userReset(); 
+      navigate("/login"); 
     }
   };
 
@@ -87,12 +80,10 @@ export default function Sidebar() {
       }
     }
 
-    // 경로 변경 시: 애니메이션 없이, 호버 상태 초기화, openMenu는 현재 경로 기준으로 설정
     setShouldAnimateTransition(false);
     setHoveredMenu(null);
-    setOpenMenu(activeParentMenu); // This handles rules #4 and #5
+    setOpenMenu(activeParentMenu);
 
-    // 경로 변경 시 혹시 남아있을 수 있는 leave 타이머 정리
     if (mouseLeaveTimerRef.current) {
       clearTimeout(mouseLeaveTimerRef.current);
       mouseLeaveTimerRef.current = null;
@@ -100,7 +91,7 @@ export default function Sidebar() {
   }, [location.pathname]);
 
   useEffect(() => {
-    // 컴포넌트 언마운트 시 타이머 정리
+    // 컴포넌트 언마운트 시 타이머 
     return () => {
       if (mouseLeaveTimerRef.current) {
         clearTimeout(mouseLeaveTimerRef.current);
@@ -109,19 +100,15 @@ export default function Sidebar() {
   }, []);
 
   const toggleMenu = (menuName: string) => {
-    setShouldAnimateTransition(true); // 부모 메뉴 직접 클릭 시에는 항상 애니메이션 적용
+    setShouldAnimateTransition(true); 
     if (openMenu === menuName) {
-      // 현재 "pinned" 열린 메뉴를 다시 클릭: 메뉴 닫기 (unpin)
+    
       setOpenMenu(null);
-      // 클릭으로 닫을 때 호버 상태도 해제하여 즉시 닫힘을 보장
       setHoveredMenu(null);
     } else {
-      // 다른 메뉴를 클릭했거나 아무 메뉴도 열려있지 않을 때: 해당 메뉴 열기 (pin)
       setOpenMenu(menuName);
-      // 클릭으로 열 때 호버 상태도 설정하여 즉시 열리고, 마우스가 벗어나도 openMenu로 유지
       setHoveredMenu(menuName);
       if (mouseLeaveTimerRef.current) {
-        // 이 메뉴에 대한 mouseLeave 타이머가 있었다면 취소
         clearTimeout(mouseLeaveTimerRef.current);
         mouseLeaveTimerRef.current = null;
       }
@@ -209,7 +196,6 @@ export default function Sidebar() {
                   <motion.div
                     key={item.name + "-submenu"} // AnimatePresence가 변경을 감지하도록 key 추가
                     initial={{ height: 0, opacity: 0 }}
-                    // initial={false}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={transitionConfig}
@@ -218,8 +204,7 @@ export default function Sidebar() {
                     {item.subItems.map((sub) => (
                       <NavLink
                         end
-                        // key={item.name}
-                        key={sub.name} // Use sub.name or sub.path for key
+                        key={sub.name} 
                         to={sub.path}
                         className={
                           ({ isActive }) =>

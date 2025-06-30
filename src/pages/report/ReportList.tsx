@@ -1,4 +1,3 @@
-// src/pages/report/ReportListPage.tsx
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -56,45 +55,6 @@ export default function ReportListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // const fetchReports = useCallback(async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await getReports(currentPage, itemsPerPage);
-  //     setReports(response.data.data);
-  //     setTotalCount(response.data.pageInfo.totalElements);
-  //   } catch (error) {
-  //     console.error("신고 목록을 불러오는데 실패했습니다:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [currentPage, itemsPerPage]);
-
-  // useEffect(() => {
-  //   fetchReports();
-  // }, [fetchReports]);
-
-  // const fetchReports = async () => {
-
-  //   try {
-  //     setLoading(true);
-  //     // API 호출 시 appliedFilters와 sortValue 사용
-  //     const params = {
-  //       page: currentPage,
-  //       size: itemsPerPage,
-  //       status: appliedFilters.status !== "전체" ? appliedFilters.status as ReportStatus : undefined,
-  //       searchTerm: appliedFilters.term || undefined,
-  //       sort: sortValue, // API가 정렬 파라미터를 받는다고 가정
-  //     };
-  //     const response = await getReports(params); // 수정된 getReports API 호출 방식에 맞게 파라미터 전달
-  //     setReports(response.data.data);
-  //     setTotalCount(response.data.pageInfo.totalElements);
-  //   } catch (error) {
-  //     console.error("신고 목록을 불러오는데 실패했습니다:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [currentPage, itemsPerPage, appliedFilters, sortValue]); // appliedFilters와 sortValue를 의존성에 추가
-
   const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
@@ -140,18 +100,15 @@ export default function ReportListPage() {
       status: statusFilter,
       term: searchTerm,
     });
-    // currentPage가 이미 1이면 useEffect가 실행되지 않으므로, 직접 fetchReports 호출
     if (currentPage === 1) {
       fetchReports();
     } else {
-      setCurrentPage(1); // currentPage가 변경되면 useEffect가 fetchReports를 호출
+      setCurrentPage(1); 
     }
   };
 
   const filteredAndSortedReports = useMemo(() => {
-    // API에서 이미 필터링 및 정렬된 데이터를 가져오므로, 여기서는 매핑만 수행
-    // 또는 클라이언트 사이드 정렬만 남겨둘 수 있습니다.
-    // API가 정렬까지 처리한다면, 이 useMemo는 단순히 매핑만 하거나 필요 없을 수 있습니다.
+   
     return reports.map((r) => ({
       ...r,
       id: r.reportId,

@@ -1,22 +1,18 @@
-// src/lib/NoticeUtils.ts
 // import { format, parseISO, isValid } from 'date-fns';
 import { 
   NoticeStatus, 
   type NoticeStatusBack, 
   type NoticeTypeBack,
   type NoticeItemView
-} from '../types/noticeTypes'; // 타입 경로 확인
+} from '../types/noticeTypes'; 
 export type NoticeStatusType = 'ONGOING' | 'SCHEDULED' | 'CLOSED' | string;
 export { NoticeStatus }; 
-// Functions moved from NoticeList.tsx
 
-// 백엔드 NoticeType을 프론트엔드 NoticeItemView['type']으로 변환 (undefined 입력 가능)
 export const mapBackendTypeToFrontendList = (backendType?: NoticeTypeBack): NoticeItemView['type'] | undefined => {
   if (!backendType) return undefined;
   return backendType === 'NOTICE' ? '공지사항' : '이벤트';
 };
 
-// 백엔드 NoticeStatus를 프론트엔드 NoticeStatus enum으로 변환 (undefined 입력 가능)
 export const mapBackendStatusToFrontendList = (backendStatus?: NoticeStatusBack): NoticeStatus | undefined => {
   if (!backendStatus) return undefined;
   switch (backendStatus) {

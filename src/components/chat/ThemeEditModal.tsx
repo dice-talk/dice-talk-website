@@ -1,28 +1,24 @@
-// src/components/theme/ThemeEditModal.tsx
 import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Input } from '../ui/Input'; // Input 컴포넌트 사용
-import { Textarea } from '../ui/Textarea'; // Textarea 컴포넌트 추가 가정 (없다면 Input으로 대체)
-import type { ThemeItem, ThemeStatus } from '../../types/chatroom/themeTypes'; // ThemeStatus 추가
+import { Input } from '../ui/Input'; 
+import { Textarea } from '../ui/Textarea'; 
+import type { ThemeItem, ThemeStatus } from '../../types/chatroom/themeTypes';
 
 interface ThemeEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   theme: ThemeItem | null;
-  onSave: (updatedFields: { // ThemeManagementPage의 handleSaveTheme 파라미터 타입과 일치
-    name?: string | null; // 이름은 수정 불가하므로 실제로는 전달 안 함
+  onSave: (updatedFields: { 
+    name?: string | null;
     description?: string | null;
-    image?: string | File | null; // File 타입 추가
+    image?: string | File | null; 
     themeStatus?: ThemeStatus;
-    // rules?: string | null; // rules 필드가 있다면 추가
   }) => void;
 }
  
 export const ThemeEditModal: React.FC<ThemeEditModalProps> = ({ isOpen, onClose, theme, onSave }) => {
-  // theme.name은 수정 불가하므로 별도 상태 X
   const [description, setDescription] = useState('');
-  // const [rules, setRules] = useState(''); // rules 필드가 있다면 추가
   const [currentImagePreview, setCurrentImagePreview] = useState<string | null>(null);
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
   const [themeStatus, setThemeStatus] = useState<ThemeStatus | undefined>();
@@ -30,26 +26,21 @@ export const ThemeEditModal: React.FC<ThemeEditModalProps> = ({ isOpen, onClose,
   useEffect(() => {
     if (theme) {
       setDescription(theme.description || '');
-      // setRules(theme.rules || ''); // rules 필드가 있다면 추가
       setThemeStatus(theme.themeStatus);
-      setCurrentImagePreview(theme.image || null); // 기존 이미지 URL 설정
-      setNewImageFile(null); // 모달 열릴 때 새 이미지 파일 초기화
+      setCurrentImagePreview(theme.image || null); 
+      setNewImageFile(null); 
     } else {
-      // 모달이 닫히거나 theme이 null일 때 상태 초기화
       setDescription('');
-      // setRules('');
       setThemeStatus(undefined);
       setCurrentImagePreview(null);
       setNewImageFile(null);
     }
-  }, [theme, isOpen]); // isOpen 추가하여 모달 열릴 때마다 상태 재설정
+  }, [theme, isOpen]);
 
   const handleSave = () => {
     if (theme) {
       const updatedFields: Parameters<ThemeEditModalProps['onSave']>[0] = {
-        // 이름은 수정 불가하므로 전달하지 않음
         description: description === theme.description ? undefined : description, // 변경된 경우에만 전달
-        // rules: rules === theme.rules ? undefined : rules, // rules 필드가 있다면 추가
         themeStatus: themeStatus === theme.themeStatus ? undefined : themeStatus,
       };
 
@@ -58,9 +49,7 @@ export const ThemeEditModal: React.FC<ThemeEditModalProps> = ({ isOpen, onClose,
       } else if (currentImagePreview === null && theme.image !== null) { // 이미지가 제거된 경우
         updatedFields.image = null;
       }
-      // 기존 이미지를 유지하는 경우 (currentImagePreview가 기존 theme.image와 같고 newImageFile이 없는 경우)
-      // updatedFields.image는 undefined로 두어 변경 없음을 나타냄
-
+  
       onSave(updatedFields);
     }
   };

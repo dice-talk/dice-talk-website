@@ -5,18 +5,17 @@ import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import Button from '../../components/ui/Button';
 import { formatDate } from '../../lib/DataUtils';
-import { isAxiosError } from 'axios'; // isAxiosError 임포트
-import { getNoticeDetail, deleteNotice } from '../../api/noticeApi'; // updateNotice -> getNoticeDetail
+import { isAxiosError } from 'axios'; 
+import { getNoticeDetail, deleteNotice } from '../../api/noticeApi';
 import {
   type NoticeResponseDto,
   type NoticeImageDto,
   type NoticeTypeBack,
   type NoticeStatusBack,
-  type NoticeItemView // Import NoticeItemView
+  type NoticeItemView 
 } from '../../types/noticeTypes';
-import { NoticeStatus } from '../../lib/NoticeUtils'; // NoticeStatus import 경로 변경
-// NoticeList.tsx와 동일한 NoticeItem 타입 및 mockNotices 데이터를 사용한다고 가정합니다.
-// 실제 애플리케이션에서는 이들을 공유 모듈에서 가져오는 것이 좋습니다.
+import { NoticeStatus } from '../../lib/NoticeUtils'; 
+
 
 // 백엔드 응답 DTO의 noticeType을 프론트엔드 type으로 변환하는 함수
 const mapBackendTypeToFrontend = (backendType: NoticeTypeBack): NoticeItemView['type'] => {
@@ -38,28 +37,22 @@ const mapBackendStatusToFrontend = (backendStatus: NoticeStatusBack): NoticeStat
   }
 };
 
-// 백엔드 API 응답 타입 (제공된 DTO 기반)
-// BackendNoticeResponseDto, BackendNoticeImageDto는 noticeTypes.ts에서 import
 
 export default function NoticeDetailPage() {
-  const { noticeId: noticeIdParam } = useParams<{ noticeId: string }>(); // noticeId 파라미터 값을 직접 가져옵니다.
+  const { noticeId: noticeIdParam } = useParams<{ noticeId: string }>(); // noticeId 파라미터 값을 직접 가져옴
   const navigate = useNavigate();
-  const [noticeItem, setNoticeItem] = useState<NoticeItemView | null>(null); // NoticeItem -> NoticeItemView
+  const [noticeItem, setNoticeItem] = useState<NoticeItemView | null>(null); 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // isEditing 상태와 isSubmitting 상태는 NoticeNewPage (수정 모드)에서 관리됩니다.
-  // const [isSubmitting, setIsSubmitting] = useState(false); // 이 컴포넌트에서는 더 이상 필요하지 않음
-
+ 
   useEffect(() => {
-    if (noticeIdParam) { // URL에서 가져온 noticeIdParam 문자열을 확인합니다.
+    if (noticeIdParam) { // URL에서 가져온 noticeIdParam 문자열을 확인
       const itemId = parseInt(noticeIdParam, 10);
 
       if (isNaN(itemId)) {
         console.error("Invalid noticeId parameter:", noticeIdParam);
         setError("잘못된 공지사항 ID입니다. ID는 숫자여야 합니다.");
         setIsLoading(false);
-        // 필요하다면 목록 페이지나 에러 페이지로 이동시킵니다.
-        // navigate('/notices');
         return;
       }
 
@@ -70,7 +63,7 @@ export default function NoticeDetailPage() {
           const backendData: NoticeResponseDto = await getNoticeDetail(itemId); // getNoticeDetail 사용 및 타입 명시
 
           // 백엔드 데이터를 프론트엔드 NoticeItem으로 변환
-          const transformedItem: NoticeItemView = { // NoticeItem -> NoticeItemView
+          const transformedItem: NoticeItemView = { 
             id: backendData.noticeId,
             title: backendData.title,
             content: backendData.content || '',
@@ -90,7 +83,6 @@ export default function NoticeDetailPage() {
           } else {
             setError("공지/이벤트 정보를 불러오는데 실패했습니다.");
           }
-          // navigate('/404'); 또는 목록 페이지로 리디렉션 고려
         } finally {
           setIsLoading(false);
         }
@@ -98,12 +90,11 @@ export default function NoticeDetailPage() {
 
       loadNoticeDetail();
     } else {
-      // noticeIdParam이 undefined인 경우 (예: 라우트 설정 오류 또는 ID 없이 직접 접근)
       console.warn("Notice ID parameter is missing from URL.");
       setError("공지사항 ID가 URL에 제공되지 않았습니다.");
       setIsLoading(false);
     }
-  }, [noticeIdParam, navigate]); // 의존성 배열에 noticeIdParam을 사용합니다.
+  }, [noticeIdParam, navigate]); // 의존성 배열에 noticeIdParam을 사용
 
   const handleListButton = () => {
     navigate('/notices'); // 공지사항 목록 페이지 경로

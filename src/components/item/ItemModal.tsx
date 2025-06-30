@@ -1,4 +1,3 @@
-// src/components/item/ItemModal.tsx
 import React from 'react';
 import {
   type ItemResponseDto,
@@ -33,9 +32,6 @@ export const ItemModal: React.FC<ItemModalProps> = ({
   ) => {
     try {
       if (isEditMode && itemToEdit) {
-        // ItemPatchDto로 단언
-        // 백엔드 PATCH API도 유사한 방식으로 DTO와 파일을 받는지 확인 필요
-        // 여기서는 createItem과 동일한 방식으로 FormData를 구성한다고 가정
         await itemApi.updateItem(
           itemToEdit.itemId,
           dto as ItemPatchDto, // DTO 객체 직접 전달
@@ -43,13 +39,10 @@ export const ItemModal: React.FC<ItemModalProps> = ({
         );
         onItemSubmitted(); // 성공 시 목록 새로고침 알림
       } else {
-        // ItemPostDto로 단언
-        // const itemPostDtoString = JSON.stringify(dto as ItemPostDto); // itemApi.createItem에서 처리
         const responseLocation = await itemApi.createItem(
           dto as ItemPostDto, // DTO 객체 직접 전달
           imageFile
         );
-        // 백엔드가 Location 헤더에 생성된 리소스 URI를 반환한다고 가정
         if (responseLocation) {
            onItemSubmitted(); // 성공 시 목록 새로고침 알림
         } else {

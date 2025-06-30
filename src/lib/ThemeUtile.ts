@@ -1,4 +1,3 @@
-// src/lib/themeUtils.ts
 export type ThemeStatusType = 'THEME_ON' | 'THEME_PLANNED' | 'THEME_CLOSE' | string;
 
 export const getThemeLabel = (status: ThemeStatusType): string => {

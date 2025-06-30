@@ -1,5 +1,5 @@
 import { useState, useRef, type ChangeEvent, useEffect } from 'react';
-import Button from './Button'; // Button 컴포넌트 경로 확인
+import Button from './Button';
 import { XCircle, UploadCloud, Star } from 'lucide-react';
 
 export interface ExistingImage {
@@ -11,18 +11,18 @@ export interface ExistingImage {
 interface ImageUploadProps {
   onImagesChange: (
     newFiles: File[],
-    removedExistingUrls: string[], // 제거된 기존 이미지의 URL 목록
-    thumbnailFlags: boolean[] // 현재 표시되는 모든 이미지(기존+새로운)에 대한 썸네일 플래그
+    removedExistingUrls: string[],
+    thumbnailFlags: boolean[] 
   ) => void;
-  existingImageUrls?: ExistingImage[]; // 기존 이미지 정보 (URL과 초기 썸네일 상태 포함)
+  existingImageUrls?: ExistingImage[]; 
   label?: string;
   maxFiles?: number;
   disabled?: boolean;
 }
 
 interface DisplayImage {
-  url: string; // Blob URL 또는 기존 이미지 URL
-  file?: File; // 새로 추가된 파일인 경우 File 객체
+  url: string;
+  file?: File;
   isExisting: boolean; // 기존 이미지인지 여부
   originalUrl?: string; // 기존 이미지인 경우 원래 URL (제거 시 사용)
   isThumbnail: boolean;
@@ -48,14 +48,7 @@ export function ImageUpload({
     }));
     setDisplayImages(initialDisplayImages);
     setRemovedUrls([]);
-    // 다음 onImagesChange 호출은 제거합니다. NoticeForm에서 초기 상태를 관리합니다.
-    // existingImageUrls가 변경될 때 (컴포넌트 마운트 또는 prop 변경 시)
-    // 초기 이미지 목록과 썸네일 상태를 부모에게 전달합니다.
-    // 이 시점에는 새로 추가된 파일이나 제거된 기존 URL은 없습니다.
-    // const initialNewFiles: File[] = [];
-    // const initialRemovedUrls: string[] = [];
-    // onImagesChange(initialNewFiles, initialRemovedUrls, initialDisplayImages.map(img => img.isThumbnail));
-  }, [existingImageUrls]);
+    }, [existingImageUrls]);
 
   const updateParentState = (currentDisplayImages: DisplayImage[], currentRemovedUrls: string[]) => {
     const newFiles = currentDisplayImages.filter(img => img.file).map(img => img.file!);
@@ -82,9 +75,6 @@ export function ImageUpload({
       if (updatedImages.length > 0 && !updatedImages.some(img => img.isThumbnail)) {
         updatedImages[0].isThumbnail = true;
       }
-      // updateParentState 호출 시 removedUrls의 최신 상태를 직접 전달하거나,
-      // setDisplayImages의 콜백 함수 내에서 removedUrls 상태를 참조하지 않도록 합니다.
-      // 여기서는 현재 로직상 removedUrls가 파일 추가 시에는 변경되지 않으므로 기존 상태를 사용해도 무방합니다.
       updateParentState(updatedImages, removedUrls); 
       return updatedImages;
     });
@@ -98,10 +88,10 @@ export function ImageUpload({
     const imageToRemove = displayImages.find(img => img.url === urlToRemove);
     if (!imageToRemove) return;
 
-    const updatedRemovedOriginalUrls = [...removedUrls]; // 상태 업데이트에 사용될 로컬 변수
+    const updatedRemovedOriginalUrls = [...removedUrls];
     if (imageToRemove.isExisting && imageToRemove.originalUrl) {
-      if (!updatedRemovedOriginalUrls.includes(imageToRemove.originalUrl)) { // 'newRemovedUrls'를 'updatedRemovedOriginalUrls'로 수정
-        updatedRemovedOriginalUrls.push(imageToRemove.originalUrl); // push 사용
+      if (!updatedRemovedOriginalUrls.includes(imageToRemove.originalUrl)) { 
+        updatedRemovedOriginalUrls.push(imageToRemove.originalUrl);
       }
     }
 
@@ -114,10 +104,10 @@ export function ImageUpload({
       if (imageToRemove.isThumbnail && updatedImages.length > 0 && !updatedImages.some(img => img.isThumbnail)) {
         updatedImages[0].isThumbnail = true;
       }
-      updateParentState(updatedImages, updatedRemovedOriginalUrls); // 업데이트된 removed URL 목록 전달
+      updateParentState(updatedImages, updatedRemovedOriginalUrls); 
       return updatedImages;
     });
-    setRemovedUrls(updatedRemovedOriginalUrls); // 상태 업데이트
+    setRemovedUrls(updatedRemovedOriginalUrls);
   };
 
   const handleSetThumbnail = (urlToSet: string) => {
@@ -145,7 +135,7 @@ export function ImageUpload({
         accept="image/*"
         disabled={disabled}
         onChange={handleFileChange}
-        multiple // 여러 파일 선택 가능하도록
+        multiple 
         ref={fileInputRef}
         className="hidden"
       />
@@ -164,7 +154,7 @@ export function ImageUpload({
                   </div>
                 ) : (
                   <Button
-                    variant="outline" // 'ghost'에서 변경하여 항상 보이도록
+                    variant="outline" 
                     size="sm"
                     onClick={() => handleSetThumbnail(img.url)}
                     className="absolute bottom-1 left-1 bg-white/80 hover:bg-white text-gray-700 hover:text-indigo-600 border-gray-300 hover:border-indigo-500 px-2 py-1 rounded-md text-xs flex items-center" // 스타일 수정

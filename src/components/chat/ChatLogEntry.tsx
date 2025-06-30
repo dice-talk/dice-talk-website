@@ -1,4 +1,3 @@
-// src/components/chat/ChatLogEntry.tsx
 import type { ChatResponseDto } from '../../types/chatroom/chatTypes';
 import { formatDateTime } from '../../lib/DataUtils';
 

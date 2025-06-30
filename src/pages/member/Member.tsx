@@ -9,12 +9,10 @@ import type {
 } from "../../components/common/reusableTableTypes";
 import { MemberDetailModal } from "../../components/member/MemberDetailModal";
 import { getMembers } from "../../api/memberApi";
-import type {
-  MemberMyInfoResponse,
-  Gender,
-} from "../../types/memberTypes";
+import type { MemberMyInfoResponse, Gender } from "../../types/memberTypes";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { mapFrontendStatusToBackend } from "../../lib/memberUtils"; // 유틸리티 함수 임포트
+import { Pagination } from "../../components/common/Pagination";
 
 interface MemberTableItem extends MemberMyInfoResponse, TableItem {
   id: number;
@@ -35,13 +33,17 @@ export default function MemberManagement() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] =
     useState<MemberMyInfoResponse | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 10;
 
   const fetchMembers = useCallback(
-    async (isReset: boolean = false) => {
+    async (page = 1, isReset = false) => {
       try {
         const params = {
-          page: 1,
-          size: 10,
+          page,
+          size: itemsPerPage,
           search: isReset ? undefined : search.trim() || undefined,
           sort:
             sortValue === "가입 순 (최신)"
@@ -52,7 +54,7 @@ export default function MemberManagement() {
           memberStatus: isReset
             ? undefined
             : statusFilter !== "전체"
-            ? mapFrontendStatusToBackend(statusFilter) // 유틸리티 함수 사용
+            ? mapFrontendStatusToBackend(statusFilter)
             : undefined,
           gender: isReset
             ? undefined
@@ -65,29 +67,29 @@ export default function MemberManagement() {
             ? ageGroupFilter
             : undefined,
         };
-
         console.log("API 요청 파라미터:", params);
-
         const response = await getMembers(params);
         setMembers(response.data.data);
+        setCurrentPage(response.data.pageInfo.page);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalElements);
       } catch (error) {
         console.error("회원 목록을 불러오는데 실패했습니다:", error);
       }
     },
     [search, sortValue, statusFilter, genderFilter, ageGroupFilter]
-  ); // useCallback 의존성 배열에 fetchMembers가 사용하는 상태값 추가
+  );
 
   useEffect(() => {
-    // 초기 로드 시 데이터 조회
-    fetchMembers();
-  }, []); // 초기 로드 시에만 실행
+    fetchMembers(1);
+  }, []);
 
   const handleResetFilters = () => {
     setStatusFilter("전체");
     setGenderFilter("전체");
     setAgeGroupFilter("전체");
     setSearch("");
-    fetchMembers(true);
+    fetchMembers(1, true);
   };
 
   const handleSearch = () => {
@@ -103,7 +105,12 @@ export default function MemberManagement() {
 
   const handleSortChange = (newSortValue: string) => {
     setSortValue(newSortValue);
-    fetchMembers(); 
+    fetchMembers();
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchMembers(page);
   };
 
   const filteredAndSortedMembers = useMemo(() => {
@@ -144,8 +151,10 @@ export default function MemberManagement() {
     {
       key: "memberStatus",
       header: "상태",
-      // item.memberStatus는 'MEMBER_ACTIVE'와 같은 백엔드 상태 값입니다.
-      cellRenderer: (item: MemberTableItem) => <StatusBadge status={item.memberStatus} type="member" />,
+      // item.memberStatus는 'MEMBER_ACTIVE'와 같은 백엔드 상태 값
+      cellRenderer: (item: MemberTableItem) => (
+        <StatusBadge status={item.memberStatus} type="member" />
+      ),
       headerClassName: "w-[15%]",
     },
   ];
@@ -157,7 +166,6 @@ export default function MemberManagement() {
         <Header />
         <main className="flex-1 bg-slate-50 p-6 md:p-8 rounded-tl-xl overflow-y-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-8">회원 관리</h2>
-
           <MemberFilterSection
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
@@ -170,17 +178,23 @@ export default function MemberManagement() {
             onSearch={handleSearch}
             onResetFilters={handleResetFilters}
           />
-
           <ReusableTable
             columns={columns}
             data={filteredAndSortedMembers}
-            totalCount={filteredAndSortedMembers.length}
+            totalCount={totalCount}
             sortValue={sortValue}
             onSortChange={handleSortChange}
             onRowClick={handleOpenDetailModal}
             sortOptions={memberSortOptions}
             emptyStateMessage="검색 결과에 해당하는 회원이 없습니다."
           />
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+
           <MemberDetailModal
             isOpen={isDetailModalOpen}
             onClose={handleCloseDetailModal}

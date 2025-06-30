@@ -10,9 +10,9 @@ interface UserState {
 
 interface AuthState {
   isLoggedIn: boolean;
-  isAuthenticated: boolean; // isAuthenticated 속성 추가
-  login: () => void; // 실제 구현에서는 토큰 등을 받아 isAuthenticated를 true로 설정
-  logout: () => void; // 실제 구현에서는 토큰을 제거하고 isAuthenticated를 false로 설정
+  isAuthenticated: boolean; 
+  login: () => void; 
+  logout: () => void; 
 }
 
 //회원가입, 로그인 후 상태 저장 및 페이지 새로고침에도 유지

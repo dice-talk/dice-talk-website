@@ -1,12 +1,15 @@
-// src/components/common/Pagination.tsx
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 }
 
-export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
-  if (totalPages <= 1) {
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) => {
+  if (totalPages < 1) {
     return null;
   }
 
@@ -50,21 +53,25 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
           {startPage > 2 && <span className="text-gray-500">...</span>}
         </>
       )}
-      {pageNumbers.map(number => (
+      {pageNumbers.map((number) => (
         <button
           key={number}
           onClick={() => onPageChange(number)}
           className={`px-2 sm:px-3 py-1 border rounded-md text-xs sm:text-sm
-            ${currentPage === number
-              ? 'bg-blue-500 text-white border-blue-500'
-              : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+            ${
+              currentPage === number
+                ? "bg-blue-500 text-white border-blue-500"
+                : "bg-white text-gray-700 hover:bg-gray-50"
+            }`}
         >
           {number}
         </button>
       ))}
       {endPage < totalPages && (
         <>
-          {endPage < totalPages -1 && <span className="text-gray-500">...</span>}
+          {endPage < totalPages - 1 && (
+            <span className="text-gray-500">...</span>
+          )}
           <button
             onClick={() => onPageChange(totalPages)}
             className="px-2 sm:px-3 py-1 border rounded-md text-xs sm:text-sm bg-white text-gray-700 hover:bg-gray-50"

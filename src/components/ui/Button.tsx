@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
-// 내부에서만 사용하는 스타일 변형 로직
 const buttonVariants = cva(
   'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
   {
@@ -8,7 +7,7 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-indigo-600 text-white hover:bg-indigo-700', // 기본 배경색을 남보라색(indigo) 계열로 변경
         outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-        destructive: 'bg-red-600 text-white hover:bg-red-700', // destructive 스타일 추가
+        destructive: 'bg-red-600 text-white hover:bg-red-700', 
         ghost: 'hover:bg-accent hover:text-accent-foreground',
       },
       size: {

@@ -1,6 +1,5 @@
-// src/pages/chat/ChatRoomManagementPage.tsx
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // useNavigate 추가
+import { useNavigate } from 'react-router-dom'; 
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import { ChatRoomFilterSection } from '../../components/chat/ChatRoomFilterSection';
@@ -29,15 +28,13 @@ export default function ChatRoomManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [pageInfo, setPageInfo] = useState<PageInfo | null>(null);
 
-  // UI 입력을 위한 필터 상태
-  const [themeNameFilter, setThemeNameFilter] = useState('ALL'); // conceptFilter -> themeNameFilter
+  const [themeNameFilter, setThemeNameFilter] = useState('ALL'); 
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [roomTypeFilter, setRoomTypeFilter] = useState('ALL');
   const [roomIdSearch, setRoomIdSearch] = useState('');
 
-  // API 요청에 사용될 실제 적용된 필터 상태
   const [appliedFilters, setAppliedFilters] = useState({
-    themeName: 'ALL', // concept -> themeName
+    themeName: 'ALL',
     status: 'ALL',
     roomType: 'ALL',
     roomId: '',
@@ -45,21 +42,21 @@ export default function ChatRoomManagementPage() {
 
   const [sortValue, setSortValue] = useState('createdAt_desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Can be made configurable
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const [itemsPerPage] = useState(10); 
+  const navigate = useNavigate(); 
 
   const fetchAndSetChatRooms = useCallback(async (pageToFetch: number, size: number, isSearchTriggered: boolean = false) => {
     setIsLoading(true);
     setError(null);
     try {
-      const params: Parameters<typeof getChatRooms>[0] = { // getChatRooms 파라미터 타입에 맞게 수정
+      const params: Parameters<typeof getChatRooms>[0] = {
         page: pageToFetch,
         size: size,
-        themeName: appliedFilters.themeName === 'ALL' ? undefined : appliedFilters.themeName, // concept -> themeName
+        themeName: appliedFilters.themeName === 'ALL' ? undefined : appliedFilters.themeName, 
         roomStatus: appliedFilters.status === 'ALL' ? undefined : appliedFilters.status as ChatRoomStatusEnum,
         roomType: appliedFilters.roomType === 'ALL' ? undefined : appliedFilters.roomType as ChatRoomTypeEnum,
         chatRoomId: appliedFilters.roomId ? Number(appliedFilters.roomId) : undefined,
-        // sort: sortValue.replace('_',','), // API가 sort 파라미터를 지원한다면 추가
+        // sort: sortValue.replace('_',','), 
       };
       const response: MultiResponse<ChatRoomMultiResponseDto> = await getChatRooms(params);
       setAllChatRooms(response.data);
@@ -74,20 +71,20 @@ export default function ChatRoomManagementPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [appliedFilters, currentPage]); // sortValue와 itemsPerPage 제거
+  }, [appliedFilters, currentPage]);
 
   useEffect(() => {
     fetchAndSetChatRooms(currentPage, itemsPerPage, false);
-  }, [currentPage, itemsPerPage, appliedFilters, sortValue, fetchAndSetChatRooms]); // fetchAndSetChatRooms 추가
+  }, [currentPage, itemsPerPage, appliedFilters, sortValue, fetchAndSetChatRooms]);
 
   const handleResetFilters = () => {
-    setThemeNameFilter('ALL'); // conceptFilter -> themeNameFilter
+    setThemeNameFilter('ALL'); 
     setStatusFilter('ALL');
     setRoomTypeFilter('ALL');
     setRoomIdSearch('');
     setSortValue('createdAt_desc');
-    setAppliedFilters({ // 적용된 필터도 초기화
-      themeName: 'ALL', // concept -> themeName
+    setAppliedFilters({ 
+      themeName: 'ALL',
       status: 'ALL',
       roomType: 'ALL',
       roomId: '',

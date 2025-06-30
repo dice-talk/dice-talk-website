@@ -1,39 +1,33 @@
-// src/components/notice/NoticeForm.tsx
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { DayPicker, type DateRange } from 'react-day-picker';
-import 'react-day-picker/dist/style.css'; // react-day-picker CSS import
+import 'react-day-picker/dist/style.css'; 
 import { ImageUpload } from '../ui/ImageUpload';
-import { NoticeStatus } from '../../lib/NoticeUtils'; // NoticeStatus import 경로 변경
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/Select'; // 커스텀 Select 컴포넌트 임포트
+import { NoticeStatus } from '../../lib/NoticeUtils'; 
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/Select'; 
 import Button from '../ui/Button'; // Button 컴포넌트 임포트
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/Popover'; 
-import type { ExistingImage } from '../ui/ImageUpload'; // ExistingImage 타입 가져오기
+import type { ExistingImage } from '../ui/ImageUpload'; // ExistingImage 타입 가져옴
 
-// import { ImageUpload } from './ImageUpload';
-// NoticeItem 인터페이스는 앱 전역에서 사용되므로, src/types/noticeTypes.ts 와 같은
-// 공유 파일로 이동하여 관리하는 것이 좋습니다. 여기서는 설명을 위해 간단히 정의합니다.
 interface NoticeItemForForm { 
   id?: number;
   type: '공지사항' | '이벤트';
   title: string;
   content?: string;
   isImportant: boolean;
-  status: NoticeStatus; // NoticeStatusFrontend 사용
+  status: NoticeStatus; 
   imageUrls?: string[];
   startDate?: string;
   endDate?: string;
-  thumbnailFlags?: boolean[]; // 각 이미지 파일에 대한 썸네일 여부
+  thumbnailFlags?: boolean[]; 
 }
 
-// NoticeNewPage에서 정의한 ExtendedNoticeFormData와 유사한 구조를 정의합니다.
-// 실제로는 NoticeNewPage의 ExtendedNoticeFormData 타입을 직접 import하거나 공유하는 것이 좋습니다.
 export interface NoticeFormData {
   title: string;
   content: string;
   isImportant: boolean;
-  status: NoticeStatus; // NoticeStatusFrontend 사용
+  status: NoticeStatus; 
   type: '공지사항' | '이벤트';
   startDate?: string;
   endDate?: string;
@@ -51,7 +45,6 @@ interface NoticeFormProps {
   mode: 'create' | 'edit';
 }
 
-// 간단한 Calendar 아이콘 SVG (필요시 라이브러리 아이콘으로 대체)
 const CalendarIcon = ({ className }: { className?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -103,9 +96,6 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
     setNewlyAddedFiles([]);
     setRemovedExistingOriginalUrls([]);
     // 초기 썸네일 플래그는 existingImagesFromProps에서 가져오거나, 없다면 모두 false로 설정
-    // ImageUpload 컴포넌트가 초기 썸네일 상태를 existingImageUrls prop을 통해 직접 관리하므로,
-    // 여기서는 onImagesChange를 통해 받는 최종 썸네일 상태를 저장합니다.
-    // 초기 렌더링 시에는 initialData.existingImages의 isThumbnail 값을 사용합니다.
     setCurrentAllThumbnailFlags(existingImagesFromProps.map(img => img.isThumbnail));
 
   }, [initialData]);
@@ -129,7 +119,6 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
 
     const today = format(new Date(), "yyyy-MM-dd");
 
-    // keptExistingImageIds 계산: 초기 기존 이미지 중, ImageUpload에서 제거되지 않은 이미지들의 ID
     const keptExistingImageIds = initialExistingImages
       .filter(img => img.id !== undefined && !removedExistingOriginalUrls.includes(img.url))
       .map(img => img.id!);
@@ -259,7 +248,7 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({
       
       <ImageUpload 
         onImagesChange={handleImageChange} 
-        existingImageUrls={initialExistingImages} // initialData에서 직접 ExistingImage[]를 전달
+        existingImageUrls={initialExistingImages}
         label="이미지 첨부 (선택 사항)" 
         maxFiles={5} 
         disabled={isSubmitting}

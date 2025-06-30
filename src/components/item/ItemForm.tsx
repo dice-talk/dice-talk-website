@@ -25,8 +25,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   isEditMode,
 }) => {
   const [itemName, setItemName] = useState('');
-  const [description, setDescription] = useState(''); // itemDescription -> description (DTO 필드명)
-  const [diceCost, setDiceCost] = useState<string>(''); // 숫자를 문자열로 변경
+  const [description, setDescription] = useState(''); 
+  const [diceCost, setDiceCost] = useState<string>(''); 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -77,14 +77,13 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         alert('아이템명은 비워둘 수 없습니다.');
         return;
       }
-      // 백엔드 @NotSpace는 null, 빈 문자열, 공백 문자열을 허용하지 않습니다.
       if (trimmedDescription === '') {
         alert('아이템 설명은 비워둘 수 없습니다.');
         return;
       }
 
       const patchDto: ItemPatchDto = {
-        itemName: trimmedItemName, // 이미 trim 처리됨
+        itemName: trimmedItemName, 
         description: trimmedDescription.replace(/\n/g, ' '), // 개행 문자를 공백으로 대체
         dicePrice: numericDiceCost, // dicePrice 사용
       };

@@ -1,4 +1,3 @@
-// src/pages/Login.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login, adminSignup } from '../../api/auth';
@@ -6,7 +5,7 @@ import { useAuthStore, useUserStore } from '../../stores/useUserStore';
 import Button from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import axios, { AxiosError } from 'axios';
-import { Eye, EyeOff } from 'lucide-react'; // 아이콘 임포트
+import { Eye, EyeOff } from 'lucide-react'; 
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
@@ -42,8 +41,14 @@ const Login = () => {
         alert('로그인 실패: 서버로부터 토큰을 받지 못했습니다.');
       }
     } catch (error) {
-      console.error(error);
-      alert('로그인 실패');
+      // console.error(error);
+      // alert('로그인 실패');
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        alert('아이디 또는 비밀번호가 일치하지 않습니다.');
+      } else {
+        alert('로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
+
     }
   };
 const handleSignup = async () => {
