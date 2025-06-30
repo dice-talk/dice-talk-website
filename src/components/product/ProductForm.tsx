@@ -5,7 +5,7 @@ import {
  type ProductPatchDto,
 } from '../../types/payment/productTypes';
 import Button from '../ui/Button';
-import { Input } from '../ui/Input'; // Input 컴포넌트가 있다고 가정
+import { Input } from '../ui/Input'; 
 
 interface ProductFormProps {
   initialData?: ProductResponseDto | null;
@@ -24,7 +24,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   isEditMode,
 }) => {
   const [productName, setProductName] = useState('');
-  // 가격과 수량 상태를 문자열로 변경하여 입력 UX 개선
   const [price, setPrice] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('');
 
@@ -42,13 +41,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       setImageFile(null); // 수정 모드 시작 시 파일 입력은 리셋
       if (fileInputRef.current) fileInputRef.current.value = ''; // 파일 입력 필드 초기화
     } else {
-      // Reset form for new product
       setProductName('');
       setPrice(''); // 초기값 빈 문자열
       setQuantity(''); // 초기값 빈 문자열
       setImageFile(null);
       setImagePreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = ''; // 파일 입력 필드 초기화
+      if (fileInputRef.current) fileInputRef.current.value = ''; 
     }
   }, [initialData]);
 
@@ -91,16 +89,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         return;
       }
 
-      // 수정 시 모든 필드 값을 포함하여 patchDto를 구성합니다.
-      // 사용자가 입력한 값이 있으면 해당 값을, 없으면 (필드를 비웠으면) 초기값을 사용합니다.
-      // 단, 가격/수량은 숫자이므로, 비워진 경우 0으로 처리됩니다. (위의 유효성 검사에서 빈 문자열은 걸러짐)
+      // 사용자가 입력한 값이 있으면 해당 값을, 없으면 초기값을 사용
+      // 가격/수량은 비워진 경우 0으로 처리
       const patchDto: ProductPatchDto = {
         productName: productName,
-        price: numericPrice, // 유효성 검사를 통과한 숫자 값
-        quantity: numericQuantity, // 유효성 검사를 통과한 숫자 값
+        price: numericPrice, 
+        quantity: numericQuantity, 
       };
 
-      // 실제 변경이 있었는지 확인 (선택 사항: 변경 없으면 API 호출 안 함)
+      // 실제 변경이 있었는지 확인
       const hasChanges =
         productName !== initialData.productName ||
         numericPrice !== initialData.price ||
@@ -129,10 +126,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     } else {
-      // 파일 선택 취소 시
       setImageFile(null);
-      // 수정 모드이고 기존 이미지가 있었다면 기존 이미지 미리보기를 유지할 수 있음
-      // 여기서는 null로 설정하여 미리보기도 제거 (또는 initialData.productImage로 복원)
+     
       setImagePreview(initialData?.productImage || null);
     }
   };

@@ -5,7 +5,7 @@ import { SummaryCard } from '../components/SummaryCard';
 import { Panel } from '../components/Panel';
 import DashboardChartTabs from '../components/DashboardChartTabs';
 import { getDashboardData } from '../api/dashboardApi';
-import type { MainDashboardResponse } from '../types/dashboardTypes'; // Import DashboardChatRoom
+import type { MainDashboardResponse } from '../types/dashboardTypes'; 
 
 export default function Home() { 
   const [selectedType, setSelectedType] = useState<'가입자 수' | '신고 수' | '채팅방 수' | '결제 수'>('가입자 수');
@@ -32,12 +32,10 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Helper function to format numbers with commas
   const formatNumber = (num: number | undefined) => {
     return num !== undefined ? num.toLocaleString() : 'N/A';
   };
 
-  // Helper function to get today's date in MM.DD format
   const getTodayDate = () => {
     const today = new Date();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
@@ -45,7 +43,6 @@ export default function Home() {
     return `${month}.${day}`;
   };
 
-  // Prepare data for Panel components
   const qnaPanelItems = dashboardData?.dashboardQuestions?.[0] ? [ // QnA 현황
     <>최근 7일간 등록된 질문: <strong>{formatNumber(dashboardData.dashboardQuestions[0].weeklyQuestionCount)}건</strong></>,
     <>미답변 질문 수: <strong>{formatNumber(dashboardData.dashboardQuestions[0].noAnswerQuestionCount)}건</strong></>
@@ -70,7 +67,6 @@ export default function Home() {
       : ['최다 결제 회원 정보가 없습니다.'])
     : ['데이터를 불러오는 중입니다...'];
 
-  // NEW: Chat Room Panel Items
   const chatRoomPanelItems = dashboardData?.dashboardChatRooms?.[0] ? [
     <>활성화 중인 전체 채팅방: <strong>{formatNumber(dashboardData.dashboardChatRooms[0].activeChatRoom)}개</strong></>,
     <>활성화 중인 단체 채팅방: <strong>{formatNumber(dashboardData.dashboardChatRooms[0].activeGroupChatRoom)}개</strong></>,
@@ -81,8 +77,7 @@ export default function Home() {
     ...(dashboardData?.todayMemberNames?.map(name => <>새로운 회원 '<strong>{name}</strong>'이 가입했습니다.</>) || []),
     ...(dashboardData?.dashboardQuestions?.map(q => <>새로운 QnA '<strong>{q.title}</strong>'이 등록되었습니다.</>) || []),
     ...(dashboardData?.recentNotices?.map(n => <>공지사항 '<strong>{n.recentNoticeTitle}</strong>'이 작성되었습니다.</>) || []),
-  ].slice(0, 5); // Limit to a reasonable number of logs
-
+  ].slice(0, 5); 
   return (
     <div className="min-h-screen flex bg-gradient-to-r from-blue-300 to-purple-300">
       <Sidebar />

@@ -1,4 +1,3 @@
-// src/api/paymentApi.ts
 import { axiosInstance } from "./axiosInstance";
 import type {
   PaymentAdminResponseDto,
@@ -12,7 +11,7 @@ export interface GetAdminPaymentsParams {
   email?: string;
   productName?: string;
   status?: PaymentStatus;
-  start?: string; // (예: "2023-10-26T10:00:00")
+  start?: string; 
   end?: string;   
   page?: number; 
   size?: number;

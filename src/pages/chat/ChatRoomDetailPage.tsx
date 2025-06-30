@@ -1,24 +1,23 @@
-// src/pages/chat/ChatRoomDetailPage.tsx
 import { useState, useEffect, useCallback, useRef, createRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // useNavigate 추가
+import { useParams, useNavigate } from 'react-router-dom'; 
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
 import Button from '../../components/ui/Button';
-import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
+import { Pagination } from '../../components/common/Pagination';
 import { Input } from '../../components/ui/Input';
-import type { ChatResponseDto } from '../../types/chatroom/chatTypes'; // ChatRoomSingleResponseDto 추가 (실제 경로에 맞게 수정 필요)
-import type { ChatRoomSingleResponseDto } from '../../types/chatroom/chatRoomTypes'; // 실제 API 응답 타입
-import ChatLogEntry from '../../components/chat/ChatLogEntry'; // 새로 만든 컴포넌트 임포트
-import { getChatRoom }  from '../../api/chatRoomApi'; // Assuming ChatRoomSingleResponseDto is defined elsewhere or implicitly by getChatRoom
+import type { ChatResponseDto } from '../../types/chatroom/chatTypes'; 
+import type { ChatRoomSingleResponseDto } from '../../types/chatroom/chatRoomTypes'; 
+import ChatLogEntry from '../../components/chat/ChatLogEntry'; 
+import { getChatRoom }  from '../../api/chatRoomApi'; 
 import { formatDateTime } from '../../lib/DataUtils';
 
-import type { PageInfo } from '../../types/common'; // PageInfo 타입 임포트
+import type { PageInfo } from '../../types/common'; 
 
 export default function ChatRoomDetailPage() {
   const { chatRoomId } = useParams<{ chatRoomId: string }>();
-  const navigate = useNavigate(); // useNavigate 훅 사용
-  const [rawChatMessages, setRawChatMessages] = useState<ChatResponseDto[]>([]); // 원본 메시지 목록
-  const [sortedChatMessages, setSortedChatMessages] = useState<ChatResponseDto[]>([]); // 정렬된 메시지 목록
+  const navigate = useNavigate(); 
+  const [rawChatMessages, setRawChatMessages] = useState<ChatResponseDto[]>([]); 
+  const [sortedChatMessages, setSortedChatMessages] = useState<ChatResponseDto[]>([]); 
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc'); // 'desc' for 최신순, 'asc' for 오래된순
   const [pageInfo, setPageInfo] = useState<PageInfo | null>(null); // 페이지 정보 상태 추가
   const [isLoading, setIsLoading] = useState(false);
@@ -36,39 +35,27 @@ export default function ChatRoomDetailPage() {
     if (!chatRoomId) return;
     setIsLoading(true);
     setError(null);
-    // 검색 결과는 페이지 변경 시 초기화하지 않음 (전체 로드된 메시지에서 검색 유지)
-    // setFoundMessage(undefined); 
     try {
-      // getChatRoom은 ChatRoomSingleResponseDto를 반환하며,
-      // 콘솔 로그에 따르면 getChatRoom은 { data: ChatRoomSingleResponseDto_payload } 형태의 객체를 반환합니다.
-      // getChatRoom의 선언된 반환 타입은 Promise<ChatRoomSingleResponseDto>이므로, rawApiResult는 ChatRoomSingleResponseDto로 타입 추론됩니다.
       const rawApiResult = await getChatRoom(Number(chatRoomId), pageToFetch, itemsPerPage);
-      
-      // apiCallResult의 'data' 속성 내부에 ChatRoomSingleResponseDto 페이로드가 있다고 가정합니다.
-      // 실제 반환되는 구조 { data: ChatRoomSingleResponseDto } 에 맞게 타입 단언합니다.
       const responseWrapper = rawApiResult as unknown as { data: ChatRoomSingleResponseDto };
       const actualData: ChatRoomSingleResponseDto = responseWrapper.data;
 
-      // 서버 응답의 Page<ChatDto.Response> 구조에 맞게 수정
-      // response.chats는 Page 객체이므로, content로 메시지 배열에 접근하고,
-      // pageInfo는 Page 객체의 속성들을 사용하여 구성합니다.
-      const newMessages = actualData?.chats?.content || []; // actualData에서 chats 접근
-      const newPageInfo = actualData?.chats ? { // actualData에서 chats 접근
-        page: actualData.chats.number + 1, // Spring Page는 0-indexed, 프론트는 1-indexed 사용 가정
+      const newMessages = actualData?.chats?.content || []; 
+      const newPageInfo = actualData?.chats ? { 
+        page: actualData.chats.number + 1, 
         size: actualData.chats.size,
         totalElements: actualData.chats.totalElements,
         totalPages: actualData.chats.totalPages,
       } : null;
 
-      // 페이지네이션에서는 현재 페이지의 데이터만 설정
       setRawChatMessages([...newMessages]);
-      setPageInfo(newPageInfo); // 페이지 정보 업데이트
+      setPageInfo(newPageInfo); 
 
-      if (newPageInfo) {
-        // setHasMore(newPageInfo.page < newPageInfo.totalPages); // hasMore는 더 이상 사용 안 함
-      } else {
-        // setHasMore(false);
-      }
+      // if (newPageInfo) {
+      //   setHasMore(newPageInfo.page < newPageInfo.totalPages); 
+      // } else {
+      //   setHasMore(false);
+      // }
 
     } catch (err) {
       setError(err instanceof Error ? err.message : '채팅방 상세 정보를 불러오는 데 실패했습니다.');
@@ -77,7 +64,6 @@ export default function ChatRoomDetailPage() {
     }
   }, [chatRoomId, itemsPerPage]); // currentPage는 useEffect에서 관리
 
-  // rawChatMessages 또는 sortOrder가 변경될 때 sortedChatMessages 업데이트
   useEffect(() => {
     const messagesToSort = [...rawChatMessages];
     if (sortOrder === 'asc') { // 오래된순
@@ -141,7 +127,7 @@ export default function ChatRoomDetailPage() {
       return;
     }
 
-    // 2. 다른 페이지에서 검색 (pageInfo가 있을 경우)
+    // 2. 다른 페이지에서 검색 
     if (pageInfo && pageInfo.totalPages > 0) {
       const result = await findPageOfChatId(idToSearch);
       if (result.page !== -1 && result.message) {
@@ -228,13 +214,13 @@ export default function ChatRoomDetailPage() {
           </div>
           {isLoading && <p className="text-center py-4">채팅 로그를 불러오는 중...</p>}
           {error && <p className="text-center py-4 text-red-500">오류: {error}</p>}
-          {!isLoading && !error && sortedChatMessages.length === 0 && ( // sortedChatMessages로 변경
+          {!isLoading && !error && sortedChatMessages.length === 0 && ( 
             <p className="text-center py-4">표시할 채팅 메시지가 없습니다.</p>
           )}
 
-          {!isLoading && !error && sortedChatMessages.length > 0 && ( // sortedChatMessages로 변경
+          {!isLoading && !error && sortedChatMessages.length > 0 && (
             <div className="space-y-3 bg-white p-4 shadow rounded-lg">
-              {sortedChatMessages.map((chat, index) => ( // sortedChatMessages로 변경
+              {sortedChatMessages.map((chat, index) => ( 
                 <div key={chat.chatId} ref={chatLogEntryRefs.current[index]}>
                   <ChatLogEntry 
                     chat={chat} 

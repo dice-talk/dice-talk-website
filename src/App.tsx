@@ -1,13 +1,13 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
-import Login from "./pages/auth/Login"; // Login 컴포넌트 경로 수정
+import Login from "./pages/auth/Login";
 import MemberManagement from "./pages/member/Member";
 import DeletedMember from "./pages/member/DeletedMember";
 import QnaManagment from "./pages/qna/QnaList";
 import QnaDetailPage from "./pages/qna/QnaDetail";
 import NoticeListPage from "./pages/notice/NoticeList";
 import NoticeDetailPage from "./pages/notice/NoticeDetail";
-import NoticeNewPage from "./pages/notice/NoticeNewPage"; // NoticeNewPage 임포트
+import NoticeNewPage from "./pages/notice/NoticeNewPage";
 import ReportListPage from "./pages/report/ReportList";
 import ReportDetailPage from "./pages/report/ReportDetail";
 import SuspendedMemberManagement from "./pages/report/SuspendedMember";
@@ -20,7 +20,6 @@ import ThemeManagementPage from "./pages/chat/ThemeManagement";
 import EventManagementPage from "./pages/chat/EventManagement";
 import ChatRoomDetailPage from "./pages/chat/ChatRoomDetailPage";
 
-// 로그인 상태를 가져오는 로직 (예시, 실제 사용하는 상태 관리 라이브러리에 맞게 수정)
 import { useAuthStore } from "./stores/useUserStore";
 import GuestQnaList from "./pages/qna/GuestQnaList";
 import GuestQnaDetailPage from "./pages/qna/GuestQnaDetail";

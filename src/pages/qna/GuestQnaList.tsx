@@ -19,7 +19,7 @@ type GuestQnaStatus = "전체" | "QUESTION_GUEST" | "QUESTION_GUEST_ANSWERED";
 
 // ReusableTable을 위한 QnaItem 확장 (TableItem의 id와 매핑)
 interface QnaTableItem extends QuestionResponse, TableItem {
-  id: number; // questionId를 id로 사용
+  id: number; 
 }
 
 const qnaSortOptions = [
@@ -176,14 +176,14 @@ export default function GuestQnaList() {
           </div>
         );
       },
-      headerClassName: "w-5/12 text-left", // 약 41.67%
+      headerClassName: "w-5/12 text-left", 
       cellClassName: "text-left",
     },
     {
       key: "email",
       header: "작성자(이메일)",
       accessor: "email",
-      headerClassName: "w-2/12", // 약 16.67% (기존 3/12에서 조정)
+      headerClassName: "w-2/12",
       cellClassName: "text-gray-700",
     },
     {
@@ -192,7 +192,7 @@ export default function GuestQnaList() {
       cellRenderer: (item) => (
         <QuestionStatusBadge status={item.questionStatus} />
       ),
-      headerClassName: "w-2/12", // 약 16.67%
+      headerClassName: "w-2/12", 
     },
     {
       key: "createdAt",

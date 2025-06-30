@@ -1,4 +1,3 @@
-// src/pages/product/ProductListPage.tsx
 import { useState, useMemo, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';
@@ -8,12 +7,12 @@ import { type ProductResponseDto, type ProductItem } from '../../types/payment/p
 import type { MultiResponse, PageInfo } from '../../types/common';
 import Button from '../../components/ui/Button';
 import { ProductModal } from '../../components/product/ProductModal';
-import { formatDate } from '../../lib/DataUtils'; // 경로 확인 필요
-import { Pagination } from '../../components/common/Pagination'; // Pagination 컴포넌트 임포트
+import { formatDate } from '../../lib/DataUtils'; 
+import { Pagination } from '../../components/common/Pagination'; 
 import { getProducts, deleteProduct } from '../../api/productApi';
 
 interface ProductTableItem extends ProductItem {
-    id: number; // ReusableTable 호환용
+    id: number; 
 }
 
 const productSortOptions = [
@@ -40,9 +39,8 @@ export default function ProductListPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // API가 1-indexed 페이지를 기대할 가능성을 고려하여 수정 (page: page)
       const response: MultiResponse<ProductResponseDto> = await getProducts({ page: page, size });
-      setProducts(response.data.map(p => ({ ...p, id: p.productId }))); // ReusableTable 호환을 위해 id 추가
+      setProducts(response.data.map(p => ({ ...p, id: p.productId }))); 
       setPageInfo(response.pageInfo);
     } catch (err) {
       console.error("Failed to fetch products:", err);
@@ -54,10 +52,9 @@ export default function ProductListPage() {
     }
   };
 
-  // 목록 업데이트를 위해 useEffect 사용 (mockProducts가 외부에서 변경될 경우 대비)
   useEffect(() => {
     fetchProducts(currentPage, PAGE_SIZE);
-  }, [currentPage]); // currentPage가 변경될 때마다 상품 목록 다시 로드
+  }, [currentPage]); 
 
 
   const handleOpenModalForCreate = () => {
@@ -76,20 +73,17 @@ export default function ProductListPage() {
   };
 
   const handleProductSubmitted = () => {
-    // 상품 생성/수정 성공 시 목록 새로고침
-    // 특정 상품 정보(submittedProduct)가 있다면, 목록에서 해당 상품만 업데이트하여 UX 개선 가능
-    // 여기서는 간단히 현재 페이지를 다시 로드
     fetchProducts(currentPage, PAGE_SIZE);
   };
 
   const handleDeleteProduct = async (productId: number) => {
-      console.log("handleDeleteProduct called with productId:", productId); // 이 부분 추가
+      console.log("handleDeleteProduct called with productId:", productId); 
     if (window.confirm("정말로 이 상품을 삭제하시겠습니까?")) {
 
       try {
         await deleteProduct(productId);
         alert("상품이 삭제되었습니다.");
-        fetchProducts(currentPage, PAGE_SIZE); // 삭제 후 목록 새로고침
+        fetchProducts(currentPage, PAGE_SIZE);
       } catch (err) {
         console.error("Failed to delete product:", err);
         alert(`상품 삭제 중 오류 발생: ${err instanceof Error ? err.message : String(err)}`);
@@ -112,7 +106,7 @@ export default function ProductListPage() {
     } else if (sortValue === 'productName_desc') {
       sorted.sort((a, b) => (b.productName || "").localeCompare(a.productName || ""));
     }
-    return sorted; // ProductItem은 이미 id 필드를 포함 (fetchProducts에서 매핑됨)
+    return sorted;
   
   }, [products, sortValue]);
 

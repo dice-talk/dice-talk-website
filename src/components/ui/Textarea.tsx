@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/Utils'; // cn 유틸리티 함수 경로 확인
+import { cn } from '../../lib/Utils'; 
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;

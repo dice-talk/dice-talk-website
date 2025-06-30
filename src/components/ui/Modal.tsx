@@ -1,4 +1,3 @@
-// src/components/ui/Modal.tsx
 import React from 'react';
 import { X } from 'lucide-react';
 import Button from './Button';

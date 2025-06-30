@@ -1,4 +1,3 @@
-// src/components/payment/PaymentHistoryFilterSection.tsx
 import React from 'react';
 import Button from '../ui/Button';
 import { DropdownFilter } from '../ui/DropdownFilter';
@@ -8,20 +7,16 @@ import { PaymentStatus } from '../../types/payment/paymentTypes';
 import { getPaymentStatusLabel } from '../../lib/PaymentUtils';
 
 interface PaymentHistoryFilterSectionProps {
-  // 날짜 필터
   startDate: string;
   onStartDateChange: (date: string) => void;
   endDate: string;
   onEndDateChange: (date: string) => void;
-  // 상태 필터
   statusFilter: string; // '전체' 또는 PaymentStatus
   onStatusFilterChange: (status: string) => void;
-  // 검색 필터
   userSearchTerm: string; // 사용자 ID 또는 이메일
   onUserSearchTermChange: (term: string) => void;
   productSearchTerm: string; // 상품명 또는 상품 ID
   onProductSearchTermChange: (term: string) => void;
-  // 액션 버튼
   onApplyFilters: () => void;
   onResetFilters: () => void;
 }  
@@ -82,6 +77,13 @@ export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionPr
           onChange={onProductSearchTermChange}
         />
         <div className="md:col-span-2 flex justify-end items-end space-x-2 pt-4 sm:pt-0">
+          <Button
+            variant="outline"
+            onClick={onResetFilters}
+            className="w-full sm:w-auto"
+          >
+            초기화
+          </Button>
           {onApplyFilters && ( 
             <Button
               variant="default"
@@ -91,13 +93,6 @@ export const PaymentHistoryFilterSection: React.FC<PaymentHistoryFilterSectionPr
               조회
             </Button>
           )}
-          <Button
-            variant="outline"
-            onClick={onResetFilters}
-            className="w-full sm:w-auto"
-          >
-            초기화
-          </Button>
         </div>
       </div>
     </div>

@@ -8,24 +8,20 @@ import {
   FileText,
 } from "lucide-react";
 
-// 백엔드 응답 스키마를 기반으로 타입 정의
 export interface MemberDetailData {
-  memberId: number; // memberId 추가
+  memberId: number; 
   email: string;
   phone?: string | null; // 백엔드 응답에 따라 optional 또는 null 가능성
   name: string;
   birth: string;
-  gender?: "MALE" | "FEMALE" | string; // 백엔드 값 그대로 또는 변환된 값
+  gender?: 'MALE' | 'FEMALE' | string; 
   region?: string | null;
   totalDice?: number | null;
-  memberStatus?: string; // 예: MEMBER_ACTIVE, MEMBER_DORMANT 등
-  notification?: boolean | string | null; // 백엔드 응답에 따라
-  // DeletedMember.tsx 에서만 사용될 수 있는 필드
+  memberStatus?: string; 
+  notification?: boolean | string | null; 
   reason?: string;
   deletedAt?: string;
-  // Member.tsx 에서만 사용될 수 있는 필드
   lastLogin?: string;
-  // SuspendedMember.tsx 에서 사용될 필드
   suspensionReason?: string;
   suspensionStartDate?: string;
   warnings?: WarningDetail[];
@@ -207,18 +203,13 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           {/* 정지 사유 및 시작일 (정지 회원일 때, 왼쪽 정렬 유지) */}
           {member.memberStatus === "MEMBER_SUSPENDED" && (
             <>
-              <RowItem
-                leftLabel="정지 사유"
-                leftValue={member.suspensionReason || "정보 없음"}
-                rightLabel="정지 시작일"
-                rightValue={member.suspensionStartDate || "정보 없음"}
-              />
-              {member.warnings &&
-                member.warnings.length > 0 &&
-                // 이 div는 RowItem과 같은 레벨에 있지 않으므로, space-y-5의 영향을 받지 않음.
-                // 대신 아래의 경고 내역 섹션이 별도로 중앙 정렬됨.
-                // 이 부분은 실제로는 아래의 중앙 정렬된 경고 내역 섹션으로 이동함.
-                null}
+               <RowItem 
+                    leftLabel="정지 사유" 
+                    leftValue={member.suspensionReason || '정보 없음'} 
+                    rightLabel="정지 시작일"
+                    rightValue={member.suspensionStartDate || '정보 없음'}
+                />
+                {member.warnings && member.warnings.length > 0 && (null)}
             </>
           )}
         </div>
@@ -279,15 +270,3 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     </Modal>
   );
 };
-
-// interface DetailItemProps {
-//   label: string;
-//   value: React.ReactNode;
-// }
-
-// const DetailItem: React.FC<DetailItemProps> = ({ label, value }) => (
-// <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
-//     <dt className="text-xs font-medium text-gray-500">{label}</dt>
-//     <dd className="mt-1 text-sm font-semibold text-gray-800 break-words">{value}</dd>
-// </div>
-// );

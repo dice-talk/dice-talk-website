@@ -1,12 +1,9 @@
-// src/lib/dateUtils.ts
-
 export const formatDateTime = (dateString: string | undefined): string => {
   if (!dateString) return "-";
 
   try {
     let processedDateString = dateString;
 
-    // dateString이 'T'는 포함하되, 'Z'나 '+09:00' 같은 타임존 표시가 없는 경우
     const isISOWithoutZone =
       typeof dateString === "string" &&
       dateString.includes("T") &&

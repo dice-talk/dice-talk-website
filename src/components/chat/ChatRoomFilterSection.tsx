@@ -1,17 +1,17 @@
 import React from 'react';
 import Button from '../ui/Button';
-import { DropdownFilter } from '../ui/DropdownFilter'; // DropdownFilter 임포트
-import { SearchInputFilter } from '../ui/SearchInputFilter'; // SearchInputFilter 임포트 (일관성을 위해)
+import { DropdownFilter } from '../ui/DropdownFilter'; 
+import { SearchInputFilter } from '../ui/SearchInputFilter'; 
 import { 
   getChatRoomStatusLabel, 
-  getChatRoomTypeLabel, // getChatRoomConceptLabel은 여기서 직접 사용하지 않음
+  getChatRoomTypeLabel, 
   chatRoomThemeFilterOptionsForDropdown
 } from '../../lib/ChatRoomUtils'; 
-import { RoomType, RoomStatus } from '../../types/chatroom/chatRoomTypes'; // 타입 대신 실제 객체 import
+import { RoomType, RoomStatus } from '../../types/chatroom/chatRoomTypes'; 
 
 interface ChatRoomFilterSectionProps {
-  themeNameFilter: string; // conceptFilter -> themeNameFilter
-  onThemeNameFilterChange: (value: string) => void; // onConceptFilterChange -> onThemeNameFilterChange
+  themeNameFilter: string; 
+  onThemeNameFilterChange: (value: string) => void; 
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
   roomTypeFilter: string;
@@ -19,18 +19,18 @@ interface ChatRoomFilterSectionProps {
   roomIdSearch: string;
   onRoomIdSearchChange: (value: string) => void;
   onResetFilters: () => void;
-  onSearch: () => void; // 조회 버튼 핸들러 추가
+  onSearch: () => void; // 조회 버튼 핸들러
 }
 
 export const ChatRoomFilterSection: React.FC<ChatRoomFilterSectionProps> = ({
-  themeNameFilter, onThemeNameFilterChange, // props 이름 변경
+  themeNameFilter, onThemeNameFilterChange, 
   statusFilter, onStatusFilterChange,
   roomTypeFilter, onRoomTypeFilterChange,
   roomIdSearch, onRoomIdSearchChange,
   onResetFilters,
-  onSearch, // 조회 핸들러 받기
+  onSearch, 
 }) => {
-  const themeOptions = chatRoomThemeFilterOptionsForDropdown; // 이 변수명은 유지해도 됩니다.
+  const themeOptions = chatRoomThemeFilterOptionsForDropdown;
 
 
   const statusOptions = [

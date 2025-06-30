@@ -1,4 +1,3 @@
-// src/api/eventApi.ts
 import { axiosInstance } from "./axiosInstance";
 import type { EventPostDto, EventPatchDto, EventResponseDto, EventStatus } from "../types/chatroom/eventTypes";
 import type { MultiResponse } from "../types/common"; // SingleResponseDto 추가

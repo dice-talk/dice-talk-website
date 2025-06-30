@@ -1,8 +1,4 @@
-import { PaymentStatus } from "../types/payment/paymentTypes"; // 이미 있다면 유지
-
-// export const getPaymentStatusLabel = (status: PaymentStatus): string => {
-//   return status; 
-// };
+import { PaymentStatus } from "../types/payment/paymentTypes";
 
 // 라벨 매핑
 const paymentStatusLabelMap: Record<PaymentStatus, string> = {

@@ -1,4 +1,3 @@
-// src/pages/payment/PaymentHistoryPage.tsx
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Header from '../../components/Header';

@@ -1,15 +1,15 @@
-// import { useEffect, useState } from 'react'; // Keep these imports if they are used elsewhere in the file, otherwise remove
+// import { useEffect, useState } from 'react';
 // import axiosInstance from '../api/axiosInstance';
 import WeeklyLineChart from './WeeklyLineChart';
-import type { DashboardWeekly, DailyCount } from '../types/dashboardTypes'; // Import types from new file
+import type { DashboardWeekly, DailyCount } from '../types/dashboardTypes'; 
 
 type SummaryType = '가입자 수' | '채팅방 수' | '신고 수' | '결제 수';
 
 interface DashboardChartTabsProps {
   selectedType: SummaryType;
-  weeklyData: DashboardWeekly | null; // Now received as a prop
-  loading: boolean; // Now received as a prop
-  error: string | null; // Now received as a prop
+  weeklyData: DashboardWeekly | null; 
+  loading: boolean; 
+  error: string | null; 
 }
 
 export default function DashboardChartTabs({
@@ -18,16 +18,12 @@ export default function DashboardChartTabs({
   loading,
   error,
 }: DashboardChartTabsProps) {
-  // No internal state for weeklyData, loading, error, or useEffect for fetching.
-  // These are now props from the parent Home component.
-
   const colorMap: Record<SummaryType, string> = {
     '가입자 수': '#3B82F6',
     '채팅방 수': '#8B5CF6',
     '신고 수': '#F59E0B',
     '결제 수': '#10B981'
   };
-  // Helper to add isFuture flag based on weekEndDate
   const processDailyCounts = (counts: DailyCount[]): DailyCount[] => {
     if (!weeklyData || counts.length === 0) return [];
     const endDate = new Date(weeklyData.weekEndDate);

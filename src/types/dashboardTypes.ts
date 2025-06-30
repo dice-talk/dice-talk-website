@@ -1,7 +1,7 @@
 export interface DailyCount {
   date: string; // YYYY-MM-DD
   count: number;
-  isFuture?: boolean; // Add this for chart rendering logic
+  isFuture?: boolean; 
 }
 
 export interface DashboardChatRoom {

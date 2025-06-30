@@ -1,4 +1,3 @@
-// 테이블에 표시될 아이템의 기본 인터페이스 (id는 필수)
 export interface TableItem {
   id: string | number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -7,7 +6,7 @@ export interface TableItem {
 
 // 각 컬럼의 정의를 위한 인터페이스
 export interface ColumnDefinition<T extends TableItem> {
-  key: string; // 데이터 객체의 키 또는 고유 식별자
+  key: string; 
   header: string; // 테이블 헤더에 표시될 텍스트
   cellRenderer?: (item: T, index: number) => React.ReactNode; // 셀 내용을 커스텀 렌더링하는 함수
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,5 +30,4 @@ export interface ReusableTableProps<T extends TableItem> {
   emptyStateMessage?: string;
   onRowClick?: (item: T) => void;
   isLoading?: boolean;
-  // 필요에 따라 추가적인 props (예: 페이지네이션 관련)를 정의할 수 있습니다.
 }

@@ -11,11 +11,11 @@ import { getPaymentStatusLabel, getStatusBadgeStyle as getPaymentStyle } from ".
 
 import type { ReportStatus } from "../../types/reportTypes";
 import type { MemberStatus } from "../../types/memberTypes";
-import type { NoticeStatus } from "../../types/noticeTypes"; // 실제 Notice 상태 타입으로 가정
+import type { NoticeStatus } from "../../types/noticeTypes"; 
 import type { ThemeStatus } from "../../types/chatroom/themeTypes";
-import type { EventStatus } from "../../types/chatroom/eventTypes"; // 실제 Event 상태 타입으로 가정 (eventUtils의 mapBackendStatusToFrontendLabel이 받는 타입)
+import type { EventStatus } from "../../types/chatroom/eventTypes"; 
 import type { PaymentStatus } from "../../types/payment/paymentTypes";
-import type { RoomStatus } from "../../types/chatroom/chatRoomTypes"; // 실제 ChatRoom 상태 타입으로 가정
+import type { RoomStatus } from "../../types/chatroom/chatRoomTypes"; 
 
 type StatusBadgeProps =
   | { type: "member"; status: MemberStatus }
@@ -29,7 +29,7 @@ type StatusBadgeProps =
 const StatusBadge = (props: StatusBadgeProps) => {
   const { status, type } = props;
   let label: string;
-  let badgeClassName: string = "bg-gray-200 text-gray-800"; // 기본값
+  let badgeClassName: string = "bg-gray-200 text-gray-800"; 
 
   switch (type) {
     case "member":
@@ -66,7 +66,6 @@ const StatusBadge = (props: StatusBadgeProps) => {
       break;
   }
 
-  // 기본 배지 스타일 (요청의 첫 번째 예시 기준)
   const baseStyle = "px-2 py-0.5 text-xs font-medium rounded-full";
 
   return (

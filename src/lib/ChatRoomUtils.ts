@@ -1,34 +1,15 @@
 import {
     RoomStatus as ChatRoomStatusEnum,
     type RoomType as ChatRoomTypeEnum,
-    type ChatRoomParticipant, // ChatRoomManagementPage에서 사용하던 타입
+    type ChatRoomParticipant, 
 } from '../types/chatroom/chatRoomTypes';
 
-// export const THEME_ID_TO_CONCEPT_DETAILS = {
-//   1: { key: 'DICE_FRIENDS', label: '다이스 프렌즈' },
-//   2: { key: 'HEART_SIGNAL', label: '하트시그널' },
-//   // 필요에 따라 다른 테마 ID와 컨셉 정보를 추가합니다.
-// } as const;
-
-// export type ConceptThemeId = keyof typeof THEME_ID_TO_CONCEPT_DETAILS;
 export const THEME_NAME_TO_LABEL_DETAILS = {
-  "다이스 프렌즈": { label: "다이스 프렌즈" }, // value와 label이 같을 수도 있고, 다를 수도 있습니다.
-  "하트시그널": { label: "하트시그널" },
+  "다이스 프렌즈": { label: "다이스 프렌즈" }, 
+  "하트 시그널": { label: "하트 시그널" }, 
 };
- export type ConceptThemeId = keyof typeof THEME_NAME_TO_LABEL_DETAILS;
+export type ConceptThemeId = keyof typeof THEME_NAME_TO_LABEL_DETAILS;
 
-/**
- * themeId를 기반으로 채팅방 컨셉 레이블을 반환합니다.
- * @param themeId - 채팅방의 테마 ID
- * @returns 컨셉 레이블 문자열
- */
-// export function getChatRoomThemeLabel(themeId: number | null | undefined): string {
-//   if (themeId === null || themeId === undefined) {
-//     return '일반'; // 예: 1:1 채팅방 또는 특정 컨셉이 없는 방
-//   }
-//   const details = THEME_NAME_TO_LABEL_DETAILS[theas ConceptThemeName];
-//   return details ? details.label : `테마 ID: ${themeId}`;
-// }
 
 export const getChatRoomTypeLabel = (type: ChatRoomTypeEnum): string => {
  switch (type) {
@@ -41,7 +22,6 @@ export const getChatRoomTypeLabel = (type: ChatRoomTypeEnum): string => {
       }
   }
 };
-
 
 export const getChatRoomStatusLabel = (status: ChatRoomStatusEnum): string => {
 
@@ -96,8 +76,6 @@ export const chatRoomThemeFilterOptionsForDropdown = [
     value: themeName,
     label: details.label,
   })),
-  // 필요하다면 '컨셉 없음'에 대한 필터 옵션 추가
-  // { value: 'NONE', label: '일반 (컨셉 없음)' },
 ];
 export const getParticipantDisplay = (participants: ChatRoomParticipant[]): string => {
   const currentCount = participants.length;
