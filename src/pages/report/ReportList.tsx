@@ -44,7 +44,7 @@ export default function ReportListPage() {
   // UI 입력을 위한 필터 상태
   const [statusFilter, setStatusFilter] = useState("전체");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortValue, setSortValue] = useState("createdAt_desc");
+  const [sortValue, setSortValue] = useState("DESC");
 
   // 실제 필터링에 사용될 필터 상태
   const [appliedFilters, setAppliedFilters] = useState({
@@ -63,7 +63,7 @@ export default function ReportListPage() {
         page: currentPage,
         size: itemsPerPage,
         ...(appliedFilters.status !== "전체"
-          ? { status: appliedFilters.status as ReportStatus }
+          ? { reportStatus: appliedFilters.status as ReportStatus }
           : {}),
         ...(appliedFilters.term ? { searchTerm: appliedFilters.term } : {}),
         ...(sortValue ? { sort: sortValue } : {}),
@@ -87,7 +87,7 @@ export default function ReportListPage() {
   const handleResetFilters = () => {
     setStatusFilter("전체");
     setSearchTerm("");
-    setSortValue("createdAt_desc");
+    setSortValue("DESC");
     setAppliedFilters({
       status: "전체",
       term: "",

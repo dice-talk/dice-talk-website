@@ -18,7 +18,6 @@ const REPORT_STATUSES: ReportStatus[] = [
   "REPORT_RECEIVED",
   "REPORT_REJECTED",
   "REPORT_COMPLETED",
-  "REPORT_DELETED",
 ];
 
 export const ReportFilterSection: React.FC<ReportFilterSectionProps> = ({
