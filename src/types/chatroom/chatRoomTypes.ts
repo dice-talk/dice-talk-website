@@ -1,13 +1,10 @@
-// src/types/chatRoomTypes.ts
-// ChatDto.Response 및 RoomEventDto.Response 타입은 실제 정의에 맞게 수정 필요
 import { type ChatResponseDto } from './chatTypes';
 import { type EventResponseDto } from './eventTypes';
 import { type ChatPartResponseDto } from './chatPart';
 // import { type MultiResponse } from '../common';
-import type { SpringPage } from "../common"; // SpringPage 임포트
+import type { SpringPage } from "../common"; 
 
 
-// ChatRoom.java의 RoomType enum
 export const RoomType = {
   GROUP: 'GROUP', // 단체 채팅방
   COUPLE:'COUPLE', // 1:1 채팅방
@@ -28,10 +25,8 @@ export interface ChatRoomParticipant {
   nickname: string;
   profileImageUrl?: string;
   gender?: 'MALE' | 'FEMALE' | 'OTHER'; // 예시 필드
-  // ... 기타 필요한 참가자 정보 필드 ...
 }
 
-// ChatRoomDto.SingleResponse
 export interface ChatRoomSingleResponseDto {
   chatRoomId: number; // 채팅방 ID
   roomType: RoomType; // 채팅방 유형
@@ -41,8 +36,8 @@ export interface ChatRoomSingleResponseDto {
   chats: SpringPage<ChatResponseDto>;
   chatParts: ChatPartResponseDto[];
   roomEvents: EventResponseDto[]; // RoomEventDto.Response 타입으로 변경 필요
-  createdAt: string; // LocalDateTime은 string으로 처리 (ISO 8601 형식)
-  modifiedAt: string; // LocalDateTime은 string으로 처리 (ISO 8601 형식)
+  createdAt: string;
+  modifiedAt: string; 
 }
 
 // ChatRoomDto.MultiResponse

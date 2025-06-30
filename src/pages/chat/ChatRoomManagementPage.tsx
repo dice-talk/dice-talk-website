@@ -1,6 +1,5 @@
-// src/pages/chat/ChatRoomManagementPage.tsx
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom"; // useNavigate 추가
+import { useNavigate } from "react-router-dom"; 
 import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/Header";
 import { ChatRoomFilterSection } from "../../components/chat/ChatRoomFilterSection";
@@ -22,6 +21,7 @@ import StatusBadge from "../../components/ui/StatusBadge";
 import { formatDateTime } from "../../lib/DataUtils";
 import { getChatRoomTypeLabel } from "../../lib/ChatRoomUtils";
 
+
 interface ChatRoomTableItem extends ChatRoomMultiResponseDto, TableItem {
   id: number;
 }
@@ -34,25 +34,22 @@ export default function ChatRoomManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [pageInfo, setPageInfo] = useState<PageInfo | null>(null);
 
-  // UI 입력을 위한 필터 상태
-  const [themeNameFilter, setThemeNameFilter] = useState("ALL"); // conceptFilter -> themeNameFilter
+  const [themeNameFilter, setThemeNameFilter] = useState("ALL"); 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [roomTypeFilter, setRoomTypeFilter] = useState("ALL");
   const [roomIdSearch, setRoomIdSearch] = useState("");
-
-  // API 요청에 사용될 실제 적용된 필터 상태
   const [appliedFilters, setAppliedFilters] = useState({
-    themeName: "ALL", // concept -> themeName
-    status: "ALL",
-    roomType: "ALL",
-    roomId: "",
+
+    themeName: 'ALL',
+    status: 'ALL',
+    roomType: 'ALL',
+    roomId: '',
   });
 
   const [sortValue, setSortValue] = useState("DESC"); // 기본값 DESC
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Can be made configurable
-  const navigate = useNavigate(); // useNavigate 훅 사용
-
+  const [itemsPerPage] = useState(10); 
+  const navigate = useNavigate(); 
   const fetchAndSetChatRooms = useCallback(
     async (
       pageToFetch: number,

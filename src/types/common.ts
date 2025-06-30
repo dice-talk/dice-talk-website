@@ -14,12 +14,7 @@ export interface MultiResponse<T> {
   pageInfo: PageInfo;
 }
 
-// SingleResponseDto에 대한 타입도 필요하다면 추가
-// export interface SingleResponse<T> {
-//   data: T;
-// }
 
-// Spring Page 객체와 유사한 타입 정의
 export interface SpringPage<T> {
   content: T[];
   pageable: {

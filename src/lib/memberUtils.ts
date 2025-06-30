@@ -1,4 +1,4 @@
-import type { MemberStatus } from "../types/memberTypes"; // 실제 MemberStatus 타입을 가져옵니다.
+import type { MemberStatus } from '../types/memberTypes'; 
 
 export const getMemberLabel = (status: MemberStatus | string): string => {
   switch (status) {

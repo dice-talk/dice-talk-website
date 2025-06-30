@@ -1,7 +1,7 @@
 import Button from '../ui/Button';
 import { DropdownFilter } from '../ui/DropdownFilter';
 import { SearchInputFilter } from '../ui/SearchInputFilter';
-import { NoticeStatus } from '../../lib/NoticeUtils'; // NoticeStatus import
+import { NoticeStatus } from '../../lib/NoticeUtils'; 
 
 const noticeTypeOptions = [
   { value: '전체', label: '전체 유형' },
@@ -9,7 +9,6 @@ const noticeTypeOptions = [
   { value: '이벤트', label: '이벤트' },
 ];
 
-// NoticeStatus enum을 사용하여 공지 상태 옵션 생성
 const noticeStatusOptions = [
   { value: '전체', label: '전체' },
   ...Object.values(NoticeStatus).map(status => ({ value: status, label: status })),
@@ -23,8 +22,8 @@ interface NoticeFilterSectionProps {
   titleSearch: string;
   onTitleSearchChange: (value: string) => void;
   onResetFilters: () => void;
-  noticeStatusFilter: string; // 새로운 prop
-  onNoticeStatusFilterChange: (value: string) => void; // 새로운 prop
+  noticeStatusFilter: string; 
+  onNoticeStatusFilterChange: (value: string) => void;
   onSearch: () => void; // 조회 버튼 클릭 핸들러 prop 추가
 }
 

@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectValue,
 } from "../ui/Select";
-import { cn } from "../../lib/Utils"; // cn 유틸리티 함수 경로 확인 필요
+import { cn } from "../../lib/Utils"; 
 import type {
   TableItem,
   ColumnDefinition,
@@ -37,7 +37,7 @@ export function ReusableTable<T extends TableItem>({
       }
       return item[column.accessor as keyof T];
     }
-    return null; // 기본적으로 아무것도 렌더링하지 않거나, item[column.key] 등을 시도할 수 있습니다.
+    return null; 
   };
 
   return (

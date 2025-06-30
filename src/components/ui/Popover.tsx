@@ -1,7 +1,6 @@
-// src/components/ui/Popover.tsx
 import * as React from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { cn } from '../../lib/Utils'; // cn 유틸리티 함수 (클래스 이름 병합용)
+import { cn } from '../../lib/Utils'; 
 
 const Popover = PopoverPrimitive.Root;
 

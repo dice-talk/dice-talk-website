@@ -17,9 +17,8 @@ import type { PageInfo } from "../../types/common";
 
 type QnaStatus = "전체" | "QUESTION_REGISTERED" | "QUESTION_ANSWERED";
 
-// ReusableTable을 위한 QnaItem 확장 (TableItem의 id와 매핑)
 interface QnaTableItem extends QuestionResponse, TableItem {
-  id: number; // questionId를 id로 사용
+  id: number; 
 }
 
 const qnaSortOptions = [
@@ -27,7 +26,6 @@ const qnaSortOptions = [
   { value: "asc", label: "등록일 (오래된순)" },
 ];
 
-// 한글 상태값을 API 코드값으로 변환
 const getStatusParam = (status: string) => {
   return status === "전체" ? undefined : status;
 };
@@ -119,7 +117,6 @@ export default function QnaList() {
     setStatusFilter("전체");
     setSearchType("제목");
     setSearchKeyword("");
-    // 적용된 필터 상태도 초기화
     setAppliedFilters({
       status: "전체",
       searchType: "제목",
@@ -151,7 +148,7 @@ export default function QnaList() {
       key: "no",
       header: "No",
       cellRenderer: (item) => item.questionId, // questionId 그대로 출력
-      headerClassName: "w-1/12", // 약 8.33%
+      headerClassName: "w-1/12", 
       cellClassName: "text-gray-700",
     },
     {
@@ -172,14 +169,14 @@ export default function QnaList() {
           </div>
         );
       },
-      headerClassName: "w-5/12 text-left", // 약 41.67%
+      headerClassName: "w-5/12 text-left",
       cellClassName: "text-left",
     },
     {
       key: "email",
       header: "작성자(이메일)",
       accessor: "email",
-      headerClassName: "w-2/12", // 약 16.67% (기존 3/12에서 조정)
+      headerClassName: "w-2/12",
       cellClassName: "text-gray-700",
     },
     {
@@ -188,7 +185,7 @@ export default function QnaList() {
       cellRenderer: (item) => (
         <QuestionStatusBadge status={item.questionStatus} />
       ),
-      headerClassName: "w-2/12", // 약 16.67%
+      headerClassName: "w-2/12", 
     },
     {
       key: "createdAt",
@@ -199,7 +196,6 @@ export default function QnaList() {
     },
   ];
 
-  // ReusableTable에 맞게 id 필드 추가
   const tableData = useMemo(
     () => qnas.map((qna) => ({ ...qna, id: qna.questionId } as QnaTableItem)),
     [qnas]

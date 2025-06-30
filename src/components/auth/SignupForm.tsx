@@ -1,24 +1,19 @@
 import { useState } from 'react';
 import { adminSignup } from '../../api/auth';
 import axios, { AxiosError } from 'axios';
-import type { AdminSignupRequest } from '../../types/authTypes'; // AdminSignupRequest 타입 임포트
-import { Input } from '../ui/Input'; // Input 컴포넌트 임포트
-import Button from '../ui/Button'; // Button 컴포넌트 임포트
+import type { AdminSignupRequest } from '../../types/authTypes'; 
+import { Input } from '../ui/Input'; 
+import Button from '../ui/Button';
 
 interface SignupFormProps {
-  onSignupSuccess: () => void; // 회원가입 성공 시 호출될 함수 (예: 탭 전환)
-  // 필요한 경우 로딩 상태 등을 부모로부터 받을 수 있습니다.
-  // isLoading: boolean;
+  onSignupSuccess: () => void; // 회원가입 성공 시 호출
 }
 
-// Signup 컴포넌트 이름을 SignupForm으로 변경하고, 페이지 레이아웃 제거
 export default function SignupForm({ onSignupSuccess }: SignupFormProps) {
-  // navigate는 부모 컴포넌트(Login.tsx)에서 처리하므로 여기서는 제거
-  // const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState(''); // 비밀번호 확인 필드 추가
+  const [confirmPassword, setConfirmPassword] = useState(''); // 비밀번호 확인 
 
   const handleSignup = async () => {
     if (password !== confirmPassword) {
@@ -45,7 +40,6 @@ export default function SignupForm({ onSignupSuccess }: SignupFormProps) {
     }
 };
 
-   // TODO: 비밀번호 확인 로직 추가
    const isPasswordMatch = password === confirmPassword || confirmPassword === '';
 
    return (

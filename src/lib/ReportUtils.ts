@@ -1,4 +1,3 @@
-// src/utils/reportUtils.ts
 import type { ReportStatus, ReportReason } from "../types/reportTypes";
 
 export const getReportStatusLabel = (status: ReportStatus): string => {
@@ -9,6 +8,8 @@ export const getReportStatusLabel = (status: ReportStatus): string => {
       return "신고 반려";
     case "REPORT_COMPLETED":
       return "처리 완료";
+    case "REPORT_DELETED":
+      return "신고 반려"; 
     default:
       return status;
   }
@@ -27,6 +28,10 @@ export const getReportStatusBadgeStyleSwitch = (
     case "REPORT_COMPLETED":
     case "처리 완료":
       return "bg-green-500 text-white font-semibold shadow-sm";
+    case "REPORT_DELETED":
+    case "신고 반려":
+      return "bg-red-500 text-white font-semibold shadow-sm";
+
     default:
       return "bg-gray-500 text-white font-semibold shadow-sm";
   }

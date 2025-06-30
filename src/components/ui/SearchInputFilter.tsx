@@ -1,4 +1,4 @@
-import Input from './Input'; // Input 컴포넌트 경로 확인
+import Input from './Input'; 
 
 interface SearchInputFilterProps {
   label: string;

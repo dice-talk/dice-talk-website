@@ -18,7 +18,7 @@ export default function BannedMemberDetail() {
         if (!memberId) return;
         const response = await getBannedMemberDetail(Number(memberId));
         setMember(response);
-        console.log(response);
+
       } catch (error) {
         console.error("회원 상세 정보를 불러오는데 실패했습니다:", error);
       } finally {
@@ -75,7 +75,7 @@ export default function BannedMemberDetail() {
               onClick={() => navigate(-1)}
               className="px-4 py-2 bg-blue-100 text-blue-900 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              목록으로 돌아가기
+              목록으로
             </button>
           </div>
 
@@ -111,10 +111,6 @@ export default function BannedMemberDetail() {
                 <div>
                   <p className="text-sm text-gray-500">지역</p>
                   <p className="font-medium">{member.region}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">연령대</p>
-                  <p className="font-medium">{member.ageGroup}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">정지 시작일</p>

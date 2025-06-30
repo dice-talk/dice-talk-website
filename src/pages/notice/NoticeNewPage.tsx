@@ -1,4 +1,3 @@
-// src/pages/notice/NoticeNewPage.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -25,11 +24,10 @@ import {
 import {
   type NoticePostDto,
   type NoticePatchDto,
-  // type NoticeTypeBack,
   type NoticeStatusBack,
   type NoticeItemView,
   type NoticeImageDto,
-} from "../../types/noticeTypes"; // 타입 경로 수정
+} from "../../types/noticeTypes"; 
 
 export default function NoticeNewPage() {
   const navigate = useNavigate();
@@ -51,7 +49,7 @@ export default function NoticeNewPage() {
   useEffect(() => {
     const loadNoticeForEdit = async (id: number) => {
       try {
-        const itemToEdit = await getNoticeDetail(id); // API 함수 사용 (fetchNoticeDetail -> getNoticeDetail)
+        const itemToEdit = await getNoticeDetail(id); 
         setInitialFormData({
           id: itemToEdit.noticeId,
           title: itemToEdit.title,
@@ -184,29 +182,25 @@ export default function NoticeNewPage() {
         noticeType: mapFrontendTypeToBackend(formData.type), // mapFrontendTypeToBackend 함수의 반환 값 사용
         noticeStatus: mapFrontendStatusToBackend(formData.status), // mapFrontendStatusToBackend 함수의 반환 값 사용
         noticeImportance: formData.isImportant ? 1 : 0,
-        // keepImageIds는 NoticeForm에서 관리되지 않으므로, 필요시 추가 구현
-        // 예: keepImageIds: initialFormData.imageUrls?.filter(url => !formData.removedImageUrls.includes(url)).map(url => /* URL에서 ID 추출 로직 */)
+       
       };
 
       const noticePatchDtoString = JSON.stringify(apiPayload);
 
-      // 수정 시에도 thumbnailFlags 등이 필요하면 추가
       console.log("Updating notice (noticePutDto):", noticeId, apiPayload);
 
-      // thumbnailFlags 생성: 첫 번째 이미지는 썸네일(true), 나머지는 false
       const thumbnailFlags =
         formData.newImageFiles && formData.newImageFiles.length > 0
           ? formData.newImageFiles.map((_: File, index: number) => index === 0)
           : undefined;
 
       try {
-        // updateNotice API는 thumbnailFlags도 받으므로, 필요시 전달
         await updateNotice(
           itemId,
           noticePatchDtoString,
           formData.newImageFiles,
           thumbnailFlags
-        ); // thumbnailFlags 추가
+        ); 
         alert("공지/이벤트가 수정되었습니다.");
         navigate(`/notices/${itemId}`);
       } catch (error) {

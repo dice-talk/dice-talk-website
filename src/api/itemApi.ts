@@ -1,4 +1,3 @@
-// src/api/itemApi.ts
 import { axiosInstance } from "./axiosInstance"; // 가정: axiosInstance가 설정된 파일
 import type { ItemPostDto, ItemPatchDto, ItemResponseDto } from "../types/payment/itemTypes";
 import type { MultiResponse } from "../types/common"; // 가정: 공통 응답 타입
@@ -10,22 +9,6 @@ export interface GetItemsAdminParams {
   size?: number;
   sort?: string;
 }
-
-// /**
-//  * 새로운 아이템 등록
-//  * @param itemPostDtoString 아이템 생성 DTO의 JSON 문자열
-//  * @param imageFile 아이템 이미지 파일 (선택 사항)
-//  * @returns 생성된 아이템의 ID를 포함한 URI (Location 헤더에서 추출된 ID)
-//  */
-// export const createItem = async (
-//   itemPostDtoString: string,
-//   imageFile?: File | null
-// ): Promise<string | null> => {
-//   const formData = new FormData();
-//   formData.append("itemPostDto", itemPostDtoString);
-//   if (imageFile) {
-//     formData.append("image", imageFile);
-//   }
 
   export const createItem = async (
   itemDto: ItemPostDto,
@@ -43,52 +26,6 @@ export interface GetItemsAdminParams {
     });
     return response.headers.location || null;
   };
-
-  // const response = await axiosInstance.post<void>(ITEM_DEFAULT_URL, formData, {
-  //   headers: {
-  //     "Content-Type": "multipart/form-data",
-  //   },
-  // });
-
-  // // HTTP 상태 코드가 201 Created 이고 Location 헤더가 존재하면 ID 추출
-  // if (response.status === 201 && response.headers.location) {
-  //   const locationParts = response.headers.location.split('/');
-  //   return locationParts[locationParts.length - 1]; // 마지막 부분이 ID
-  // }
-  // return null;
-
-
-/**
- * 기존 아이템 수정
- * @param itemId 수정할 아이템 ID
- * @param itemPatchDtoString 아이템 수정 DTO의 JSON 문자열
- * @param imageFile 아이템 이미지 파일 (선택 사항)
- * @returns 수정된 아이템 정보
- */
-// export const updateItem = async (
-//   itemId: number,
-//   itemPatchDtoString: string,
-//   imageFile?: File | null
-// ): Promise<ItemResponseDto> => {
-//   const formData = new FormData();
-//   formData.append("itemPatchDto", itemPatchDtoString); // 백엔드가 기대하는 "itemPatchDto" 이름으로 추가
-//   if (imageFile) {
-//     formData.append("image", imageFile); // 백엔드가 기대하는 "image" 이름으로 추가
-//   }
-
-//   const response = await axiosInstance.patch<ItemResponseDto>(
-//     `${ITEM_DEFAULT_URL}/${itemId}`, // itemId를 URL 경로에 포함
-//     formData,
-//     {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//       },
-//     }
-//   );
-//   return response.data;
-// };
-
-
 
 
 export const updateItem = async (
