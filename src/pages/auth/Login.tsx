@@ -127,7 +127,7 @@ const handleSignup = async () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none bg-transparent"
                   aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
-                >{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                >{showPassword ? <Eye size={18} /> : <EyeOff size={18} />}</button>
               </div>
             </div>
             <Button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white">로그인</Button>
@@ -160,7 +160,7 @@ const handleSignup = async () => {
                   onClick={() => setShowSignupPassword(!showSignupPassword)}
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none bg-transparent"
                   aria-label={showSignupPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
-                >{showSignupPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                >{showSignupPassword ? <Eye size={18} /> : <EyeOff size={18} />}</button>
               </div>
             </div>
             <div>
@@ -179,7 +179,7 @@ const handleSignup = async () => {
                   onClick={() => setShowSignupPasswordConfirm(!showSignupPasswordConfirm)}
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none bg-transparent"
                   aria-label={showSignupPasswordConfirm ? "비밀번호 숨기기" : "비밀번호 보기"}
-                >{showSignupPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                >{showSignupPasswordConfirm ? <Eye size={18} /> : <EyeOff size={18} />}</button>
               </div>
               {passwordMatch === true && signupPasswordConfirm !== '' && (
                 <p className="mt-1 text-xs text-green-600">비밀번호가 일치합니다.</p>
